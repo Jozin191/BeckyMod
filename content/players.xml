@@ -1,0 +1,9 @@
+<players root="gfx/characters/costumes/" portraitroot="gfx/ui/stage/" nameimageroot="gfx/ui/boss/">
+    <player name="Becky"
+        skin="character_becky.png"
+        skinColor = "1"
+        nameimage="playername_becky.png"
+        portrait="playerportrait_becky.png"
+        black="6"
+    />
+</players>
