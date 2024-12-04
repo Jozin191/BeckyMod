@@ -14,6 +14,11 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, BeckyMod.OnPreAddCollectible)
 
 function BeckyMod:OnInit()
+    local hairCostume = Isaac.GetCostumeIdByPath("gfx/characters/becky_hair.anm2")
+    local player = Isaac.GetPlayer()
+    if player:GetPlayerType() == PLAYER_BECKY then
+        player:AddNullCostume(hairCostume)
+    end
     receivedItems = {}
     generatedDevilItems = {}
     firstDealRun = true
