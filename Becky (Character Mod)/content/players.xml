@@ -1,0 +1,9 @@
+<players root="gfx/characters/costumes/" 
+         portraitroot="gfx/ui/boss/" 
+         nameimageroot="gfx/ui/boss/" 
+         bigportraitroot="gfx/ui/stage/">
+	<player name="Becky" skin="Becky_sprite.png" hp="2" black="4" canShoot="false"
+          nameimage="Becky_name_portrait.png" 
+          portrait="Becky_portrait.png" 
+          bigportrait="Becky_portrait.png"/>
+</players>
