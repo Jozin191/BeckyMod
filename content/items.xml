@@ -17,4 +17,8 @@
         passivecache="true"
         />
 
+        <!--TRINKETS-->
+        <!--Burning Feather-->
+        <trinket id="3" name="Burning Feather" description="A broken dream" gfx="burning_feather.png" />
+
 </items>

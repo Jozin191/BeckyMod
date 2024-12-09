@@ -1,5 +1,10 @@
 BeckyMod = RegisterMod("Becky", 1)
 
+--characters
 include("becky_scripts.characters.becky")
+
+--collectibles
 include("becky_scripts.items.passives.dream_banisher")
-include("becky_scripts.familiars.becky_ghost")
+
+--trinkets
+include("becky_scripts.items.trinkets.burning_feather")
