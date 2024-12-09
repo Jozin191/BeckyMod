@@ -20,9 +20,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, burningFeather.onInit)
 function burningFeather:onNewUnclearedRoom()
     local player = Isaac.GetPlayer()
     
-    if not player:HasTrinket(BURNING_FEATHER) then
-        return
-    else
+    if player:HasTrinket(BURNING_FEATHER) then
         if Game():GetRoom():IsClear() == false then
             local randomNumber = rng:RandomInt(100)
             if randomNumber >= 50 then
@@ -36,7 +34,6 @@ function burningFeather:onNewUnclearedRoom()
                 player:EvaluateItems()
                 burningFeatherFlight = false
                 player:GetEffects():RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)
-                print("triggou")
             end
         elseif Game():GetRoom():IsClear() then
             burningFeatherFlight = false
@@ -63,3 +60,4 @@ function burningFeather:takeDamageOnRoom()
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, burningFeather.takeDamageOnRoom)
+return burningFeather
