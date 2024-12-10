@@ -16,9 +16,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, BeckyMod.OnPreAddColl
 
 function BeckyMod:OnInit()
     local hairCostume = Isaac.GetCostumeIdByPath("gfx/characters/becky_hair.anm2")
+    local bodyCostume = Isaac.GetCostumeIdByPath("gfx/characters/becky_body.anm2")
     local player = Isaac.GetPlayer()
     if player:GetPlayerType() == PLAYER_BECKY then
         player:AddNullCostume(hairCostume)
+        player:AddNullCostume(bodyCostume)
 
         player:SetPocketActiveItem(pocketItem, ActiveSlot.SLOT_POCKET, true)
         game:GetItemPool():RemoveCollectible(pocketItem)

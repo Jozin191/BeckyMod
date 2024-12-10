@@ -1,8 +1,8 @@
 <AnimatedActor>
-	<Info CreatedBy="Jozin191" CreatedOn="10/12/2024 18:09:34" Version="19" Fps="30"/>
+	<Info CreatedBy="Jozin191" CreatedOn="10/12/2024 18:13:12" Version="20" Fps="30"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="costumes\body.png" Id="0"/>
+			<Spritesheet Path="costumes\becky_body.png" Id="0"/>
 		</Spritesheets>
 		<Layers>
 			<Layer Name="body0" Id="0" SpritesheetId="0"/>
