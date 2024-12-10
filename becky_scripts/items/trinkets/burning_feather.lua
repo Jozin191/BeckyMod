@@ -1,7 +1,6 @@
-local burningFeather = {}
 local BURNING_FEATHER = Isaac.GetTrinketIdByName("Burning Feather")
 local RECOMMENDED_SHIFT_IDX = 35
-local startSeed = Game():GetSeeds():GetStartSeed()
+local startSeed = Game():GetSeeds():GetStartSeed() + 1
 local rng = RNG()
 
 local playerGetDamage = false
@@ -9,15 +8,15 @@ local burningFeatherFlight = false
 rng:SetSeed(startSeed, RECOMMENDED_SHIFT_IDX)
 
 --just so the player can't keep the flight on a new run
-function burningFeather:onInit()
+function BeckyMod:onInit()
     local player = Isaac.GetPlayer()
     burningFeatherFlight = false
     player:AddCacheFlags(CacheFlag.CACHE_FLYING)
     player:EvaluateItems()
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, burningFeather.onInit)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BeckyMod.onInit)
 
-function burningFeather:onNewUnclearedRoom()
+function BeckyMod:onNewUnclearedRoom()
     local player = Isaac.GetPlayer()
     
     if player:HasTrinket(BURNING_FEATHER) then
@@ -43,21 +42,20 @@ function burningFeather:onNewUnclearedRoom()
         end
     end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, burningFeather.onNewUnclearedRoom)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BeckyMod.onNewUnclearedRoom)
 
-function burningFeather:canPlayerFly(player, cacheFlags)
+function BeckyMod:canPlayerFly(player, cacheFlags)
     if cacheFlags & CacheFlag.CACHE_FLYING == CacheFlag.CACHE_FLYING then
         player.CanFly = burningFeatherFlight
     end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, burningFeather.canPlayerFly)
+BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BeckyMod.canPlayerFly)
 
-function burningFeather:takeDamageOnRoom()
+function BeckyMod:takeDamageOnRoom()
     local player = Isaac.GetPlayer()
     if playerGetDamage then
         player:TakeDamage(1, DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 0)
         playerGetDamage = false
     end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, burningFeather.takeDamageOnRoom)
-return burningFeather
+BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BeckyMod.takeDamageOnRoom)

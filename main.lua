@@ -8,3 +8,6 @@ include("becky_scripts.items.passives.dream_banisher")
 
 --trinkets
 include("becky_scripts.items.trinkets.burning_feather")
+
+--custom texture for items (such as custom mr dolly)
+include("becky_scripts.misc.custom_items")
