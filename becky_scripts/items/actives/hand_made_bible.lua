@@ -70,7 +70,7 @@ end
 -- Active
 BeckyMod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, type, rng, player, useflags, activeslot)
     if type == hand_made_bible then
-        player:GetData().comebackkkk = true
+        player:GetData().BeckyGhostReturn = true
         
         return {
             Discharge = true,
@@ -85,7 +85,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function(_, familiar)
     if familiar.Variant == beckyGhostVariant then
         familiar:AddToFollowers()
         familiar.FireCooldown = getResetCharge(familiar)
-        if familiar.Player then familiar.Player:GetData().comebackkkk = false end
+        if familiar.Player then familiar.Player:GetData().BeckyGhostReturn = false end
     end
 end)
 
@@ -138,9 +138,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, familiar)
         -- firing
         if doFire then
             -- check if player used active
-            if familiar.Player:GetData().comebackkkk or not familiar:GetData().fireDirection or not familiar:GetData().fireInheritance then
+            if familiar.Player:GetData().BeckyGhostReturn or not familiar:GetData().fireDirection or not familiar:GetData().fireInheritance then
                 familiar:GetData().firing = false
-                familiar.Player:GetData().comebackkkk = false
+                familiar.Player:GetData().BeckyGhostReturn = false
             else
                 familiar.Velocity = familiar:GetData().fireDirection * (familiar.Player.ShotSpeed * ghostShotSpeedMult) + familiar:GetData().fireInheritance
                 familiar:GetSprite():Play(getAnim("Release", familiar:GetData().animDirection))
@@ -158,6 +158,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, familiar)
                 movementVelocity = targetDirection:Normalized():Resized(ghostSnapSpeed + (targetDirection:Length() / ghostSnapDistanceDiv)) 
             end
             
+            familiar.Player:GetData().BeckyGhostReturn = false
             familiar.Velocity = lerp(familiar.Velocity, movementVelocity, ghostSnapSmoothness)
             local animDirectionCheck = familiar.Player:GetFireDirection()
             local directionInheritance = familiar.Player:GetTearMovementInheritance(dir_to_vec[animDirectionCheck])

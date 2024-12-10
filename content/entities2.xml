@@ -1,4 +1,4 @@
 <entities anm2root="gfx/" version="5" deathanm2="gfx/death enemies.anm2">
     <!-- FAMILIAR -->
-    <entity id="3" name="Becky Ghost" friction="1" shadowSize="11" anm2path="familiar/BeckyGhostSheet.anm2"/>
+    <entity id="3" name="Becky Ghost" collisionRadius="10" friction="1" shadowSize="11" anm2path="familiar/BeckyGhostSheet.anm2"/>
 </entities>
