@@ -31,7 +31,7 @@ function BeckyMod:OnInit()
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BeckyMod.OnInit)
 
-function BeckyMod:changePickupPrice(pickup)
+--[[function BeckyMod:changePickupPrice(pickup)
     local player = Isaac.GetPlayer()
     local room = game:GetRoom()
     local itemConfig = Isaac.GetItemConfig()
@@ -57,9 +57,9 @@ function BeckyMod:changePickupPrice(pickup)
         end
     end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, BeckyMod.changePickupPrice, PickupVariant.PICKUP_COLLECTIBLE)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, BeckyMod.changePickupPrice, PickupVariant.PICKUP_COLLECTIBLE)]]
 
-function BeckyMod:generateDevilItems()
+function BeckyMod:postNewRoom()
     local player = Isaac.GetPlayer()
     local room = game:GetRoom()
 
@@ -78,8 +78,14 @@ function BeckyMod:generateDevilItems()
             end
         end
     end
+    if player:GetPlayerType() == PLAYER_BECKY then
+        if room:GetType() == RoomType.ROOM_ANGEL then
+            game:GetLevel():AddAngelRoomChance(50)
+            enteredAngelRoom = true
+        end
+    end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BeckyMod.generateDevilItems)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BeckyMod.postNewRoom)
 
 function BeckyMod:updateAngelPickupPrices()
     local player = Isaac.GetPlayer()
@@ -95,7 +101,6 @@ function BeckyMod:updateAngelPickupPrices()
                 local quality = itemData and itemData.Quality or 0
                 local newPrice
 
-                -- Evita atualizar pickups que já foram coletados
                 if not receivedItems[subtype] then
                     if player:GetHearts() > 0 then
                         if quality <= 2 then
@@ -107,7 +112,6 @@ function BeckyMod:updateAngelPickupPrices()
                         newPrice = PickupPrice.PRICE_THREE_SOULHEARTS
                     end
 
-                    -- Atualiza o preço do pickup
                     pickup.OptionsPickupIndex = 0
                     pickup.AutoUpdatePrice = false
                     pickup.Price = newPrice
@@ -119,7 +123,7 @@ end
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, BeckyMod.updateAngelPickupPrices)
 
-function BeckyMod:updateAngelItems()
+--[[function BeckyMod:updateAngelItems()
     local player = Isaac.GetPlayer()
     local room = game:GetRoom()
 
@@ -137,7 +141,7 @@ function BeckyMod:updateAngelItems()
         end
     end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, BeckyMod.updateAngelItems, EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, BeckyMod.updateAngelItems, EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE)]]
 
 --Add angel deal chance instead of devil deal
 
@@ -163,16 +167,6 @@ function BeckyMod:angelDealChance()
 end
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_DEVIL_APPLY_ITEMS, BeckyMod.angelDealChance)
 
-function BeckyMod:enteringAngelRoom()
-    local player = Isaac.GetPlayer()
-    if player:GetPlayerType() == PLAYER_BECKY then
-        if game:GetRoom():GetType() == RoomType.ROOM_ANGEL then
-            game:GetLevel():AddAngelRoomChance(50)
-            enteredAngelRoom = true
-        end
-    end
-end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BeckyMod.enteringAngelRoom)
 
 --checks if the player ever made a deal with in a angel room
 function BeckyMod:gotAngelItem()
@@ -197,7 +191,6 @@ function BeckyMod:onBossDeath(entity)
     local player = Isaac.GetPlayer()
     local becky = player:GetPlayerType() == PLAYER_BECKY
     if becky and entity:IsBoss() then
-        print("Boss defeated")
         bossIsDead = true
     end
 end
@@ -216,3 +209,8 @@ function BeckyMod:checkAngelRoomGen()
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BeckyMod.checkAngelRoomGen)
+
+function BeckyMod:onNewFloor()
+    bossIsDead = false
+end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, BeckyMod.onNewFloor)
