@@ -16,6 +16,6 @@ if UniqueItemsAPI then
             SpritePath = {"gfx_becky_custom/beckybirthright.png"}
         }, UniqueItemsAPI.ObjectType.COLLECTIBLE)
     end
+    
+    BeckyMod:AddCallback(UniqueItemsAPI.Callbacks.LOAD_UNIQUE_ITEMS, BeckyMod.onCustomSpritesLoad)
 end
-BeckyMod:AddCallback(UniqueItemsAPI.Callbacks.LOAD_UNIQUE_ITEMS, BeckyMod.onCustomSpritesLoad)
-
