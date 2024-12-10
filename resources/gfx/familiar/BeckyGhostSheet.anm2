@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="Jozin" CreatedOn="09/12/2024 00:43:33" Version="11" Fps="30"/>
+	<Info CreatedBy="Jozin" CreatedOn="12/9/2024 10:11:40 PM" Version="12" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="BeckyGhostSheet2.png" Id="0"/>
@@ -208,7 +208,7 @@
 			<NullAnimations/>
 			<Triggers/>
 		</Animation>
-		<Animation Name="ChargeDownFull" FrameNum="24" Loop="true">
+		<Animation Name="ChargeFullDown" FrameNum="24" Loop="true">
 			<RootAnimation>
 				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="24" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
 			</RootAnimation>
@@ -234,7 +234,7 @@
 			<NullAnimations/>
 			<Triggers/>
 		</Animation>
-		<Animation Name="ChargeUpFull" FrameNum="24" Loop="true">
+		<Animation Name="ChargeFullUp" FrameNum="24" Loop="true">
 			<RootAnimation>
 				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="24" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
 			</RootAnimation>

@@ -1,3 +1,9 @@
+--[[ to do:
+add ghost synergies
+organize this script and make it more readable and use a state system familiar.State (maybe)
+fix jank with more than one ghost (maybe)
+]]-- 
+
 local hand_made_bible = Isaac.GetItemIdByName("Hand Made Bible")
 local beckyGhostVariant = Isaac.GetEntityVariantByName("Becky Ghost")
 local chargeBar = include("becky_scripts.UI.chargebar")
@@ -37,10 +43,10 @@ local function getAnim(name, direction)
     return name .. animSuffix[direction]
 end
 
-local function getFinished(sprite, name)
+local function getFinished(sprite, name, frameNum)
     local isFinished = false
     for i, suffix in pairs(animSuffix) do
-        if sprite:GetSprite():IsFinished(name .. suffix) then
+        if sprite:GetSprite():IsFinished(name .. suffix) or (frameNum and frameNum <= sprite:GetSprite():GetFrame()) then
             isFinished = true
         end
     end
@@ -156,10 +162,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, familiar)
             local animDirectionCheck = familiar.Player:GetFireDirection()
             local directionInheritance = familiar.Player:GetTearMovementInheritance(dir_to_vec[animDirectionCheck])
             local animName = "Charge"
-            if getFinished(familiar, "Charge") or getFinished(familiar, "ChargeFull") or getIsPlaying(familiar, "ChargeFull") then animName = "ChargeFull" end
+            if getFinished(familiar, "Charge", 11) or getFinished(familiar, "ChargeFull") or familiar.State == 1 then animName = "ChargeFull" end
+            if animName == "ChargeFull" then familiar.State = 1 end
             familiar:GetSprite():Play(getAnim(animName, animDirectionCheck), getFinished(familiar, "ChargeFull"))
             if animName == "Charge" then
-                familiar:GetSprite():SetFrame(math.floor(13 * (1 - (familiar.FireCooldown / getResetCharge(familiar)))))
+                familiar:GetSprite():SetFrame(math.floor(11 * (1 - (familiar.FireCooldown / getResetCharge(familiar)))))
                 --familiar:GetSprite().PlaybackSpeed = 13 / getResetCharge(familiar)
             end
 
@@ -174,6 +181,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, familiar)
         else
             chargeBar.released = true
             familiar:FollowParent()
+            familiar.State = 0
             local animDirectionCheck = familiar.Player:GetMovementDirection()
             familiar:GetSprite():Play(getAnim("Idle", animDirectionCheck))
             familiar.FlipX = isFlipped[animDirectionCheck]
