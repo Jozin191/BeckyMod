@@ -1,0 +1,7 @@
+<sounds root="sfx/">
+    <sound name="becky_ghost">
+        <sample weight="1" path="ghostNoise (3).wav" />
+        <sample weight="1" path="ghostNoise (2).wav" />
+        <sample weight="1" path="ghostNoise (1).wav" />
+    </sound>
+</sounds>

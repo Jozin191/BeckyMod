@@ -1,4 +1,5 @@
 local PLAYER_BECKY = Isaac.GetPlayerTypeByName("Becky", false)
+local pocketItem = Isaac.GetItemIdByName("Hand Made Bible")
 local game = Game()
 local receivedItems = {}
 local generatedDevilItems = {}
@@ -18,6 +19,9 @@ function BeckyMod:OnInit()
     local player = Isaac.GetPlayer()
     if player:GetPlayerType() == PLAYER_BECKY then
         player:AddNullCostume(hairCostume)
+
+        player:SetPocketActiveItem(pocketItem, ActiveSlot.SLOT_POCKET, true)
+        game:GetItemPool():RemoveCollectible(pocketItem)
     end
     receivedItems = {}
     generatedDevilItems = {}
