@@ -1,5 +1,6 @@
 if UniqueItemsAPI then
-    function BeckyMod:onCustomSpritesLoad()
+
+    BeckyMod:AddCallback(UniqueItemsAPI.Callbacks.LOAD_UNIQUE_ITEMS, function()
         local PLAYER_BECKY = Isaac.GetPlayerTypeByName("Becky", false)
         UniqueItemsAPI.RegisterMod("BeckyMod")
         UniqueItemsAPI.RegisterCharacter("Becky", false, "Becky")
@@ -10,12 +11,11 @@ if UniqueItemsAPI then
             SpritePath = {"gfx_becky_custom/Mr_Dolly_Becky.png"}
         }, UniqueItemsAPI.ObjectType.COLLECTIBLE)
 
-        UniqueItemsAPI.AssignUniqueObject({ --Mr Dolly Custom Sprite
+        UniqueItemsAPI.AssignUniqueObject({ --Birthright Custom Sprite
             PlayerType = PLAYER_BECKY,
             ObjectID = CollectibleType.COLLECTIBLE_BIRTHRIGHT,
             SpritePath = {"gfx_becky_custom/beckybirthright.png"}
         }, UniqueItemsAPI.ObjectType.COLLECTIBLE)
-    end
-    
-    BeckyMod:AddCallback(UniqueItemsAPI.Callbacks.LOAD_UNIQUE_ITEMS, BeckyMod.onCustomSpritesLoad)
+    end)
+
 end

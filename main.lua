@@ -3,14 +3,13 @@ RECOMMENDED_SHIFT_IDX = 35
 
 local f = Font()
 f:Load("font/terminus.fnt")
-local function requireRepentogon()
+BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
     if not REPENTOGON then
-        f:DrawString("REPENTOGON isn't installed", 60, 50, KColor(1,1,1,1,0,0,0),0,true)
-        f:DrawString("Head to the REPENTOGON mod page for instructions!", 60, 70, KColor(1,1,1,1,0,0,0),0,true)
-        f:DrawString("(Becky mod requires repentogon to work)", 60, 90, KColor(1,1,1,1,0,0,0),0,true)
+        f:DrawString("REPENTOGON isn't installed", 60, 50, KColor(1,1,1,1),0,true)
+        f:DrawString("Head to the REPENTOGON mod page for instructions!", 60, 70, KColor(1,1,1,1),0,true)
+        f:DrawString("(Becky mod requires repentogon to work)", 60, 90, KColor(1,1,1,1),0,true)
     end
-end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, requireRepentogon)
+end)
 if not REPENTOGON then return end
 
 --characters
