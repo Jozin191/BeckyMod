@@ -61,6 +61,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BeckyMod.OnInit)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, BeckyMod.changePickupPrice, PickupVariant.PICKUP_COLLECTIBLE)]]
 
+local markedPickup = {}
+
 function BeckyMod:postNewRoom()
     local player = Isaac.GetPlayer()
     local room = game:GetRoom()
@@ -84,6 +86,13 @@ function BeckyMod:postNewRoom()
         if room:GetType() == RoomType.ROOM_ANGEL then
             game:GetLevel():AddAngelRoomChance(50)
             enteredAngelRoom = true
+            markedPickup = {}
+            for _, entity in ipairs(Isaac.GetRoomEntities()) do
+                local pickup = entity:ToPickup()
+                if pickup and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
+                    table.insert(markedPickup, pickup.Position)
+                end
+            end
         end
     end
 end
@@ -102,8 +111,15 @@ function BeckyMod:updateAngelPickupPrices()
                 local itemData = itemConfig:GetCollectible(subtype)
                 local quality = itemData and itemData.Quality or 0
                 local newPrice
-
-                if not receivedItems[subtype] then
+                local matched = false
+                
+                for _, savedPosition in ipairs(markedPickup) do
+                    if pickup.Position:Distance(savedPosition) < 1 then
+                        matched = true
+                        break
+                    end
+                end
+                if not receivedItems[subtype] and matched then
                     if player:GetHearts() > 0 then
                         if quality <= 2 then
                             newPrice = PickupPrice.PRICE_ONE_HEART
@@ -113,7 +129,6 @@ function BeckyMod:updateAngelPickupPrices()
                     else
                         newPrice = PickupPrice.PRICE_THREE_SOULHEARTS
                     end
-
                     pickup.OptionsPickupIndex = 0
                     pickup.AutoUpdatePrice = false
                     pickup.Price = newPrice
