@@ -62,6 +62,7 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, BeckyMod.changePickupPrice, PickupVariant.PICKUP_COLLECTIBLE)]]
 
 local markedPickup = {}
+local markedRealPickup = {}
 
 function BeckyMod:postNewRoom()
     local player = Isaac.GetPlayer()
@@ -87,10 +88,14 @@ function BeckyMod:postNewRoom()
             game:GetLevel():AddAngelRoomChance(50)
             enteredAngelRoom = true
             markedPickup = {}
+            markedRealPickup = {}
             for _, entity in ipairs(Isaac.GetRoomEntities()) do
                 local pickup = entity:ToPickup()
                 if pickup and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
                     table.insert(markedPickup, pickup.Position)
+                end
+                if pickup and pickup.Variant ~= PickupVariant.PICKUP_COLLECTIBLE then
+                    table.insert(markedRealPickup, pickup.Position)
                 end
             end
         end
@@ -133,6 +138,21 @@ function BeckyMod:updateAngelPickupPrices()
                     pickup.AutoUpdatePrice = false
                     pickup.Price = newPrice
                 end
+            end
+            if pickup and PickupVariant ~= PickupVariant.PICKUP_COLLECTIBLE then
+                local newPrice
+                local matched = false
+                for _, savedPosition in ipairs(markedRealPickup) do
+                    if pickup.Position:Distance(savedPosition) < 1 then
+                        matched = true
+                        break
+                    end
+                end
+                if matched then
+                    newPrice = PickupPrice.PRICE_SPIKES
+                    pickup.AutoUpdatePrice = false
+                    pickup.Price = newPrice
+                end  
             end
         end
     end
