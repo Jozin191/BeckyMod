@@ -8,6 +8,7 @@ fix bug with more than one ghost not parenting to each other
 local hand_made_bible = Isaac.GetItemIdByName("Hand Made Bible")
 local beckyGhostVariant = Isaac.GetEntityVariantByName("Becky Ghost")
 local synergiesScript = "becky_scripts.items.actives.hand_made_bible_synergies"
+local chargebarScript = "becky_scripts.UI.chargebar"
 local ghostDamageCooldown = 3
 local ghostFireDelayMult = 1
 local ghostShotSpeedMult = 10
@@ -159,7 +160,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, familiar)
         -- chargebar
         local chargeBar = familiar:GetData().chargeBar
         if not chargeBar or (chargeBar and not chargeBar.charge) then
-            chargeBar = include("becky_scripts.UI.chargebar")
+            chargeBar = include(chargebarScript)
             familiar:GetData().chargeBar = chargeBar
         elseif chargeBar.initCallbacks then
             BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, chargeBar.chargeBarInit)
