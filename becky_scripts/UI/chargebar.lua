@@ -8,7 +8,8 @@ local chargeBar = {
     anm2File = "gfx/chargebar_beckyghost.anm2",
     invertChargeSprites = false,
     target = nil,
-    targetOffset = Vector.Zero
+    targetOffset = Vector.Zero,
+    initCallbacks = true
 }
 
 local ChargeBarState = {
@@ -19,7 +20,7 @@ local ChargeBarState = {
 }
 
 function chargeBar.chargeBarRender(_)
-    if not Options.ChargeBars or not chargeBar.target or chargeBar.alreadyHasChargeBar(chargeBar.target:ToPlayer()) or ((REPENTOGON and RoomTransition.IsRenderingBossIntro()) or (not REPENTOGON and Game():IsPaused() and not Game():IsPauseMenuOpen())) then return end
+    if not Options.ChargeBars or not chargeBar.target or ((REPENTOGON and RoomTransition.IsRenderingBossIntro()) or (not REPENTOGON and Game():IsPaused() and not Game():IsPauseMenuOpen())) then return end
     local inv = 0
     if chargeBar.invertChargeSprites then inv = -1 end
 
