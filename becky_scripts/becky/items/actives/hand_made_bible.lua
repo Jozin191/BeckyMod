@@ -19,6 +19,9 @@ HAND_MADE_BIBLE.GHOST_SNAP_SMOOTHNESS = 0.3
 HAND_MADE_BIBLE.GHOST_SNAP_SPEED = 1
 HAND_MADE_BIBLE.GHOST_SNAP_DISTANCE_DIV = 3
 
+HAND_MADE_BIBLE.GHOST_DAMAGE_MULT_AS_BECKY = 1 --In case we want to change it
+HAND_MADE_BIBLE.GHOST_DAMAGE_MULT_NOT_AS_BECKY = 0.75
+
 BeckyMod.Item.HAND_MADE_BIBLE = HAND_MADE_BIBLE
 
 local dir_to_vec = {
@@ -131,7 +134,16 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_FAMILIAR_COLLISION, function(_, familia
             if not familiar:GetData().BeckyGhostDamageCooldown then familiar:GetData().BeckyGhostDamageCooldown = 0 end
             if familiar:GetData().BeckyGhostDamageCooldown == 0 then
                 familiar:GetData().BeckyGhostDamageCooldown = HAND_MADE_BIBLE.GHOST_DAMAGE_COOLDOWN
-                entity:TakeDamage(familiar.Player.Damage, 0, EntityRef(familiar.Player), 0)
+
+                local damageTaken = familiar.Player.Damage
+
+                if familiar.Player:GetPlayerType() == BeckyMod.Character.BECKY.PLAYERTYPE then
+                    damageTaken = damageTaken * HAND_MADE_BIBLE.GHOST_DAMAGE_MULT_AS_BECKY
+                else
+                    damageTaken = damageTaken * HAND_MADE_BIBLE.GHOST_DAMAGE_MULT_NOT_AS_BECKY
+                end
+
+                entity:TakeDamage(damageTaken, 0, EntityRef(familiar.Player), 0)
             end
         end
     end
