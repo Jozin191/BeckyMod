@@ -6,8 +6,7 @@ BURNING_FEATHER.ID = Isaac.GetTrinketIdByName("Burning Feather")
 local startSeed = Game():GetSeeds():GetStartSeed() + 1
 local rng = RNG()
 
-BURNING_FEATHER.PLAYER_GET_DAMAGE = false --100% sure this means no local co-op support LOL
-BURNING_FEATHER.BURNING_FEATHER_FLIGHT = false
+BURNING_FEATHER.BURNING_FEATHER_FLIGHT = false --100% sure this means no local co-op support LOL
 
 BeckyMod.Trinket.BURNING_FEATHER = BURNING_FEATHER
 
@@ -34,7 +33,8 @@ function BURNING_FEATHER:onNewUnclearedRoom()
                 player:AddCacheFlags(CacheFlag.CACHE_FLYING)
                 player:EvaluateItems()
             elseif randomNumber == 1 then
-                BURNING_FEATHER.PLAYER_GET_DAMAGE = true
+                player:TakeDamage(1, DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 0)
+
                 player:AddCacheFlags(CacheFlag.CACHE_FLYING)
                 player:EvaluateItems()
                 BURNING_FEATHER.BURNING_FEATHER_FLIGHT = false
@@ -57,12 +57,3 @@ function BURNING_FEATHER:canPlayerFly(player, cacheFlags)
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BURNING_FEATHER.canPlayerFly)
-
-function BURNING_FEATHER:takeDamageOnRoom()
-    local player = Isaac.GetPlayer()
-    if BURNING_FEATHER.PLAYER_GET_DAMAGE then
-        player:TakeDamage(1, DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 0)
-        BURNING_FEATHER.PLAYER_GET_DAMAGE = false
-    end
-end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BURNING_FEATHER.takeDamageOnRoom)
