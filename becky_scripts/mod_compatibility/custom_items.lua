@@ -1,7 +1,7 @@
 if UniqueItemsAPI then
 
     BeckyMod:AddCallback(UniqueItemsAPI.Callbacks.LOAD_UNIQUE_ITEMS, function()
-        local PLAYER_BECKY = Isaac.GetPlayerTypeByName("Becky", false)
+        local PLAYER_BECKY = BeckyMod.Character.BECKY.PLAYERTYPE
         UniqueItemsAPI.RegisterMod("BeckyMod")
         UniqueItemsAPI.RegisterCharacter("Becky", false, "Becky")
 

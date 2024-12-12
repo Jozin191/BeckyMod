@@ -4,6 +4,7 @@ BeckyMod.RECOMMENDED_SHIFT_IDX = 35
 BeckyMod.Game = Game()
 
 BeckyMod.Item = {}
+BeckyMod.Trinket = {}
 BeckyMod.Character = {}
 
 local f = Font()
@@ -17,8 +18,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 end)
 if not REPENTOGON then return end
 
---characters
-include("becky_scripts.becky.characters.becky")
+--Changed the order since characters need to get actives. If the character loads first and the item later, it errors. 
 
 --collectibles
 include("becky_scripts.becky.items.passives.dream_banisher")
@@ -26,6 +26,9 @@ include("becky_scripts.becky.items.actives.hand_made_bible")
 
 --trinkets
 include("becky_scripts.becky.items.trinkets.burning_feather")
+
+--characters
+include("becky_scripts.becky.characters.becky")
 
 --custom texture for items (such as custom mr dolly)
 include("becky_scripts.mod_compatibility.external_items_descriptions")
