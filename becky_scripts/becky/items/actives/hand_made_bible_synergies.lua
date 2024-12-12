@@ -23,7 +23,7 @@ local function getSynergy(name, familiar)
     local player = familiar.Player
     -- laser/brimstone
     if name == "laser" then
-        if getLaserVariant(familiar.Player) ~= 0 then
+        if getLaserVariant(player) ~= 0 then
             return true
         end
     end
@@ -47,10 +47,24 @@ function synergies.GhostFire(familiar)
     if getSynergy("laser", familiar) and not familiar:GetData().BeckyGhostLaser then
         local angle = (familiar.Velocity * -1):GetAngleDegrees()
         local offset = Vector(0, -19) + (familiar.Velocity * Vector(-2, -2))
-        local laser = EntityLaser.ShootAngle(getLaserVariant(familiar.Player), familiar.Position + offset, angle, 400, Vector.Zero, familiar)
+        local laser = EntityLaser.ShootAngle(getLaserVariant(player), familiar.Position + offset, angle, 400, Vector.Zero, familiar)
         --local laser = player:FireBrimstone(familiar.Velocity * -1, familiar)
         laser:AddTearFlags(player.TearFlags)
         laser.Velocity = familiar.Velocity
+
+        local brimCount = player:GetCollectibleNum(CollectibleType.COLLECTIBLE_BRIMSTONE) + player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_BRIMSTONE)
+        local techCount = player:GetCollectibleNum(CollectibleType.COLLECTIBLE_TECHNOLOGY) + player:GetEffects():GetCollectibleEffectNum(CollectibleType.COLLECTIBLE_TECHNOLOGY)
+
+        local finalDmg = (player.Damage * 0.75)
+
+        if brimCount >= 2 then
+            finalDmg = finalDmg * 1.2 + 1 --Is this the damage???
+        elseif techCount > 0 then
+            finalDmg = finalDmg * 1.5
+        end
+
+        laser.CollisionDamage = finalDmg
+
         familiar:GetData().BeckyGhostLaser = laser
     end
 end
