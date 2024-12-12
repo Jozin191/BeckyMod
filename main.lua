@@ -1,8 +1,5 @@
 BeckyMod = RegisterMod("Becky", 1)
-BeckyMod.RECOMMENDED_SHIFT_IDX = 35
-
-BeckyMod.Item = {}
-BeckyMod.Character = {}
+RECOMMENDED_SHIFT_IDX = 35
 
 local f = Font()
 f:Load("font/terminus.fnt")
@@ -16,15 +13,14 @@ end)
 if not REPENTOGON then return end
 
 --characters
-include("becky_scripts.becky.characters.becky")
+include("becky_scripts.characters.becky")
 
 --collectibles
-include("becky_scripts.becky.items.passives.dream_banisher")
-include("becky_scripts.becky.items.actives.hand_made_bible")
+include("becky_scripts.items.passives.dream_banisher")
+include("becky_scripts.items.actives.hand_made_bible")
 
 --trinkets
-include("becky_scripts.becky.items.trinkets.burning_feather")
+include("becky_scripts.items.trinkets.burning_feather")
 
 --custom texture for items (such as custom mr dolly)
-include("becky_scripts.mod_compatibility.external_items_descriptions")
-include("becky_scripts.mod_compatibility.custom_items")
+include("becky_scripts.misc.custom_items")
