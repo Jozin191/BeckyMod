@@ -1,11 +1,10 @@
 local BURNING_FEATHER = Isaac.GetTrinketIdByName("Burning Feather")
-local RECOMMENDED_SHIFT_IDX = 35
 local startSeed = Game():GetSeeds():GetStartSeed() + 1
 local rng = RNG()
 
 local playerGetDamage = false
 local burningFeatherFlight = false
-rng:SetSeed(startSeed, RECOMMENDED_SHIFT_IDX)
+rng:SetSeed(startSeed, BeckyMod.RECOMMENDED_SHIFT_IDX)
 
 --just so the player can't keep the flight on a new run
 function BeckyMod:onInit()

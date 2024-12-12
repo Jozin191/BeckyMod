@@ -7,8 +7,8 @@ fix bug with more than one ghost not parenting to each other
 
 local hand_made_bible = Isaac.GetItemIdByName("Hand Made Bible")
 local beckyGhostVariant = Isaac.GetEntityVariantByName("Becky Ghost")
-local synergiesScript = "becky_scripts.items.actives.hand_made_bible_synergies"
-local chargebarScript = "becky_scripts.UI.chargebar"
+local synergiesScript = "becky_scripts.becky.items.actives.hand_made_bible_synergies"
+local chargebarScript = "becky_scripts.becky.UI.chargebar"
 local ghostDamageCooldown = 3
 local ghostFireDelayMult = 1
 local ghostShotSpeedMult = 10
@@ -274,7 +274,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFl
         --player:GetEffects():GetCollectibleEffectNum(hand_made_bible)
         local itemCount = player:GetCollectibleNum(hand_made_bible)
         local rng = RNG()
-        rng:SetSeed(math.max(Random(), 1), RECOMMENDED_SHIFT_IDX)
+        rng:SetSeed(math.max(Random(), 1), BeckyMod.RECOMMENDED_SHIFT_IDX)
     
         player:CheckFamiliar(beckyGhostVariant, itemCount, rng, Isaac.GetItemConfig():GetCollectible(hand_made_bible))
     end
