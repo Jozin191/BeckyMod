@@ -1,8 +1,12 @@
 BeckyMod = RegisterMod("Becky", 1)
 BeckyMod.RECOMMENDED_SHIFT_IDX = 35
 
-BeckyMod.SAVE_MANAGER = include("becky.utils.save_manager")
-BeckyMod.SAVE_MANAGER.Init(BeckyMod)
+BeckyMod.SaveManager = include("becky_scripts.utils.save_manager")
+BeckyMod.SaveManager.Init(BeckyMod)
+
+include("becky_scripts.utils.saving_system")
+
+BeckyMod.Scheduler = include("becky_scripts.utils.schedule_data")
 
 BeckyMod.Game = Game()
 

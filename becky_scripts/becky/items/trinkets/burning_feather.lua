@@ -6,8 +6,6 @@ BURNING_FEATHER.ID = Isaac.GetTrinketIdByName("Burning Feather")
 local startSeed = Game():GetSeeds():GetStartSeed() + 1
 local rng = RNG()
 
-BURNING_FEATHER.BURNING_FEATHER_FLIGHT = false --100% sure this means no local co-op support LOL
-
 BeckyMod.Trinket.BURNING_FEATHER = BURNING_FEATHER
 
 rng:SetSeed(startSeed, BeckyMod.RECOMMENDED_SHIFT_IDX) --??? does it work like this??? what the fuck
@@ -15,7 +13,6 @@ rng:SetSeed(startSeed, BeckyMod.RECOMMENDED_SHIFT_IDX) --??? does it work like t
 --just so the player can't keep the flight on a new run
 function BURNING_FEATHER:onInit()
     local player = Isaac.GetPlayer()
-    BURNING_FEATHER.BURNING_FEATHER_FLIGHT = false
     player:AddCacheFlags(CacheFlag.CACHE_FLYING)
     player:EvaluateItems()
 end
@@ -29,19 +26,25 @@ function BURNING_FEATHER:onNewUnclearedRoom()
             local randomNumber = rng:RandomInt(2) --No need to make it 100, it's basically just 1/2 at the end of the day
             if randomNumber == 0 then
                 player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_FATE, true)
-                BURNING_FEATHER.BURNING_FEATHER_FLIGHT = true
-                player:AddCacheFlags(CacheFlag.CACHE_FLYING)
-                player:EvaluateItems()
-            elseif randomNumber == 1 then
-                player:TakeDamage(1, DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 0)
+
+                BeckyMod:RoomSave(player).BurningFeatherFlight = true
 
                 player:AddCacheFlags(CacheFlag.CACHE_FLYING)
                 player:EvaluateItems()
-                BURNING_FEATHER.BURNING_FEATHER_FLIGHT = false
+            elseif randomNumber == 1 then
+                player:AddCacheFlags(CacheFlag.CACHE_FLYING)
+                player:EvaluateItems()
                 player:GetEffects():RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)
+
+                Scheduler.Schedule( --Needs to wait for a frame lol
+					1,
+					function()
+						player:TakeDamage(1, DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 0)
+					end,
+					{ player }
+				)
             end
         elseif Game():GetRoom():IsClear() then
-            BURNING_FEATHER.BURNING_FEATHER_FLIGHT = false
             player:AddCacheFlags(CacheFlag.CACHE_FLYING)
             player:GetEffects():RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)
             player:EvaluateItems()
@@ -53,7 +56,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BURNING_FEATHER.onNewUnclear
 function BURNING_FEATHER:canPlayerFly(player, cacheFlags)
     -- If the player can already fly, do nothing lol
     if not player.CanFly and player:HasTrinket(BURNING_FEATHER.ID) and cacheFlags & CacheFlag.CACHE_FLYING == CacheFlag.CACHE_FLYING then
-        player.CanFly = BURNING_FEATHER.BURNING_FEATHER_FLIGHT
+        player.CanFly = BeckyMod:RoomSave(player).BurningFeatherFlight
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BURNING_FEATHER.canPlayerFly)
