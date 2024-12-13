@@ -55,8 +55,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BURNING_FEATHER.onNewUnclear
 
 function BURNING_FEATHER:canPlayerFly(player, cacheFlags)
     -- If the player can already fly, do nothing lol
-    if not player.CanFly and player:HasTrinket(BURNING_FEATHER.ID) and cacheFlags & CacheFlag.CACHE_FLYING == CacheFlag.CACHE_FLYING then
-        player.CanFly = BeckyMod:TempSave(player).BurningFeatherFlight
+    local save = BeckyMod:TempSave(player)
+    if not player.CanFly and player:HasTrinket(BURNING_FEATHER.ID) and save.BurningFeatherFlight and cacheFlags & CacheFlag.CACHE_FLYING == CacheFlag.CACHE_FLYING then
+        player.CanFly = true
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BURNING_FEATHER.canPlayerFly)
