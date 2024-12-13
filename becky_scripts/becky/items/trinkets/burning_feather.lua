@@ -27,7 +27,7 @@ function BURNING_FEATHER:onNewUnclearedRoom()
             if randomNumber == 0 then
                 player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_FATE, true)
 
-                BeckyMod:RoomSave(player).BurningFeatherFlight = true
+                BeckyMod:TempSave(player).BurningFeatherFlight = true
 
                 player:AddCacheFlags(CacheFlag.CACHE_FLYING)
                 player:EvaluateItems()
@@ -56,7 +56,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BURNING_FEATHER.onNewUnclear
 function BURNING_FEATHER:canPlayerFly(player, cacheFlags)
     -- If the player can already fly, do nothing lol
     if not player.CanFly and player:HasTrinket(BURNING_FEATHER.ID) and cacheFlags & CacheFlag.CACHE_FLYING == CacheFlag.CACHE_FLYING then
-        player.CanFly = BeckyMod:RoomSave(player).BurningFeatherFlight
+        player.CanFly = BeckyMod:TempSave(player).BurningFeatherFlight
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BURNING_FEATHER.canPlayerFly)
