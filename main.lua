@@ -6,7 +6,7 @@ BeckyMod.SaveManager.Init(BeckyMod)
 
 include("becky_scripts.utils.saving_system")
 
-BeckyMod.Scheduler = include("becky_scripts.utils.schedule_data")
+Scheduler = include("becky_scripts.utils.schedule_data")
 
 BeckyMod.Game = Game()
 
