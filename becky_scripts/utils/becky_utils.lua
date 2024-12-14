@@ -66,3 +66,23 @@ function BeckyMod:DebugLog(...)
 		mod:Log(...)
 	end
 end
+
+---@param beamType
+---|0  #Default Instant Crack the Sky. 17 frames of hitbox
+---|1  #2 frames of hitbox before turning into SubType 10
+---|2  #Delayed with a visual cue. 17 frames of hitbox
+---|10 #Visual only, no hitbox
+---@param pos Vector
+---@param spawner Entity
+---@param parent Entity
+---@param damage number
+---@return EntityEffect
+function BeckyMod:FireHolyBeam(beamType, pos, spawner, parent, damage)
+	local beam = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, beamType, pos, Vector.Zero, spawner):ToEffect()
+	---@cast beam EntityEffect
+
+	beam.Parent = parent
+	beam.CollisionDamage = damage
+	beam:Update()
+	return beam
+end

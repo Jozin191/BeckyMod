@@ -11,12 +11,24 @@
         chargetype="timed" 
         cache="familiars"
         passivecache="true"
+        tags="book angel"
+        />
+
+        <!--Bedtime Stories For Angels-->
+        <active id="2"
+        name="Bedtime Stories For Angels"
+        gfx="bedtime_stories_for_angels.png"
+        description="Sleepy mimimimi woah what is that thing"
+        quality="2"
+        maxcharges="4"
+        chargetype="normal"
+        tags="book angel"
         />
 
         <!--PASSIVE ITEMS-->
         <!--Dream Banisher-->
 
-        <passive id="2" 
+        <passive id="3" 
         name="Dream Banisher"
         gfx="dream_banisher.png" 
         description="flavor text yay" 
