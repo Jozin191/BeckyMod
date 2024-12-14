@@ -1,45 +1,48 @@
-local dreamBanisher = Isaac.GetItemIdByName("Dream Banisher")
-local curseDmg = 1.5
-local curseTears = 0.5
+local DREAM_BANISHER = {}
 
--- i got the formula for this from the tboi modding discord resource page, from a guide by catinsurance
-local function toTearsPerSecond(maxFireDelay)
-    return 30 / (maxFireDelay + 1)
-  end
-  
-local function toMaxFireDelay(tearsPerSecond)
-    return (30 / tearsPerSecond) - 1
-end
+DREAM_BANISHER.ID = Isaac.GetItemIdByName("Dream Banisher")
+DREAM_BANISHER.CURSE_DAMAGE = 1.5
+DREAM_BANISHER.CURSE_TEARS = 0.5
 
-  
-function BeckyMod:evaluateCache(player, cacheFlags)
-    if cacheFlags & CacheFlag.CACHE_DAMAGE == CacheFlag.CACHE_DAMAGE then
-        if Game():GetLevel():GetCurses() > 0 then
-            if player:HasCollectible(dreamBanisher) then
-                player.Damage = player.Damage + curseDmg
-            end
+BeckyMod.Item.DREAM_BANISHER = DREAM_BANISHER
+
+function DREAM_BANISHER:evaluateCache(player, cacheFlags)
+    if BeckyMod:areThereCurses() and player:HasCollectible(DREAM_BANISHER.ID) then
+        if cacheFlags & CacheFlag.CACHE_DAMAGE == CacheFlag.CACHE_DAMAGE then
+            player.Damage = player.Damage + DREAM_BANISHER.CURSE_DAMAGE
         end
-    end
-    if cacheFlags & CacheFlag.CACHE_FIREDELAY == CacheFlag.CACHE_FIREDELAY then
-        if Game():GetLevel():GetCurses() > 0 then
-            if player:HasCollectible(dreamBanisher) then
-                local tearsPerSecond = toTearsPerSecond(player.MaxFireDelay)
-                tearsPerSecond = tearsPerSecond + curseTears
-                player.MaxFireDelay = toMaxFireDelay(tearsPerSecond)
-            end
+        if cacheFlags & CacheFlag.CACHE_FIREDELAY == CacheFlag.CACHE_FIREDELAY then
+            local tearsPerSecond = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
+            tearsPerSecond = tearsPerSecond + DREAM_BANISHER.CURSE_TEARS
+            player.MaxFireDelay = BeckyMod:toMaxFireDelay(tearsPerSecond)
         end
     end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BeckyMod.evaluateCache)
+BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, DREAM_BANISHER.evaluateCache)
 
-function BeckyMod:postNewFloor()
-    local player = Isaac.GetPlayer()
-    if player:HasCollectible(dreamBanisher) then
-        player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-        player:AddCacheFlags(CacheFlag.CACHE_FIREDELAY)
-        player:EvaluateItems()
-        player:AddBlackHearts(1)
+function DREAM_BANISHER:postNewFloor()
+    BeckyMod:ForEachPlayer(function(player)
+        if player:HasCollectible(DREAM_BANISHER.ID) then
+            player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+            player:AddCacheFlags(CacheFlag.CACHE_FIREDELAY)
+            player:EvaluateItems()
+            player:AddBlackHearts(1)
+        end
+    end)
+end
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, DREAM_BANISHER.postNewFloor)
+
+function DREAM_BANISHER:curseCheck()
+    if BeckyMod:areThereCurses() then
+        BeckyMod:ForEachPlayer(function(player)
+            if player:HasCollectible(DREAM_BANISHER.ID) then
+                player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+                player:AddCacheFlags(CacheFlag.CACHE_FIREDELAY)
+                player:EvaluateItems()
+            end
+        end)
     end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, BeckyMod.postNewFloor)
 
+BeckyMod:AddCallback(ModCallbacks.MC_POST_CURSE_EVAL, DREAM_BANISHER.curseCheck)

@@ -1,8 +1,15 @@
 BeckyMod = RegisterMod("Becky", 1)
 BeckyMod.RECOMMENDED_SHIFT_IDX = 35
 
+--FLAGS!!!
+BeckyMod.FLAGS = {}
+BeckyMod.FLAGS.Debug = true
+--End of flags
+
 BeckyMod.SaveManager = include("becky_scripts.utils.save_manager")
 BeckyMod.SaveManager.Init(BeckyMod)
+
+include("becky_scripts.utils.becky_utils")
 
 include("becky_scripts.utils.saving_system")
 
@@ -37,6 +44,5 @@ include("becky_scripts.becky.items.trinkets.burning_feather")
 --characters
 include("becky_scripts.becky.characters.becky")
 
---custom texture for items (such as custom mr dolly)
-include("becky_scripts.mod_compatibility.external_items_descriptions")
-include("becky_scripts.mod_compatibility.custom_items")
+--Mod compatibility! (all patches are loaded in this file)
+include("becky_scripts.mod_compatibility.load_patches")

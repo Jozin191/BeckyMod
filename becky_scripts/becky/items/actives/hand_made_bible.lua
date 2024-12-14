@@ -202,13 +202,13 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, familiar)
         end
 
         -- destroying poop attack go! also works for tnt
-        local poop = Game():GetRoom():GetGridEntityFromPos(familiar.Position)
+        local poop = BeckyMod.Game:GetRoom():GetGridEntityFromPos(familiar.Position)
         local isColliding = false
         local isPoop = false
         if poop and (poop:ToPoop() or poop:ToTNT()) then isPoop = true end
         if isPoop then
             poop:Hurt(math.floor(familiar.Player.Damage))
-        elseif Game():GetRoom():GetGridCollisionAtPos(familiar.Position) > GridCollisionClass.COLLISION_OBJECT then
+        elseif BeckyMod.Game:GetRoom():GetGridCollisionAtPos(familiar.Position) > GridCollisionClass.COLLISION_OBJECT then
             familiar:GetData().firing = false
             isColliding = true
             familiar.Player:GetData().BeckyGhostReturn = false

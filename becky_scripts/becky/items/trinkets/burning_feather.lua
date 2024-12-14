@@ -3,7 +3,7 @@
 local BURNING_FEATHER = {}
 
 BURNING_FEATHER.ID = Isaac.GetTrinketIdByName("Burning Feather")
-local startSeed = Game():GetSeeds():GetStartSeed() + 1
+local startSeed = BeckyMod.Game:GetSeeds():GetStartSeed() + 1
 local rng = RNG()
 
 BeckyMod.Trinket.BURNING_FEATHER = BURNING_FEATHER
@@ -22,7 +22,7 @@ function BURNING_FEATHER:onNewUnclearedRoom()
     local player = Isaac.GetPlayer()
     
     if player:HasTrinket(BURNING_FEATHER.ID) then
-        if Game():GetRoom():IsClear() == false then
+        if BeckyMod.Game:GetRoom():IsClear() == false then
             local randomNumber = rng:RandomInt(2) --No need to make it 100, it's basically just 1/2 at the end of the day
             if randomNumber == 0 then
                 player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_FATE, true)
@@ -44,7 +44,7 @@ function BURNING_FEATHER:onNewUnclearedRoom()
 					{ player }
 				)
             end
-        elseif Game():GetRoom():IsClear() then
+        elseif BeckyMod.Game:GetRoom():IsClear() then
             player:AddCacheFlags(CacheFlag.CACHE_FLYING)
             player:GetEffects():RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)
             player:EvaluateItems()
