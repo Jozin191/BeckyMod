@@ -119,7 +119,7 @@ end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, function(_) -- because of luamod breaking things
     local entities = Isaac.GetRoomEntities()
-    for i, entity in ipairs(entities) do
+    for _, entity in ipairs(entities) do
         local familiar = entity and entity:ToFamiliar()
         if familiar and familiar.Variant == HAND_MADE_BIBLE.BECKY_GHOST_VARIANT then
             familiar:GetData().LastBeckyGhostCostume = nil

@@ -86,3 +86,7 @@ function BeckyMod:FireHolyBeam(beamType, pos, spawner, parent, damage)
 	beam:Update()
 	return beam
 end
+
+function BeckyMod:addPercentToDealChance(chance, percent)
+	return chance * (percent/13.5)
+end
