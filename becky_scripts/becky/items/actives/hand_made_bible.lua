@@ -1,3 +1,10 @@
+--[[
+    CREDTIS:
+        ITEM IDEA: Jozin
+        ART: Jozin
+        CODE: Mocha
+]]
+
 --[[ to do:
 add ghost synergies
 organize this script and make it more readable and use a state system familiar.State (maybe)

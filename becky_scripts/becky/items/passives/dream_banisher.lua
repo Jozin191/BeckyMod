@@ -1,3 +1,10 @@
+--[[
+    CREDTIS:
+        ITEM IDEA: Darigoat
+        ART: Nerfexus
+        CODE: Tiburones202 and Nerfexus
+]]
+
 local DREAM_BANISHER = {}
 
 DREAM_BANISHER.ID = Isaac.GetItemIdByName("Dream Banisher")

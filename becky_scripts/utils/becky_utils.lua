@@ -1,6 +1,7 @@
 local mod = BeckyMod
 
--- i got the formula for this from the tboi modding discord resource page, from a guide by catinsurance
+--- No idea how to explain this lol.
+--- I got the formula for this from the tboi modding discord resource page, from a guide by catinsurance.
 function mod:toTearsPerSecond(maxFireDelay)
     return 30 / (maxFireDelay + 1)
 end
@@ -10,21 +11,15 @@ function mod:toMaxFireDelay(tearsPerSecond)
 end
 
 function mod:ForEachPlayer(func)
-	if REPENTOGON then
-		for i, player in ipairs(PlayerManager.GetPlayers()) do
-			if func(player, i) then
-				return true
-			end
-		end
-	else
-		for i = 0, mod.Game:GetNumPlayers() - 1 do
-			if func(Isaac.GetPlayer(i), i) then
-				return true
-			end
+	for i, player in ipairs(PlayerManager.GetPlayers()) do
+		if func(player, i) then
+			return true
 		end
 	end
 end
 
+--- Returns true if there is a curse present.
+--- Mods can modify this (Look at the Epiphany compatibility to see how it's done).
 function mod:areThereCurses()
     return BeckyMod.Game:GetLevel():GetCurses() > 0
 end
@@ -87,6 +82,8 @@ function BeckyMod:FireHolyBeam(beamType, pos, spawner, parent, damage)
 	return beam
 end
 
+---Deal chances are stupid and 100% is 135% in the code LOL.
+---@return Float
 function BeckyMod:addPercentToDealChance(chance, percent)
 	return chance * (percent/13.5)
 end

@@ -56,8 +56,14 @@ local function EIDPatch()
 	EID:setModIndicatorName("Becky")
 	local CustomSprite = Sprite()
 	CustomSprite:Load("gfx/ui/eid/hud_eid_becky.anm2", true)
-	EID:addIcon("Becky Ghost", "BeckyIcon", 0, 8, 8, 6, 6, CustomSprite)
+	EID:addIcon("Becky Ghost", "BeckyIcon", 0, 16, 16, 6, 6, CustomSprite)
 	EID:setModIndicatorIcon("Becky Ghost")
+
+	local CharIcons = Sprite()
+	CharIcons:Load("gfx/ui/eid/becky_icons.anm2", true)
+	EID:addIcon("Becky", "Becky", 0, 16, 16, 6, 6, CharIcons)
+
+	EID.InlineIcons["Player" .. Character.BECKY.PLAYERTYPE] = EID.InlineIcons["Becky"]
 
 	-- Dynamic Callbacks
 
@@ -212,7 +218,7 @@ local function EIDPatch()
 
 	--[[
 		DESC EXAMPLE:
-		[Item.SOMETHING.ID] = {
+		[Item.SOMETHING.ID] = { -- EN: [X] | SPA: [X] 
 			en_us = {
 				Name = "NAME",
 				Description = {
@@ -226,7 +232,7 @@ local function EIDPatch()
 	-- Items
 
 	local EID_Collectibles = {
-		[Item.HAND_MADE_BIBLE.ID] = {
+		[Item.HAND_MADE_BIBLE.ID] = { -- EN: [X] | SPA: [X] 
 			en_us = {
 				Name = "Hand Made Bible",
 				Description = {
@@ -235,7 +241,7 @@ local function EIDPatch()
 				},
 			},
 		},
-		[Item.DREAM_BANISHER.ID] = {
+		[Item.DREAM_BANISHER.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Dream Banisher",
 				Description = {
@@ -287,7 +293,7 @@ local function EIDPatch()
 
 	local EID_Characters
 	EID_Characters = {
-		[Mod.Character.BECKY.PLAYERTYPE] = { -- EN: [OK] | RU: [OK] | KO_KR: [OK] | IT: [X] | SPA: [OK] | ZH_CN: [OK] | FR: [OK]
+		[Character.BECKY.PLAYERTYPE] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Becky",
 				Description = {
