@@ -14,7 +14,6 @@ BeckyMod.Character.BECKY = BECKY
 
 function BECKY:OnPreAddCollectible(type)
     BECKY.RECEIVED_ITEMS[type] = true
-    return true
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, BECKY.OnPreAddCollectible)
 
