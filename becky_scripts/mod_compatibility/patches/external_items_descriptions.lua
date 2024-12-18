@@ -297,7 +297,7 @@ local function EIDPatch()
 			en_us = {
 				Name = "Becky",
 				Description = {
-					"{{AngelDevilChanceSmall}} Devil and Angel deals are swapped"
+					"{{AngelDevilChanceSmall}} Devil and Angel deal chances and prices are swapped",
 				}
 			}
 		}
