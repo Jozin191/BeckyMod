@@ -3,27 +3,31 @@ local BECKY = {}
 BECKY.PLAYERTYPE = Isaac.GetPlayerTypeByName("Becky", false)
 BECKY.POCKET_ITEM = BeckyMod.Item.HAND_MADE_BIBLE.ID
 local game = BeckyMod.Game
-BECKY.RECEIVED_ITEMS = {}
 BECKY.GENERATED_DEVIL_ITEMS = {}
 
 BECKY.ENTERED_ANGEL_ROOM = false
 BECKY.GOT_ANGEL_ITEM = false
-BECKY.FIRST_DEAL_RUN = true
+
+BECKY.HAIR_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_hair.anm2")
+BECKY.BODY_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_body.anm2")
 
 BeckyMod.Character.BECKY = BECKY
 
-function BECKY:OnPreAddCollectible(type)
-    BECKY.RECEIVED_ITEMS[type] = true
+function BECKY:OnPreAddCollectible(type, _, _, _, _, player)
+    local runSave = BeckyMod:RunSave(player)
+    if runSave.BECKY_RECEIVED_ITEMS then
+        runSave.BECKY_RECEIVED_ITEMS[type] = true
+    else
+        runSave.BECKY_RECEIVED_ITEMS = { }
+    end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, BECKY.OnPreAddCollectible)
 
 function BECKY:OnInit()
-    local hairCostume = Isaac.GetCostumeIdByPath("gfx/characters/becky_hair.anm2")
-    local bodyCostume = Isaac.GetCostumeIdByPath("gfx/characters/becky_body.anm2")
     local player = Isaac.GetPlayer()
     if player:GetPlayerType() == BECKY.PLAYERTYPE then
-        player:AddNullCostume(hairCostume)
-        player:AddNullCostume(bodyCostume)
+        player:AddNullCostume(BECKY.HAIR_COSTUME)
+        player:AddNullCostume(BECKY.BODY_COSTUME)
 
         player:SetPocketActiveItem(BECKY.POCKET_ITEM, ActiveSlot.SLOT_POCKET, true)
 
@@ -38,9 +42,7 @@ function BECKY:OnInit()
 
         game:GetItemPool():RemoveCollectible(BECKY.POCKET_ITEM)
     end
-    BECKY.RECEIVED_ITEMS = {}
     BECKY.GENERATED_DEVIL_ITEMS = {}
-    BECKY.FIRST_DEAL_RUN = true
     BECKY.GOT_ANGEL_ITEM = false
     BECKY.ENTERED_ANGEL_ROOM = false
 end
@@ -57,7 +59,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit)
         local quality = itemData and itemData.Quality or 0
         local newPrice
         pickup.OptionsPickupIndex = 0
-        if not BECKY.RECEIVED_ITEMS[subtype] then
+        if not BECKY.BECKY_RECEIVED_ITEMS[subtype] then
             if player:GetHearts() > 0 then
                 if quality <= 2 then
                     newPrice = PickupPrice.PRICE_ONE_HEART
@@ -119,27 +121,26 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BECKY.postNewRoom)
 function BECKY:updateAngelPickupPrices()
     local player = Isaac.GetPlayer()
     local room = game:GetRoom()
-    local itemConfig = Isaac.GetItemConfig()
 
     if player:GetPlayerType() == BECKY.PLAYERTYPE and room:GetType() == RoomType.ROOM_ANGEL then
         for _, entity in ipairs(Isaac.GetRoomEntities()) do
             local pickup = entity:ToPickup()
             if pickup and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
                 local subtype = pickup.SubType
-                local itemData = itemConfig:GetCollectible(subtype)
-                local quality = itemData and itemData.Quality or 0
+                local itemData = Isaac.GetItemConfig():GetCollectible(subtype)
+                local price = itemData and itemData.DevilPrice or 1
                 local newPrice
                 local matched = false
-                
+
                 for _, savedPosition in ipairs(markedPickup) do
                     if pickup.Position:Distance(savedPosition) < 1 then
                         matched = true
                         break
                     end
                 end
-                if not BECKY.RECEIVED_ITEMS[subtype] and matched then
+                if not BeckyMod:RunSave(player).BECKY_RECEIVED_ITEMS[subtype] and matched then
                     if player:GetHearts() > 0 then
-                        if quality <= 2 then
+                        if price == 1 then
                             newPrice = PickupPrice.PRICE_ONE_HEART
                         else
                             newPrice = PickupPrice.PRICE_TWO_HEARTS
@@ -196,22 +197,31 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, BECKY.updateAngelItems,
 --Add angel deal chance instead of devil deal
 
 
-function BECKY:angelDealChance()
-    local player = Isaac.GetPlayer()
-    local becky = player:GetPlayerType() == BECKY.PLAYERTYPE
-    if not BECKY.ENTERED_ANGEL_ROOM and not BECKY.GOT_ANGEL_ITEM and becky and BECKY.FIRST_DEAL_RUN then
+function BECKY:angelDealChance(chance)
+    local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
+
+    if not player then
+        return chance
+    end
+
+    local runSave = BeckyMod:RunSave(player)
+    if not runSave.FIRST_DEAL_RUN then
+        runSave.FIRST_DEAL_RUN = true
+    end
+
+    if not BECKY.ENTERED_ANGEL_ROOM and not BECKY.GOT_ANGEL_ITEM and runSave.FIRST_DEAL_RUN then
         game:GetLevel():AddAngelRoomChance(100)
     end
-    if BECKY.ENTERED_ANGEL_ROOM and BECKY.GOT_ANGEL_ITEM and becky then
+    if BECKY.ENTERED_ANGEL_ROOM and BECKY.GOT_ANGEL_ITEM then
         game:GetLevel():AddAngelRoomChance(100)
-    elseif BECKY.ENTERED_ANGEL_ROOM and not BECKY.GOT_ANGEL_ITEM and becky then
+    elseif BECKY.ENTERED_ANGEL_ROOM and not BECKY.GOT_ANGEL_ITEM then
         local rngDoor = math.random(100)
         if rngDoor >= 50 then
             game:GetLevel():InitializeDevilAngelRoom(false, true)
         else
             game:GetLevel():InitializeDevilAngelRoom(true, false)
         end
-    elseif not BECKY.ENTERED_ANGEL_ROOM and not BECKY.FIRST_DEAL_RUN and becky then
+    elseif not BECKY.ENTERED_ANGEL_ROOM and not runSave.FIRST_DEAL_RUN then
         game:GetLevel():InitializeDevilAngelRoom(false, true)
     end
 end
@@ -235,25 +245,26 @@ function BECKY:gotAngelItem()
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, BECKY.gotAngelItem)
 
-local bossIsDead = false
-
 function BECKY:onBossDeath(entity)
-    local player = Isaac.GetPlayer()
-    local becky = player:GetPlayerType() == BECKY.PLAYERTYPE
-    if becky and entity:IsBoss() then
-        bossIsDead = true
+    local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
+    if player and entity:IsBoss() then
+        BeckyMod:RunSave(player).bossIsDead = true
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, BECKY.onBossDeath)
 
 function BECKY:checkAngelRoomGen()
-    if bossIsDead then
-        local level = game:GetLevel()
-        local currentRoomDesc = level:GetRoomByIdx(GridRooms.ROOM_DEVIL_IDX)
-        if currentRoomDesc.Data ~= nil then
-            BECKY.FIRST_DEAL_RUN = false
-            if BECKY.FIRST_DEAL_RUN == false then
-                bossIsDead = false
+    local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
+
+    if player then
+        local runSave = BeckyMod:RunSave(player)
+
+        if runSave.bossIsDead then
+            local level = game:GetLevel()
+            local currentRoomDesc = level:GetRoomByIdx(GridRooms.ROOM_DEVIL_IDX)
+            if currentRoomDesc.Data ~= nil then
+                runSave.FIRST_DEAL_RUN = false
+                runSave.bossIsDead = false
             end
         end
     end
@@ -261,6 +272,11 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BECKY.checkAngelRoomGen)
 
 function BECKY:onNewFloor()
-    bossIsDead = false
+    local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
+
+    if player then
+        local runSave = BeckyMod:RunSave(player)
+        runSave.bossIsDead = false
+    end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, BECKY.onNewFloor)

@@ -1,20 +1,21 @@
 <items gfxroot="gfx/items/" version="1">
         <!--ACTIVE ITEMS-->
-
         <!--Hand Made Bible-->
-        <active id="1" 
-        name="Hand Made Bible" 
-        gfx="hand_made_bible.png" 
-        description="There's a ghost!" 
-        quality="4" 
-        maxcharges="100" 
-        chargetype="timed" 
+
+        <active id="1"
+        name="Hand Made Bible"
+        gfx="hand_made_bible.png"
+        description="There's a ghost!"
+        quality="4"
+        maxcharges="100"
+        chargetype="timed"
         cache="familiars"
         passivecache="true"
         tags="book angel"
         />
 
         <!--Bedtime Stories For Angels-->
+
         <active id="2"
         name="Bedtime Stories For Angels"
         gfx="bedtime_stories_for_angels.png"
@@ -28,17 +29,24 @@
         <!--PASSIVE ITEMS-->
         <!--Dream Banisher-->
 
-        <passive id="3" 
+        <passive id="3"
         name="Dream Banisher"
-        gfx="dream_banisher.png" 
-        description="flavor text yay" 
-        quality="2" 
-        cache="firedelay damage"  
+        gfx="dream_banisher.png"
+        description="flavor text yay"
+        quality="2"
+        cache="firedelay damage"
         passivecache="true"
         />
 
         <!--TRINKETS-->
         <!--Burning Feather-->
-        <trinket id="3" name="Burning Feather" description="A broken dream" gfx="burning_feather.png" />
+
+        <trinket id="3"
+        name="Burning Feather"
+        description="A broken dream"
+        gfx="burning_feather.png"
+        cache="flying"
+        passivecache="true"
+        />
 
 </items>

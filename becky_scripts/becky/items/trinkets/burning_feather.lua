@@ -8,48 +8,40 @@ local rng = RNG()
 
 BeckyMod.Trinket.BURNING_FEATHER = BURNING_FEATHER
 
-rng:SetSeed(startSeed, BeckyMod.RECOMMENDED_SHIFT_IDX) --??? does it work like this??? what the fuck
-
---just so the player can't keep the flight on a new run
-function BURNING_FEATHER:onInit()
-    local player = Isaac.GetPlayer()
-    player:AddCacheFlags(CacheFlag.CACHE_FLYING)
-    player:EvaluateItems()
-end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BURNING_FEATHER.onInit)
+rng:SetSeed(startSeed, BeckyMod.RECOMMENDED_SHIFT_IDX) --??? does it work like this??? what the frick
 
 function BURNING_FEATHER:onNewUnclearedRoom()
-    local player = Isaac.GetPlayer()
-    
-    if player:HasTrinket(BURNING_FEATHER.ID) then
-        if BeckyMod.Game:GetRoom():IsClear() == false then
-            local randomNumber = rng:RandomInt(2) --No need to make it 100, it's basically just 1/2 at the end of the day
-            if randomNumber == 0 then
-                player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_FATE, true)
+    BeckyMod:ForEachPlayer(function(player)
+        if player:HasTrinket(BURNING_FEATHER.ID) then
+            if BeckyMod.Game:GetRoom():IsClear() == false then
+                local randomNumber = rng:RandomInt(2) --No need to make it 100, it's basically just 1/2 at the end of the day
+                if randomNumber == 0 then
+                    player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_FATE, true)
 
-                BeckyMod:TempSave(player).BurningFeatherFlight = true
+                    BeckyMod:TempSave(player).BurningFeatherFlight = true
 
+                    player:AddCacheFlags(CacheFlag.CACHE_FLYING)
+                    player:EvaluateItems()
+                elseif randomNumber == 1 then
+                    player:AddCacheFlags(CacheFlag.CACHE_FLYING)
+                    player:EvaluateItems()
+                    player:GetEffects():RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)
+
+                    Scheduler.Schedule( --Needs to wait for a frame lol
+        				1,
+        				function()
+        					player:TakeDamage(1, DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 0)
+        				end,
+        				{ player }
+        			)
+                end
+            elseif BeckyMod.Game:GetRoom():IsClear() then
                 player:AddCacheFlags(CacheFlag.CACHE_FLYING)
-                player:EvaluateItems()
-            elseif randomNumber == 1 then
-                player:AddCacheFlags(CacheFlag.CACHE_FLYING)
-                player:EvaluateItems()
                 player:GetEffects():RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)
-
-                Scheduler.Schedule( --Needs to wait for a frame lol
-					1,
-					function()
-						player:TakeDamage(1, DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 0)
-					end,
-					{ player }
-				)
+                player:EvaluateItems()
             end
-        elseif BeckyMod.Game:GetRoom():IsClear() then
-            player:AddCacheFlags(CacheFlag.CACHE_FLYING)
-            player:GetEffects():RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)
-            player:EvaluateItems()
         end
-    end
+    end)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BURNING_FEATHER.onNewUnclearedRoom)
 
