@@ -27,6 +27,16 @@ function BECKY:OnInit()
         player:AddNullCostume(bodyCostume)
 
         player:SetPocketActiveItem(BECKY.POCKET_ITEM, ActiveSlot.SLOT_POCKET, true)
+
+        Scheduler.Schedule( --Needs to wait for a frame lol
+	    	1,
+	    	function()
+	    		player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS)
+                player:EvaluateItems()
+	    	end,
+	    	{ player }
+	    )
+
         game:GetItemPool():RemoveCollectible(BECKY.POCKET_ITEM)
     end
     BECKY.RECEIVED_ITEMS = {}

@@ -293,8 +293,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, familiar)
     end
 end)
 
-BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlags)
-    if cacheFlags == CacheFlag.CACHE_FAMILIARS then
+function HAND_MADE_BIBLE:CheckFamiliar(player, cacheFlags)
+    if cacheFlags & CacheFlag.CACHE_FAMILIARS == CacheFlag.CACHE_FAMILIARS then
         --player:GetEffects():GetCollectibleEffectNum(HAND_MADE_BIBLE.ID)
         local itemCount = player:GetCollectibleNum(HAND_MADE_BIBLE.ID)
         local rng = RNG()
@@ -302,4 +302,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFl
     
         player:CheckFamiliar(HAND_MADE_BIBLE.BECKY_GHOST_VARIANT, itemCount, rng, Isaac.GetItemConfig():GetCollectible(HAND_MADE_BIBLE.ID))
     end
-end)
+end
+
+BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, HAND_MADE_BIBLE.CheckFamiliar)
