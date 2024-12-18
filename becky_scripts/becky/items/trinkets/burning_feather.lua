@@ -22,7 +22,7 @@ function BURNING_FEATHER:onNewUnclearedRoom()
 
                     player:AddCacheFlags(CacheFlag.CACHE_FLYING)
                     player:EvaluateItems()
-                elseif randomNumber == 1 then
+                else --AKA "randomNumber == 1"
                     player:AddCacheFlags(CacheFlag.CACHE_FLYING)
                     player:EvaluateItems()
                     player:GetEffects():RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)
