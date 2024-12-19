@@ -41,7 +41,7 @@
         <!--TRINKETS-->
         <!--Burning Feather-->
 
-        <trinket id="3"
+        <trinket id="1"
         name="Burning Feather"
         description="A broken dream"
         gfx="burning_feather.png"
@@ -49,4 +49,11 @@
         passivecache="true"
         />
 
+        <trinket id="2"
+        name="Holy Bookmark"
+        description="Funny placeholder haha"
+        gfx="holy_bookmark.png"
+        cache="luck"
+        passivecache="true"
+        />
 </items>

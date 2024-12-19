@@ -1,5 +1,3 @@
---Lowkey I think the code is kinda ass (I didn't code it) -Tibu
-
 local BURNING_FEATHER = {}
 
 BURNING_FEATHER.ID = Isaac.GetTrinketIdByName("Burning Feather")

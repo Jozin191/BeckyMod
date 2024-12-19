@@ -45,6 +45,7 @@ local patches = {
     "external_items_descriptions",
     "custom_items",
     "epiphany",
+	"beckyPatch"
 }
 
 for _, fileName in ipairs(patches) do

@@ -16,6 +16,13 @@ include("becky_scripts.utils.saving_system")
 Scheduler = include("becky_scripts.utils.schedule_data")
 
 BeckyMod.Game = Game()
+BeckyMod.itemconfig = Isaac.GetItemConfig()
+function BeckyMod:RefreshItemConfig()
+	BeckyMod.itemconfig = Isaac.GetItemConfig()
+end
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, BeckyMod.RefreshItemConfig)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BeckyMod.RefreshItemConfig)
 
 BeckyMod.Item = {}
 BeckyMod.Trinket = {}
@@ -40,6 +47,7 @@ include("becky_scripts.becky.items.actives.hand_made_bible")
 
 --trinkets
 include("becky_scripts.becky.items.trinkets.burning_feather")
+include("becky_scripts.becky.items.trinkets.holy_bookmark")
 
 --characters
 include("becky_scripts.becky.characters.becky")
