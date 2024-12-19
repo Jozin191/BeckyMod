@@ -73,11 +73,8 @@ function BECKY:postNewRoom()
             markedRealPickup = {}
             for _, entity in ipairs(Isaac.GetRoomEntities()) do
                 local pickup = entity:ToPickup()
-                if pickup and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
-                    table.insert(markedPickup, pickup.Position)
-                end
-                if pickup and pickup.Variant ~= PickupVariant.PICKUP_COLLECTIBLE then
-                    table.insert(markedRealPickup, pickup.Position)
+                if pickup then
+                    table.insert((pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE) and markedPickup or markedRealPickup, pickup.Position)
                 end
             end
         end
