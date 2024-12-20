@@ -9,6 +9,8 @@ BeckyMod.FLAGS.Debug = true
 BeckyMod.SaveManager = include("becky_scripts.utils.save_manager")
 BeckyMod.SaveManager.Init(BeckyMod)
 
+include("becky_scripts.utils.lua_overrides")
+
 include("becky_scripts.utils.becky_utils")
 
 include("becky_scripts.utils.saving_system")
@@ -23,6 +25,7 @@ end
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, BeckyMod.RefreshItemConfig)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BeckyMod.RefreshItemConfig)
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_MODS_LOADED, CallbackPriority.IMPORTANT, BeckyMod.RefreshItemConfig)
 
 BeckyMod.Item = {}
 BeckyMod.Trinket = {}

@@ -11,7 +11,7 @@
         chargetype="timed"
         cache="familiars"
         passivecache="true"
-        tags="book angel"
+        tags="book"
         />
 
         <!--Bedtime Stories For Angels-->
@@ -23,7 +23,7 @@
         quality="2"
         maxcharges="4"
         chargetype="normal"
-        tags="book angel"
+        tags="book"
         />
 
         <!--PASSIVE ITEMS-->

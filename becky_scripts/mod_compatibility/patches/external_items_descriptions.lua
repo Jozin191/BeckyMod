@@ -287,7 +287,7 @@ local function EIDPatch()
 
 	-- Trinkets
 
-
+	--Reminder for myself: holy bookmark specifies "unique" item (no extra copies)
 
 	-- Add Characters
 
