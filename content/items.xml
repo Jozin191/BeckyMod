@@ -32,7 +32,7 @@
         <passive id="3"
         name="Dream Banisher"
         gfx="dream_banisher.png"
-        description="flavor text yay"
+        description="A cursed night"
         quality="2"
         cache="firedelay damage"
         passivecache="true"
@@ -51,7 +51,7 @@
 
         <trinket id="2"
         name="Holy Bookmark"
-        description="Funny placeholder haha"
+        description="With lightness come luck"
         gfx="holy_bookmark.png"
         cache="luck"
         passivecache="true"

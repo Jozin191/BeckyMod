@@ -287,7 +287,75 @@ local function EIDPatch()
 
 	-- Trinkets
 
+	local function getTrinketMult(descObj)
+		local mult = 1
+		if descObj.ObjSubType & TrinketType.TRINKET_GOLDEN_FLAG == TrinketType.TRINKET_GOLDEN_FLAG then
+			mult = mult + 1
+		end
+		if BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_MOMS_BOX) then
+			mult = mult + 1
+		end
+		return mult
+	end
+
 	--Reminder for myself: holy bookmark specifies "unique" item (no extra copies)
+
+	local EID_Trinkets
+	EID_Trinkets = {
+		[Trinket.HOLY_BOOKMARK.ID] = { -- EN: [OK] | SPA: [X] 
+			_modifier = function(descObj, line) ---@param descObj EID_DescObj
+				local mult = getTrinketMult(descObj)
+				local luckTxt = tostring(Trinket.HOLY_BOOKMARK.LUCK_PER_ITEM * mult)
+
+				if mult > 1 then
+					luckTxt = "{{ColorGold}}" .. luckTxt .. "{{CR}}"
+				end
+
+				return EID:SimpleReplace(line, "{1}", luckTxt, 1)
+			end,
+
+			en_us = {
+				Name = "Holy Bookmark",
+				Description = {
+					function(descObj)
+						return EID_Trinkets[Trinket.HOLY_BOOKMARK.ID]._modifier(descObj, "↑ {{Luck}} +{1} luck")
+					end,
+					"#{{AngelChanceSmall}} Each unique angel-related item that the player owns grants an extra +" .. Trinket.HOLY_BOOKMARK.LUCK_PER_ITEM .. " luck",
+					"#Actives grant twice the luck",
+				}
+			},
+		},
+	}
+
+	for id, trinketDescData in pairs(EID_Trinkets) do
+		for language, descData in pairs(trinketDescData) do
+			if language:match('^_') then goto continue end -- skip helper private fields
+	
+			local name = descData.Name
+			local description = descData.Description
+	
+			if not DD:IsValidDescription(description) then
+				Mod:Log("Invalid trinket description for " .. name .. " (" .. id .. ")", "Language: " .. language)
+				goto continue
+			end
+	
+			local minimized = DD:MakeMinimizedDescription(description)
+	
+			if not containsFunction(minimized) and not trinketDescData._AppendToEnd then
+				EID:addTrinket(id, table.concat(minimized, ""), name, language)
+			else
+				-- don't add descriptions for vanilla trinkets that already have one
+				if not EID.descriptions[language].trinkets[id] then
+					EID:addTrinket(id, "", name, language) -- description only contains name/language, the actual description is generated at runtime
+				end
+	
+				DD:SetCallback(DD:CreateCallback(minimized, trinketDescData._AppendToEnd), EntityType.ENTITY_PICKUP,
+					PickupVariant.PICKUP_TRINKET, id, language)
+			end
+	
+			::continue::
+		end
+	end
 
 	-- Add Characters
 
@@ -312,6 +380,37 @@ local function EIDPatch()
 			end
 		end
 	end
+
+	EID:addDescriptionModifier(
+		"Becky Dynamic Description Manager",
+		-- condition
+		function(descObj)
+			local subtype = descObj.ObjSubType
+			if descObj.ObjVariant == PickupVariant.PICKUP_TRINKET then
+				subtype = Mod:RemoveBitFlags(subtype, TrinketType.TRINKET_GOLDEN_FLAG)
+			end
+
+			return DD:GetCallback(descObj.ObjType, descObj.ObjVariant, subtype, EID.getLanguage() or "en_us") ~= nil
+		end,
+		-- modifier
+		function(descObj)
+			local subtype = descObj.ObjSubType
+			if descObj.ObjVariant == PickupVariant.PICKUP_TRINKET then
+				subtype = Mod:RemoveBitFlags(subtype, TrinketType.TRINKET_GOLDEN_FLAG)
+			end
+
+			local callback = DD:GetCallback(descObj.ObjType, descObj.ObjVariant, subtype, EID.getLanguage() or "en_us")
+			local descString = callback.Func(descObj) ---@diagnostic disable-line: need-check-nil
+
+			if callback.AppendToEnd then ---@diagnostic disable-line: need-check-nil
+				descObj.Description = descObj.Description .. descString
+			else
+				descObj.Description = descString .. descObj.Description
+			end
+
+			return descObj
+		end
+	)
 
 	--EID._currentMod = "" --So items added after this with no set mod don't display as the becky mod
 end

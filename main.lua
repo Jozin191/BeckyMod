@@ -15,6 +15,10 @@ include("becky_scripts.utils.becky_utils")
 
 include("becky_scripts.utils.saving_system")
 
+include("becky_scripts.utils.table_functions")
+
+include("becky_scripts.utils.bitmask_helper")
+
 Scheduler = include("becky_scripts.utils.schedule_data")
 
 BeckyMod.Game = Game()
