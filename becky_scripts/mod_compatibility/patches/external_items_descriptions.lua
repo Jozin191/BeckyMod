@@ -382,6 +382,25 @@ local function EIDPatch()
 	end
 
 	EID:addDescriptionModifier(
+		"Holy Bookmark Items",
+		-- condition
+		function(descObj)
+			if not BECKY_EID:ClosestPlayerTo(descObj.Entity):HasTrinket(Trinket.HOLY_BOOKMARK.ID) then
+				return false
+			end
+			local isActiveIn = table.indexOf(Trinket.HOLY_BOOKMARK.HolyList.Actives, descObj.ObjSubType) ~= -1
+			local isCollectibleIn = table.indexOf(Trinket.HOLY_BOOKMARK.HolyList.Passives, descObj.ObjSubType) ~= -1
+			return isActiveIn or isCollectibleIn
+		end,
+		-- modifier
+		function(descObj)
+			descObj.Description = descObj.Description .. '#{{Trinket' .. Trinket.HOLY_BOOKMARK.ID .. '}} {{ColorSilver}}This item contributes to Holy Bookmark'
+
+			return descObj
+		end
+	)
+
+	EID:addDescriptionModifier(
 		"Becky Dynamic Description Manager",
 		-- condition
 		function(descObj)

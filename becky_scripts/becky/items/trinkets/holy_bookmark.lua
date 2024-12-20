@@ -11,7 +11,7 @@ HOLY_BOOKMARK.ID = Isaac.GetTrinketIdByName("Holy Bookmark")
 
 BeckyMod.Trinket.HOLY_BOOKMARK = HOLY_BOOKMARK
 
-HOLY_BOOKMARK.LUCK_PER_ITEM = 0.25
+HOLY_BOOKMARK.LUCK_PER_ITEM = 0.5
 
 HOLY_BOOKMARK.HolyList = {
     --Add non-seraphim but angel-realted passives in here
@@ -48,11 +48,11 @@ HOLY_BOOKMARK.HolyList = {
 
 function HOLY_BOOKMARK:addItem(type, itemId)
     if type == ItemType.ITEM_ACTIVE then
-        if table.indexOf(HOLY_BOOKMARK.HolyList.Actives, itemId) then
+        if table.indexOf(HOLY_BOOKMARK.HolyList.Actives, itemId) == -1 then
             HOLY_BOOKMARK.HolyList.Actives[#HOLY_BOOKMARK.HolyList.Actives + 1] = itemId
         end
     else
-        if table.indexOf(HOLY_BOOKMARK.HolyList.Passives, itemId) then
+        if table.indexOf(HOLY_BOOKMARK.HolyList.Passives, itemId) == -1 then
             HOLY_BOOKMARK.HolyList.Passives[#HOLY_BOOKMARK.HolyList.Passives + 1] = itemId
         end
     end
