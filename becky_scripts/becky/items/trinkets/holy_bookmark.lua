@@ -1,3 +1,10 @@
+--[[
+    CREDTIS:
+        ITEM IDEA: Tiburones202
+        ART: Nerfexus
+        CODE: Tiburones202
+]]
+
 local HOLY_BOOKMARK = {}
 
 HOLY_BOOKMARK.ID = Isaac.GetTrinketIdByName("Holy Bookmark")

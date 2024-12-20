@@ -1,3 +1,10 @@
+--[[
+    CREDTIS:
+        ITEM IDEA: InterstellarNuggo
+        ART: Nerfexus
+        CODE: Tiburones202 and Nerfexus
+]]
+
 local BURNING_FEATHER = {}
 
 BURNING_FEATHER.ID = Isaac.GetTrinketIdByName("Burning Feather")
