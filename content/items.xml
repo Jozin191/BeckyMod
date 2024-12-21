@@ -60,7 +60,7 @@
         <trinket id="3"
         name="Rejection"
         description="Denied from heaven's gate"
-        gfx="holy_bookmark.png"
+        gfx="rejection.png"
         cache=""
         />
 </items>

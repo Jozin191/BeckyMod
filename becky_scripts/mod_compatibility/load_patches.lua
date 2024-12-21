@@ -2,8 +2,7 @@
 
 local Mod = BeckyMod
 local loader = {
-	Patches = {},
-	AppliedPatches = false,
+	Patches = {}
 }
 
 Mod.PatchesLoader = loader
@@ -35,8 +34,6 @@ function loader:ApplyPatches()
 			Mod:DebugLog(table.concat({ "Loaded", tostring(patch.Mod), "patch" }, " "))
 		end
 	end
-
-	loader.AppliedPatches = true
 end
 
 local root = "becky_scripts.mod_compatibility.patches"
@@ -54,10 +51,4 @@ end
 
 -- This has to be done after all mods are loaded
 -- Because otherwise mods that are loaded after Becky will not be detected
-Mod:AddPriorityCallback(ModCallbacks.MC_POST_GAME_STARTED, CallbackPriority.LATE, loader.ApplyPatches)
-
-Mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
-	if not loader.AppliedPatches then
-		loader:ApplyPatches()
-	end
-end)
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_MODS_LOADED, CallbackPriority.LATE, loader.ApplyPatches)

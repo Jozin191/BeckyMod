@@ -80,6 +80,15 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BECKY.postNewRoom)
 
 function BECKY:updateAngelDealPrice(pickup)
+    if not BeckyMod:GetRerollPersistentData(pickup).beckyPassiveChecked then
+        return
+    end
+
+    if PlayerManager.AnyoneHasTrinket(TrinketType.TRINKET_YOUR_SOUL) then
+        pickup.Price = PickupPrice.PRICE_SOUL
+        return
+    end
+
     local subtype = pickup.SubType
     local itemData = Isaac.GetItemConfig():GetCollectible(subtype)
     local price = itemData and itemData.DevilPrice or 1
@@ -133,6 +142,8 @@ function BECKY:initAngelPickupPrices(pickup)
         local pData = BeckyMod:GetRerollPersistentData(pickup)
 
         if pickup.FrameCount <= 1 and not pData.beckyPassiveChecked then
+            pData.beckyPassiveChecked = true
+
             if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
                 BECKY:updateAngelDealPrice(pickup)
             else
@@ -140,8 +151,6 @@ function BECKY:initAngelPickupPrices(pickup)
             end
 
             pickup.AutoUpdatePrice = false
-
-            pData.beckyPassiveChecked = true
 
             Scheduler.Schedule(1, function()
                 pickup.OptionsPickupIndex = 0
@@ -213,7 +222,21 @@ function BECKY:checkAngelItem(_, player)
         local firstBecky = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE) --Mod only checks the first becky for everything else
         BeckyMod:RunSave(firstBecky).GOT_ANGEL_ITEM = true
 
-        BeckyMod:DebugLog("GOT AN ANGEL ITEM")
+        Scheduler.Schedule(
+	    	1,
+	    	function()
+                for _, entity in ipairs(Isaac.GetRoomEntities()) do
+                    local pickup = entity:ToPickup()
+                    if pickup 
+                    and pickup.SubType ~= CollectibleType.COLLECTIBLE_NULL
+                    and pickup:Exists()
+                    and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE
+                    then
+                        BECKY:updateAngelDealPrice(pickup)
+                    end
+                end
+            end
+	    )
     end
 end
 
@@ -224,7 +247,7 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, CallbackPrior
 function BECKY:onBossDeath(entity)
     local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
     if player and entity:IsBoss() then
-        BeckyMod:RunSave(player).bossIsDead = true
+        BeckyMod:FloorSave(player).bossIsDead = true
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, BECKY.onBossDeath)
@@ -234,25 +257,16 @@ function BECKY:checkAngelRoomGen()
 
     if player then
         local runSave = BeckyMod:RunSave(player)
+        local floorSave = BeckyMod:FloorSave(player)
 
-        if runSave.bossIsDead then
+        if floorSave.bossIsDead then
             local level = game:GetLevel()
             local currentRoomDesc = level:GetRoomByIdx(GridRooms.ROOM_DEVIL_IDX)
             if currentRoomDesc.Data ~= nil then
                 runSave.FIRST_DEAL_RUN = false
-                runSave.bossIsDead = false
+                floorSave.bossIsDead = false
             end
         end
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BECKY.checkAngelRoomGen)
-
-function BECKY:onNewFloor()
-    local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
-
-    if player then
-        local runSave = BeckyMod:RunSave(player)
-        runSave.bossIsDead = false
-    end
-end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, BECKY.onNewFloor)
