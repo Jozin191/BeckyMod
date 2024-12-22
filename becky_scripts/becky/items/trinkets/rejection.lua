@@ -27,7 +27,7 @@ BeckyMod.Trinket.REJECTION = REJECTION
 function REJECTION:checkDealPickup(item, player)
     local player = player:ToPlayer()
 
-    if player and PlayerManager.AnyoneHasTrinket(REJECTION.ID) then
+    if player and BeckyMod.AnyoneHasTrinketPlusGolden(REJECTION.ID) then
         if REJECTION.ValidPriceTypes[item.Price] then
             local P1 = Isaac.GetPlayer() --The extra chance will always check for P1
             local runSave = BeckyMod:RunSave(P1)
@@ -37,6 +37,7 @@ function REJECTION:checkDealPickup(item, player)
             end
 
             runSave.extraDealchanceByRejectionForNextFloor = runSave.extraDealchanceByRejectionForNextFloor + REJECTION.EXTRA_CHANCE_PER_DEAL
+            print(runSave.extraDealchanceByRejectionForNextFloor)
         end
     end
 end
@@ -44,15 +45,11 @@ end
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_PICKUP_SHOP_PURCHASE, CallbackPriority.LATE, REJECTION.checkDealPickup, PickupVariant.PICKUP_COLLECTIBLE)
 
 function REJECTION:onNewFloor()
-    if PlayerManager.AnyoneHasTrinket(REJECTION.ID) then
-        --Lock devil/angel
+    local P1 = Isaac.GetPlayer() --The extra chance will always check for P1
+    local runSave = BeckyMod:RunSave(P1)
 
-        
-
+    if BeckyMod.AnyoneHasTrinketPlusGolden(REJECTION.ID) then
         --Deal chance stuff
-
-        local P1 = Isaac.GetPlayer() --The extra chance will always check for P1
-        local runSave = BeckyMod:RunSave(P1)
 
         if not runSave.extraDealchanceByRejectionForNextFloor then
             runSave.extraDealchanceByRejectionForNextFloor = 0
@@ -61,21 +58,40 @@ function REJECTION:onNewFloor()
         runSave.extraDealchanceByRejection = runSave.extraDealchanceByRejectionForNextFloor
         runSave.extraDealchanceByRejectionForNextFloor = 0
     end
+
+    if runSave.someoneHadRejection then --Anyone had the trinket at one point
+        --Lock to devil deal
+
+        BeckyMod.Game:AddDevilRoomDeal()
+    end
 end
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, REJECTION.onNewFloor)
 
 function REJECTION:devilModifyChances(chance)
-    if PlayerManager.AnyoneHasTrinket(REJECTION.ID) then
+    if BeckyMod.AnyoneHasTrinketPlusGolden(REJECTION.ID) then
         local runSave = BeckyMod:RunSave(Isaac.GetPlayer())
 
         if not runSave.extraDealchanceByRejection then
             runSave.extraDealchanceByRejection = 0
         end
 
-        return chance * (1 + runSave.extraDealchanceByRejection/100)
+        local totalCount = PlayerManager.GetTotalTrinketMultiplier(REJECTION.ID)
+        local finalExtraChance = (runSave.extraDealchanceByRejection * 2 * (1 - 0.5^totalCount))/100
+
+        return chance + finalExtraChance
     end
+
     return chance
 end
 
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_DEVIL_APPLY_SPECIAL_ITEMS, REJECTION.devilModifyChances)
+
+function REJECTION:LockToDevilDeals()
+    BeckyMod:RunSave(Isaac.GetPlayer()).someoneHadRejection = true
+
+    BeckyMod.Game:AddDevilRoomDeal() --Lock in for the current floor
+end
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_ADDED, REJECTION.LockToDevilDeals, REJECTION.ID)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_ADDED, REJECTION.LockToDevilDeals, REJECTION.ID | TrinketType.TRINKET_GOLDEN_FLAG) --Separate version for the golden version (?

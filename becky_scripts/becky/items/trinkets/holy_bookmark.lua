@@ -73,7 +73,7 @@ end
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_MODS_LOADED, CallbackPriority.LATE, HOLY_BOOKMARK.addAllItems)
 
 function HOLY_BOOKMARK:applyLuck(player, cacheFlags)
-    if player:HasTrinket(HOLY_BOOKMARK.ID) and cacheFlags & CacheFlag.CACHE_LUCK == CacheFlag.CACHE_LUCK then
+    if player:HasTrinket(HOLY_BOOKMARK.ID) and BeckyMod:HasBitFlags(cacheFlags, CacheFlag.CACHE_LUCK) then
         local holyStuffCount = player:GetTrinketMultiplier(HOLY_BOOKMARK.ID) --Counts itself
 
         for i = 1, #HOLY_BOOKMARK.HolyList.Passives do

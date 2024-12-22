@@ -326,11 +326,26 @@ local function EIDPatch()
 			},
 		},
 		[Trinket.REJECTION.ID] = {
+			_modifier = function(descObj, line) ---@param descObj EID_DescObj
+				local mult = getTrinketMult(descObj)
+				local chanceTxt = tostring(Trinket.REJECTION.EXTRA_CHANCE_PER_DEAL * 2 * (1 - 0.5^mult))
+
+				if mult > 1 then
+					chanceTxt = "{{ColorGold}}" .. chanceTxt .. "{{CR}}"
+				end
+
+				return EID:SimpleReplace(line, "{1}", chanceTxt, 1)
+			end,
+
 			en_us = {
 				Name = "Rejection",
 				Description = {
-					"{{Warning}} Locks you from angel deals",
-					"#{{DevilChanceSmall}} For every deal taken in one floor, you get a 10% deal chance multiplier in the next"
+					function(descObj)
+						return EID_Trinkets[Trinket.REJECTION.ID]._modifier(descObj, 
+							"{{DevilChanceSmall}} For every deal taken in one floor, you get +{1} deal chance in the next"
+						)
+					end,
+					"#{{Warning}} Locks you from angel deals for the rest of the run when picked up, even after dropped",
 				}
 			}
 		}

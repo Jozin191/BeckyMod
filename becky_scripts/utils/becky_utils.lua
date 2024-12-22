@@ -97,3 +97,7 @@ function BeckyMod:forceAngelDevil(angel, devil, force)
 
 	level:InitializeDevilAngelRoom(angel, devil)
 end
+
+function BeckyMod.AnyoneHasTrinketPlusGolden(ItemID)
+	return PlayerManager.AnyoneHasTrinket(ItemID) or PlayerManager.AnyoneHasTrinket(ItemID | TrinketType.TRINKET_GOLDEN_FLAG)
+end
