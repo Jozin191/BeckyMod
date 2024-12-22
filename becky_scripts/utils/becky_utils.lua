@@ -82,8 +82,18 @@ function BeckyMod:FireHolyBeam(beamType, pos, spawner, parent, damage)
 	return beam
 end
 
----Deal chances are stupid and 100% is 135% in the code LOL.
+---Deal chances are stupid.
 ---@return Float
 function BeckyMod:addPercentToDealChance(chance, percent)
-	return chance * (percent/13.5)
+	return chance * (1 + percent/100)
+end
+
+function BeckyMod:forceAngelDevil(angel, devil, force)
+	local level = game:GetLevel()
+
+	if force then
+		level:GetRoomByIdx(GridRooms.ROOM_DEVIL_IDX).Data = nil
+	end
+
+	level:InitializeDevilAngelRoom(angel, devil)
 end

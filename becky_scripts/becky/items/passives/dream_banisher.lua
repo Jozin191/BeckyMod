@@ -59,6 +59,7 @@ function DREAM_BANISHER:devilModifyChances(chance)
     if firstPlayer then
         return BeckyMod:addPercentToDealChance(chance, DREAM_BANISHER.DEAL_INCREASE)
     end
+    return chance
 end
 
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_DEVIL_APPLY_SPECIAL_ITEMS, DREAM_BANISHER.devilModifyChances)

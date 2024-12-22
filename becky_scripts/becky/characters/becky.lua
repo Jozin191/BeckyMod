@@ -218,7 +218,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_DEVIL_APPLY_ITEMS, BECKY.angelDealChanc
 function BECKY:checkAngelItem(_, player)
     local player = player:ToPlayer()
 
-    if player and player:GetPlayerType() == BECKY.PLAYERTYPE and game:GetRoom():GetType() == RoomType.ROOM_ANGEL then
+    if player
+        and player:GetPlayerType() == BECKY.PLAYERTYPE
+        and game:GetRoom():GetType() == RoomType.ROOM_ANGEL
+        and player:CanPickupItem()
+        and player:IsExtraAnimationFinished()
+    then
         local firstBecky = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE) --Mod only checks the first becky for everything else
         BeckyMod:RunSave(firstBecky).GOT_ANGEL_ITEM = true
 

@@ -325,6 +325,15 @@ local function EIDPatch()
 				}
 			},
 		},
+		[Trinket.REJECTION.ID] = {
+			en_us = {
+				Name = "Rejection",
+				Description = {
+					"{{Warning}} Locks you from angel deals",
+					"#{{DevilChanceSmall}} For every deal taken in one floor, you get a 10% deal chance multiplier in the next"
+				}
+			}
+		}
 	}
 
 	for id, trinketDescData in pairs(EID_Trinkets) do

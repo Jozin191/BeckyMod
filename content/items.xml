@@ -38,6 +38,15 @@
         passivecache="true"
         />
 
+        <passive id="4"
+        name="Coxinha"
+        gfx="coxinha.png"
+        description="A cursed night"
+        quality="2"
+        cache="speed"
+        passivecache="true"
+        />
+
         <!--TRINKETS-->
         <!--Burning Feather-->
 

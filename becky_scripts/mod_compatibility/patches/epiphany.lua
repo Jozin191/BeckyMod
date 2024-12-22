@@ -30,6 +30,16 @@ local function EpiphanyPatch()
     HOLY_BOOKMARK = BeckyMod.Trinket.HOLY_BOOKMARK
     HOLY_BOOKMARK:addItem(ItemType.ITEM_ACTIVE, Epiphany.Item.DIVINE_REMNANTS.ID)
     HOLY_BOOKMARK:addItem(ItemType.ITEM_PASSIVE, Epiphany.Item.RETRIBUTION.ID)
+
+    --Rejection
+
+    REJECTION = BeckyMod.Trinket.REJECTION
+
+    REJECTION.ValidPriceTypes[Epiphany.PickupPrice.PRICE_TWO_BROKEN_HEARTS] = true
+
+    if Epiphany.PickupPrice.PRICE_TWO_BLUE_BROKEN_HEARTS then
+        REJECTION.ValidPriceTypes[Epiphany.PickupPrice.PRICE_TWO_BLUE_BROKEN_HEARTS] = true
+    end
 end
 
 loader:RegisterPatch("Epiphany", EpiphanyPatch)
