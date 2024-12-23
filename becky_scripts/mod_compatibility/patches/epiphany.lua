@@ -31,15 +31,23 @@ local function EpiphanyPatch()
     HOLY_BOOKMARK:addItem(ItemType.ITEM_ACTIVE, Epiphany.Item.DIVINE_REMNANTS.ID)
     HOLY_BOOKMARK:addItem(ItemType.ITEM_PASSIVE, Epiphany.Item.RETRIBUTION.ID)
 
-    --Rejection
+    --Devilzon Prime
 
-    REJECTION = BeckyMod.Trinket.REJECTION
+    DEVILZON_PRIME = BeckyMod.Trinket.DEVILZON_PRIME
 
-    REJECTION.ValidPriceTypes[Epiphany.PickupPrice.PRICE_TWO_BROKEN_HEARTS] = true
+    DEVILZON_PRIME.ValidPriceTypes[Epiphany.PickupPrice.PRICE_TWO_BROKEN_HEARTS] = true
 
     if Epiphany.PickupPrice.PRICE_TWO_BLUE_BROKEN_HEARTS then
-        REJECTION.ValidPriceTypes[Epiphany.PickupPrice.PRICE_TWO_BLUE_BROKEN_HEARTS] = true
+        DEVILZON_PRIME.ValidPriceTypes[Epiphany.PickupPrice.PRICE_TWO_BLUE_BROKEN_HEARTS] = true
     end
+
+    --Eden blacklist
+
+    --[[
+    Epiphany.API:AddItemsToEdenBlackList(
+        BeckyMod.Item.COXINHA.ID
+    )
+    ]]
 end
 
 loader:RegisterPatch("Epiphany", EpiphanyPatch)

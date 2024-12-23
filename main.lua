@@ -50,12 +50,13 @@ if not REPENTOGON then return end
 
 --collectibles
 include("becky_scripts.becky.items.passives.dream_banisher")
+include("becky_scripts.becky.items.passives.coxinha")
 include("becky_scripts.becky.items.actives.hand_made_bible")
 
 --trinkets
 include("becky_scripts.becky.items.trinkets.burning_feather")
 include("becky_scripts.becky.items.trinkets.holy_bookmark")
-include("becky_scripts.becky.items.trinkets.rejection")
+include("becky_scripts.becky.items.trinkets.devilzon_prime")
 
 --characters
 include("becky_scripts.becky.characters.becky")

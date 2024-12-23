@@ -41,10 +41,12 @@
         <passive id="4"
         name="Coxinha"
         gfx="coxinha.png"
-        description="A cursed night"
+        description="mmmmmmmmmmmm food item foooooooood jummers"
         quality="2"
         cache="speed"
         passivecache="true"
+        maxhearts="2"
+        hearts="6"
         />
 
         <!--TRINKETS-->
@@ -67,7 +69,7 @@
         />
 
         <trinket id="3"
-        name="Rejection"
+        name="Devilzon Prime"
         description="Denied from heaven's gate"
         gfx="rejection.png"
         cache=""

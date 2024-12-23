@@ -214,6 +214,16 @@ local function EIDPatch()
 	
 	BECKY_EID.DynamicDescriptions = DD
 
+	--Health related stuff on items
+
+	if EID.HealthUpData then
+		EID.HealthUpData["5.100." .. tostring(Item.COXINHA.ID)] = 1
+	end
+	
+	if EID.HealingItemData then
+		EID.HealingItemData["5.100." .. tostring(Item.COXINHA.ID)] = true
+	end
+
 	--Actual Descriptions
 
 	--[[
@@ -250,6 +260,16 @@ local function EIDPatch()
 					"#{{CurseBlind}} When having a curse, gain:",
 					"#↑ {{Damage}} +1.5 Damage",
 					"#↑ {{Tears}} +0.5 Tears"
+				},
+			},
+		},
+		[Item.COXINHA.ID] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Coxinha",
+				Description = {
+					"↑ {{Heart}} +1 Health",
+					"#↑ {{Speed}} +0.3 Speed",
+					"#{{HealingRed}} Heals 2 hearts",
 				},
 			},
 		},
@@ -325,10 +345,10 @@ local function EIDPatch()
 				}
 			},
 		},
-		[Trinket.REJECTION.ID] = {
+		[Trinket.DEVILZON_PRIME.ID] = {
 			_modifier = function(descObj, line) ---@param descObj EID_DescObj
 				local mult = getTrinketMult(descObj)
-				local chanceTxt = tostring(Trinket.REJECTION.EXTRA_CHANCE_PER_DEAL * 2 * (1 - 0.5^mult))
+				local chanceTxt = tostring(Trinket.DEVILZON_PRIME.EXTRA_CHANCE_PER_DEAL * 2 * (1 - 0.5^mult))
 
 				if mult > 1 then
 					chanceTxt = "{{ColorGold}}" .. chanceTxt .. "{{CR}}"
@@ -338,10 +358,10 @@ local function EIDPatch()
 			end,
 
 			en_us = {
-				Name = "Rejection",
+				Name = "Devilzon Prime",
 				Description = {
 					function(descObj)
-						return EID_Trinkets[Trinket.REJECTION.ID]._modifier(descObj, 
+						return EID_Trinkets[Trinket.DEVILZON_PRIME.ID]._modifier(descObj, 
 							"{{DevilChanceSmall}} For every deal taken in one floor, you get +{1} deal chance in the next"
 						)
 					end,
