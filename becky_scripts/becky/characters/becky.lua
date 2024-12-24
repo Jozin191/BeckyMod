@@ -95,19 +95,40 @@ function BECKY:updateAngelDealPrice(pickup)
 
     local newPrice
 
-    local normalHearts = 0
+    local resultingType = ""
 
-    local anyoneIsBB = PlayerManager.FirstPlayerByType(PlayerType.PLAYER_BLUEBABY)
+    if BeckyMod:IsAnyoneKeeper() then
+        resultingType = "KEEPER"
+    elseif PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY) then
+        resultingType = "BLUE BABY"
+    end
 
-    BeckyMod:ForEachPlayer(function(player)
-        normalHearts = normalHearts + player:GetHearts()
-    end)
+    if resultingType == "BLUE BABY" then
+        --If someone is blue baby
+        if price == 1 then
+            newPrice = PickupPrice.PRICE_ONE_SOUL_HEART
+        else
+            newPrice = PickupPrice.PRICE_TWO_SOUL_HEARTS
+        end
+    elseif resultingType == "KEEPER" then
+        --If any player is keeper
+        newPrice = price*15
+    else
+        --TO DO: ADD MOD COMPATIBILITY
 
-    if not anyoneIsBB then
-        --If no one is blue baby
-        if normalHearts == 2 and price == 2 then
+        
+
+        --No special stuff
+
+        local normalHeartsCount = 0
+
+        BeckyMod:ForEachPlayer(function(player)
+            normalHeartsCount = normalHeartsCount + player:GetHearts()
+        end)
+
+        if normalHeartsCount == 2 and price == 2 then
             newPrice = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS
-        elseif normalHearts > 0 then
+        elseif normalHeartsCount > 0 then
             if price == 1 then
                 newPrice = PickupPrice.PRICE_ONE_HEART
             else
@@ -115,13 +136,6 @@ function BECKY:updateAngelDealPrice(pickup)
             end
         else
             newPrice = PickupPrice.PRICE_THREE_SOULHEARTS
-        end
-    else
-        --If someone is blue baby
-        if price == 1 then
-            newPrice = PickupPrice.PRICE_ONE_SOUL_HEART
-        else
-            newPrice = PickupPrice.PRICE_TWO_SOUL_HEARTS
         end
     end
 

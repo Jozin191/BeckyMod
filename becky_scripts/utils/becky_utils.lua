@@ -101,3 +101,16 @@ end
 function BeckyMod.AnyoneHasTrinketPlusGolden(ItemID)
 	return PlayerManager.AnyoneHasTrinket(ItemID) or PlayerManager.AnyoneHasTrinket(ItemID | TrinketType.TRINKET_GOLDEN_FLAG)
 end
+
+function BeckyMod:IsAnyKeeper(player)
+	local type = player:GetPlayerType()
+	return type == PlayerType.PLAYER_KEEPER or type == PlayerType.PLAYER_KEEPER_B or (Epiphany and type == Epiphany.PlayerType.KEEPER)
+end
+
+function BeckyMod:IsAnyoneKeeper()
+	for _, player in ipairs(PlayerManager.GetPlayers()) do
+		if BeckyMod:IsAnyKeeper(player) then
+			return true
+		end
+	end
+end
