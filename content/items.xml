@@ -70,8 +70,8 @@
 
         <trinket id="3"
         name="Devilzon Prime"
-        description="Denied from heaven's gate"
-        gfx="rejection.png"
+        description="Premium subscription… at a price"
+        gfx="devilzon_prime.png"
         cache=""
         />
 </items>

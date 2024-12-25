@@ -8,6 +8,19 @@ BECKY.BODY_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_body.anm2")
 
 BeckyMod.Character.BECKY = BECKY
 
+BECKY.ExcludeSpikePickupVariants = {
+    PickupVariant.PICKUP_CHEST,
+    PickupVariant.PICKUP_BOMBCHEST,
+    PickupVariant.PICKUP_ETERNALCHEST,
+    PickupVariant.PICKUP_MIMICCHEST,
+    PickupVariant.PICKUP_REDCHEST,
+    PickupVariant.PICKUP_OLDCHEST,
+    PickupVariant.PICKUP_WOODENCHEST,
+    PickupVariant.PICKUP_MEGACHEST,
+    PickupVariant.PICKUP_HAUNTEDCHEST,
+    PickupVariant.PICKUP_LOCKEDCHEST
+}
+
 local game = BeckyMod.Game
 
 --[[
@@ -103,16 +116,16 @@ function BECKY:updateAngelDealPrice(pickup)
         resultingType = "BLUE BABY"
     end
 
-    if resultingType == "BLUE BABY" then
+    if resultingType == "KEEPER" then
+        --If any player is keeper
+        newPrice = price*15
+    elseif resultingType == "BLUE BABY" then
         --If someone is blue baby
         if price == 1 then
             newPrice = PickupPrice.PRICE_ONE_SOUL_HEART
         else
             newPrice = PickupPrice.PRICE_TWO_SOUL_HEARTS
         end
-    elseif resultingType == "KEEPER" then
-        --If any player is keeper
-        newPrice = price*15
     else
         --TO DO: ADD MOD COMPATIBILITY
 
@@ -161,7 +174,9 @@ function BECKY:initAngelPickupPrices(pickup)
             if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
                 BECKY:updateAngelDealPrice(pickup)
             else
-                pickup.Price = PickupPrice.PRICE_SPIKES
+                if BECKY.ExcludeSpikePickupVariants[pickup.Variant] then
+                    pickup.Price = PickupPrice.PRICE_SPIKES
+                end
             end
 
             pickup.AutoUpdatePrice = false
