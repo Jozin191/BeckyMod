@@ -6,40 +6,64 @@ BECKY.POCKET_ITEM = BeckyMod.Item.HAND_MADE_BIBLE.ID
 BECKY.HAIR_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_hair.anm2")
 BECKY.BODY_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_body.anm2")
 
-BeckyMod.Character.BECKY = BECKY
-
 BECKY.ExcludeSpikePickupVariants = {
-    PickupVariant.PICKUP_CHEST,
-    PickupVariant.PICKUP_BOMBCHEST,
-    PickupVariant.PICKUP_ETERNALCHEST,
-    PickupVariant.PICKUP_MIMICCHEST,
-    PickupVariant.PICKUP_REDCHEST,
-    PickupVariant.PICKUP_OLDCHEST,
-    PickupVariant.PICKUP_WOODENCHEST,
-    PickupVariant.PICKUP_MEGACHEST,
-    PickupVariant.PICKUP_HAUNTEDCHEST,
-    PickupVariant.PICKUP_LOCKEDCHEST
+    [PickupVariant.PICKUP_CHEST] = true,
+    [PickupVariant.PICKUP_BOMBCHEST] = true,
+    [PickupVariant.PICKUP_ETERNALCHEST] = true,
+    [PickupVariant.PICKUP_MIMICCHEST] = true,
+    [PickupVariant.PICKUP_REDCHEST] = true,
+    [PickupVariant.PICKUP_OLDCHEST] = true,
+    [PickupVariant.PICKUP_WOODENCHEST] = true,
+    [PickupVariant.PICKUP_MEGACHEST] = true,
+    [PickupVariant.PICKUP_HAUNTEDCHEST] = true,
+    [PickupVariant.PICKUP_LOCKEDCHEST] = true,
 }
+
+BeckyMod.Character.BECKY = BECKY
 
 local game = BeckyMod.Game
 
---[[
-function BECKY:OnPreAddCollectible(type, _, _, _, _, _)
-    local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE) --Everything else checks for the first becky
+--Deal modifiers (keeper's passive, blue baby's passive, or modded stuff)
+--Modded example: Tarnished Judas
 
-    if player then
-        local runSave = BeckyMod:RunSave(player)
-        if runSave.BECKY_RECEIVED_ITEMS then
-            runSave.BECKY_RECEIVED_ITEMS[tostring(type)] = true --Needs to be a string because of the sparse arrays
-        else
-            runSave.BECKY_RECEIVED_ITEMS = { 
-                [tostring(type)] = true
-            }
-        end
+BECKY.DealModifiers = BECKY.DealModifiers or {
+    ["KEEPER"] = {
+        priority = -100,
+        condition = function()
+            return BeckyMod:IsAnyoneKeeper()
+        end,
+        modification = function(pickup, price)
+            pickup.Price = price*15
+        end,
+    },
+    ["BLUE BABY"] = {
+        priority = 500,
+        condition = function()
+            return PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY)
+        end,
+        modification = function(pickup, price)
+            if price == 1 then
+                pickup.Price = PickupPrice.PRICE_ONE_SOUL_HEART
+            else
+                pickup.Price = PickupPrice.PRICE_TWO_SOUL_HEARTS
+            end
+        end,
+    },
+}
+
+---Add a custom deal modifiers. Can add multiple at the same time.
+---Sorts them later after adding, lower priority means that it goes before!
+function BECKY.AddDealModifiers(dealModifiers)
+    for name, data in pairs(dealModifiers) do
+        BECKY.DealModifiers[name] = data
     end
+
+    table.sort(BECKY.DealModifiers, function (a, b)
+        return a.priority < b.priority
+    end)
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, BECKY.OnPreAddCollectible)
-]]
+
+--End of deal modifiers
 
 function BECKY:OnInit(player)
     if player:GetPlayerType() == BECKY.PLAYERTYPE then
@@ -106,8 +130,6 @@ function BECKY:updateAngelDealPrice(pickup)
     local itemData = Isaac.GetItemConfig():GetCollectible(subtype)
     local price = itemData and itemData.DevilPrice or 1
 
-    local newPrice
-
     local resultingType = ""
 
     if BeckyMod:IsAnyoneKeeper() then
@@ -118,13 +140,13 @@ function BECKY:updateAngelDealPrice(pickup)
 
     if resultingType == "KEEPER" then
         --If any player is keeper
-        newPrice = price*15
+        pickup.Price = price*15
     elseif resultingType == "BLUE BABY" then
         --If someone is blue baby
         if price == 1 then
-            newPrice = PickupPrice.PRICE_ONE_SOUL_HEART
+            pickup.Price = PickupPrice.PRICE_ONE_SOUL_HEART
         else
-            newPrice = PickupPrice.PRICE_TWO_SOUL_HEARTS
+            pickup.Price = PickupPrice.PRICE_TWO_SOUL_HEARTS
         end
     else
         --TO DO: ADD MOD COMPATIBILITY
@@ -140,19 +162,17 @@ function BECKY:updateAngelDealPrice(pickup)
         end)
 
         if normalHeartsCount == 2 and price == 2 then
-            newPrice = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS
+            pickup.Price = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS
         elseif normalHeartsCount > 0 then
             if price == 1 then
-                newPrice = PickupPrice.PRICE_ONE_HEART
+                pickup.Price = PickupPrice.PRICE_ONE_HEART
             else
-                newPrice = PickupPrice.PRICE_TWO_HEARTS
+                pickup.Price = PickupPrice.PRICE_TWO_HEARTS
             end
         else
-            newPrice = PickupPrice.PRICE_THREE_SOULHEARTS
+            pickup.Price = PickupPrice.PRICE_THREE_SOULHEARTS
         end
     end
-
-    pickup.Price = newPrice
 end
 
 function BECKY:initAngelPickupPrices(pickup)
@@ -174,7 +194,7 @@ function BECKY:initAngelPickupPrices(pickup)
             if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
                 BECKY:updateAngelDealPrice(pickup)
             else
-                if BECKY.ExcludeSpikePickupVariants[pickup.Variant] then
+                if not BECKY.ExcludeSpikePickupVariants[pickup.Variant] then
                     pickup.Price = PickupPrice.PRICE_SPIKES
                 end
             end
