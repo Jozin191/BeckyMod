@@ -42,8 +42,8 @@
 
         <passive id="4"
         name="Defiled Chalice"
-        gfx="placeholderBall.png"
-        description="placeholder"
+        gfx="chalice.png"
+        description="Spill their blood"
         quality="1"
         cache=""
         hearts="2"

@@ -24,28 +24,23 @@ local game = BeckyMod.Game
 --Deal modifiers (keeper's passive, blue baby's passive, or modded stuff)
 --Modded example: Tarnished Judas
 
-BECKY.NewDealModifiers = {}
-
 BECKY.DealModifiers = {}
+BECKY.OldDealModifiers = {}
 
 ---Add a custom deal modifiers. Can add multiple at the same time.
 ---Sorts them later after adding them, lower priority meaning that it goes before!
 function BECKY.AddDealModifiers(toAddDealModifiers)
-    local newDealModifiers = {}
-    for _, data in ipairs(BECKY.DealModifiers) do
-        table.insert(newDealModifiers, data)
-    end
+    BECKY.OldDealModifiers = BECKY.DealModifiers
     for _, data in ipairs(toAddDealModifiers) do
-        print("LINE 75: " .. data.identificator .. " POS:".. #newDealModifiers)
-        table.insert(newDealModifiers, data)
+        print("LINE 75: " .. data.identificator .. " POS:".. #BECKY.DealModifiers)
+        table.insert(BECKY.OldDealModifiers, data)
     end
+
+    BECKY.DealModifiers = BECKY.OldDealModifiers
     
-    table.sort(newDealModifiers, function (a,b)
+    table.sort(BECKY.DealModifiers, function (a,b)
         return a.priority < b.priority
     end)
-
-    BECKY.DealModifiers = newDealModifiers
-    BECKY.NewDealModifiers = newDealModifiers
 
     for _, data in pairs(BECKY.DealModifiers) do
         print("LINE 75: " .. data.identificator .. " PRIORITY:".. data.priority)
@@ -76,7 +71,7 @@ BECKY.AddDealModifiers({
             newPickup.Price = (price == 1) and PickupPrice.PRICE_ONE_SOUL_HEART or PickupPrice.PRICE_TWO_SOUL_HEARTS
             return newPickup
         end,
-    }
+    },
 })
 
 BeckyMod.Character.BECKY = BECKY
@@ -149,14 +144,12 @@ function BECKY:updateAngelDealPrice(pickup)
     local itemData = Isaac.GetItemConfig():GetCollectible(subtype)
     local price = itemData and itemData.DevilPrice or 1
 
-    print(BECKY.NewDealModifiers == BECKY.DealModifiers)
-
     for _, data in ipairs(BECKY.DealModifiers) do
         print("LINE 146: " .. data.identificator)
     end
 
     for _, modifierData in ipairs(BECKY.DealModifiers) do
-        print("LINE 150: " .. modifierData.identificator, modifierData.condition(pickup))
+        print("LINE 150: " .. modifierData.identificator)
         if modifierData.condition(pickup) then
             pickup = modifierData.modification(pickup, price)
             return
