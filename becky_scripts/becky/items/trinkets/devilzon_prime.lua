@@ -58,12 +58,6 @@ function DEVILZON_PRIME:onNewFloor()
         runSave.extraDealchanceByDevilzonPrime = runSave.extraDealchanceByDevilzonPrimeForNextFloor
         runSave.extraDealchanceByDevilzonPrimeForNextFloor = 0
     end
-
-    if runSave.someoneHadDevilzonPrime then --Anyone had the trinket at one point
-        --Lock to devil deal
-
-        BeckyMod.Game:AddDevilRoomDeal()
-    end
 end
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, DEVILZON_PRIME.onNewFloor)
@@ -86,12 +80,3 @@ function DEVILZON_PRIME:devilModifyChances(chance)
 end
 
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_DEVIL_APPLY_SPECIAL_ITEMS, DEVILZON_PRIME.devilModifyChances)
-
-function DEVILZON_PRIME:LockToDevilDeals()
-    BeckyMod:RunSave(Isaac.GetPlayer()).someoneHadDevilzonPrime = true
-
-    BeckyMod.Game:AddDevilRoomDeal() --Lock in for the current floor
-end
-
-BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_ADDED, DEVILZON_PRIME.LockToDevilDeals, DEVILZON_PRIME.ID)
-BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_ADDED, DEVILZON_PRIME.LockToDevilDeals, DEVILZON_PRIME.ID | TrinketType.TRINKET_GOLDEN_FLAG) --Separate version for the golden version (?

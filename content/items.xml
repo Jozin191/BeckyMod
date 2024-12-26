@@ -30,15 +30,6 @@
         <!--Dream Banisher-->
 
         <passive id="3"
-        name="Dream Banisher"
-        gfx="dream_banisher.png"
-        description="A cursed night"
-        quality="2"
-        cache="firedelay damage"
-        passivecache="true"
-        />
-
-        <passive id="4"
         name="Coxinha"
         gfx="coxinha.png"
         description="mmmmmmmmmmmm food item foooooooood jummers"
@@ -47,6 +38,15 @@
         passivecache="true"
         maxhearts="2"
         hearts="6"
+        />
+
+        <passive id="4"
+        name="Defiled Chalice"
+        gfx="placeholderBall.png"
+        description="placeholder"
+        quality="1"
+        cache=""
+        hearts="2"
         />
 
         <!--TRINKETS-->

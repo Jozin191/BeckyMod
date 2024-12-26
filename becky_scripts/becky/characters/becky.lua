@@ -19,49 +19,67 @@ BECKY.ExcludeSpikePickupVariants = {
     [PickupVariant.PICKUP_LOCKEDCHEST] = true,
 }
 
-BeckyMod.Character.BECKY = BECKY
-
 local game = BeckyMod.Game
 
 --Deal modifiers (keeper's passive, blue baby's passive, or modded stuff)
 --Modded example: Tarnished Judas
 
-BECKY.DealModifiers = BECKY.DealModifiers or {
-    ["KEEPER"] = {
+BECKY.NewDealModifiers = {}
+
+BECKY.DealModifiers = {}
+
+---Add a custom deal modifiers. Can add multiple at the same time.
+---Sorts them later after adding them, lower priority meaning that it goes before!
+function BECKY.AddDealModifiers(toAddDealModifiers)
+    local newDealModifiers = {}
+    for _, data in ipairs(BECKY.DealModifiers) do
+        table.insert(newDealModifiers, data)
+    end
+    for _, data in ipairs(toAddDealModifiers) do
+        print("LINE 75: " .. data.identificator .. " POS:".. #newDealModifiers)
+        table.insert(newDealModifiers, data)
+    end
+    
+    table.sort(newDealModifiers, function (a,b)
+        return a.priority < b.priority
+    end)
+
+    BECKY.DealModifiers = newDealModifiers
+    BECKY.NewDealModifiers = newDealModifiers
+
+    for _, data in pairs(BECKY.DealModifiers) do
+        print("LINE 75: " .. data.identificator .. " PRIORITY:".. data.priority)
+    end
+end
+
+BECKY.AddDealModifiers({
+    {
+        identificator = "KEEPER",
         priority = -100,
-        condition = function()
+        condition = function(_)
             return BeckyMod:IsAnyoneKeeper()
         end,
         modification = function(pickup, price)
-            pickup.Price = price*15
+            local newPickup = pickup
+            newPickup.Price = price*15
+            return newPickup
         end,
     },
-    ["BLUE BABY"] = {
+    {
+        identificator = "BLUE BABY",
         priority = 500,
-        condition = function()
+        condition = function(_)
             return PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY)
         end,
         modification = function(pickup, price)
-            if price == 1 then
-                pickup.Price = PickupPrice.PRICE_ONE_SOUL_HEART
-            else
-                pickup.Price = PickupPrice.PRICE_TWO_SOUL_HEARTS
-            end
+            local newPickup = pickup
+            newPickup.Price = (price == 1) and PickupPrice.PRICE_ONE_SOUL_HEART or PickupPrice.PRICE_TWO_SOUL_HEARTS
+            return newPickup
         end,
-    },
-}
+    }
+})
 
----Add a custom deal modifiers. Can add multiple at the same time.
----Sorts them later after adding, lower priority means that it goes before!
-function BECKY.AddDealModifiers(dealModifiers)
-    for name, data in pairs(dealModifiers) do
-        BECKY.DealModifiers[name] = data
-    end
-
-    table.sort(BECKY.DealModifiers, function (a, b)
-        return a.priority < b.priority
-    end)
-end
+BeckyMod.Character.BECKY = BECKY
 
 --End of deal modifiers
 
@@ -121,6 +139,7 @@ function BECKY:updateAngelDealPrice(pickup)
         return
     end
 
+    --Should I move this to deal modifiers as the number 1 priority thing?
     if PlayerManager.AnyoneHasTrinket(TrinketType.TRINKET_YOUR_SOUL) then
         pickup.Price = PickupPrice.PRICE_SOUL
         return
@@ -130,48 +149,38 @@ function BECKY:updateAngelDealPrice(pickup)
     local itemData = Isaac.GetItemConfig():GetCollectible(subtype)
     local price = itemData and itemData.DevilPrice or 1
 
-    local resultingType = ""
+    print(BECKY.NewDealModifiers == BECKY.DealModifiers)
 
-    if BeckyMod:IsAnyoneKeeper() then
-        resultingType = "KEEPER"
-    elseif PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY) then
-        resultingType = "BLUE BABY"
+    for _, data in ipairs(BECKY.DealModifiers) do
+        print("LINE 146: " .. data.identificator)
     end
 
-    if resultingType == "KEEPER" then
-        --If any player is keeper
-        pickup.Price = price*15
-    elseif resultingType == "BLUE BABY" then
-        --If someone is blue baby
+    for _, modifierData in ipairs(BECKY.DealModifiers) do
+        print("LINE 150: " .. modifierData.identificator, modifierData.condition(pickup))
+        if modifierData.condition(pickup) then
+            pickup = modifierData.modification(pickup, price)
+            return
+        end
+    end
+
+    --No special stuff
+
+    local normalHeartsCount = 0
+
+    BeckyMod:ForEachPlayer(function(player)
+        normalHeartsCount = normalHeartsCount + player:GetHearts()
+    end)
+
+    if normalHeartsCount == 2 and price == 2 then
+        pickup.Price = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS
+    elseif normalHeartsCount > 0 then
         if price == 1 then
-            pickup.Price = PickupPrice.PRICE_ONE_SOUL_HEART
+            pickup.Price = PickupPrice.PRICE_ONE_HEART
         else
-            pickup.Price = PickupPrice.PRICE_TWO_SOUL_HEARTS
+            pickup.Price = PickupPrice.PRICE_TWO_HEARTS
         end
     else
-        --TO DO: ADD MOD COMPATIBILITY
-
-        
-
-        --No special stuff
-
-        local normalHeartsCount = 0
-
-        BeckyMod:ForEachPlayer(function(player)
-            normalHeartsCount = normalHeartsCount + player:GetHearts()
-        end)
-
-        if normalHeartsCount == 2 and price == 2 then
-            pickup.Price = PickupPrice.PRICE_ONE_HEART_AND_TWO_SOULHEARTS
-        elseif normalHeartsCount > 0 then
-            if price == 1 then
-                pickup.Price = PickupPrice.PRICE_ONE_HEART
-            else
-                pickup.Price = PickupPrice.PRICE_TWO_HEARTS
-            end
-        else
-            pickup.Price = PickupPrice.PRICE_THREE_SOULHEARTS
-        end
+        pickup.Price = PickupPrice.PRICE_THREE_SOULHEARTS
     end
 end
 
