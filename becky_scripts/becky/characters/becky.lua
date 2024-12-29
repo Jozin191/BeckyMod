@@ -32,7 +32,7 @@ BECKY.OldDealModifiers = {}
 function BECKY.AddDealModifiers(toAddDealModifiers)
     BECKY.OldDealModifiers = BECKY.DealModifiers
     for _, data in ipairs(toAddDealModifiers) do
-        print("LINE 75: " .. data.identificator .. " POS:".. #BECKY.DealModifiers)
+        --print("LINE 75: " .. data.identificator .. " POS:".. #BECKY.DealModifiers)
         table.insert(BECKY.OldDealModifiers, data)
     end
 
@@ -42,9 +42,11 @@ function BECKY.AddDealModifiers(toAddDealModifiers)
         return a.priority < b.priority
     end)
 
+    --[[
     for _, data in pairs(BECKY.DealModifiers) do
         print("LINE 75: " .. data.identificator .. " PRIORITY:".. data.priority)
     end
+    ]]
 end
 
 BECKY.AddDealModifiers({
@@ -144,12 +146,14 @@ function BECKY:updateAngelDealPrice(pickup)
     local itemData = Isaac.GetItemConfig():GetCollectible(subtype)
     local price = itemData and itemData.DevilPrice or 1
 
+    --[[
     for _, data in ipairs(BECKY.DealModifiers) do
         print("LINE 146: " .. data.identificator)
     end
+    ]]
 
     for _, modifierData in ipairs(BECKY.DealModifiers) do
-        print("LINE 150: " .. modifierData.identificator)
+        --print("LINE 150: " .. modifierData.identificator)
         if modifierData.condition(pickup) then
             pickup = modifierData.modification(pickup, price)
             return
