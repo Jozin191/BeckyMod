@@ -268,7 +268,7 @@ local function EIDPatch()
 				Name = "Coxinha",
 				Description = {
 					"↑ {{Heart}} +1 Health",
-					"#↑ {{Speed}} +0.3 Speed",
+					"#↑ {{Speed}} +" .. Item.COXINHA.SPEED_INCREASE .. " Speed",
 					"#{{HealingRed}} Heals 2 hearts",
 				},
 			},
@@ -365,7 +365,6 @@ local function EIDPatch()
 							"{{DevilChanceSmall}} For every deal taken in one floor, you get +{1} deal chance in the next"
 						)
 					end,
-					"#{{Warning}} Locks you from angel deals for the rest of the run when picked up, even after dropped",
 				}
 			}
 		}

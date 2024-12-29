@@ -32,7 +32,7 @@
         <passive id="3"
         name="Coxinha"
         gfx="coxinha.png"
-        description="mmmmmmmmmmmm food item foooooooood jummers"
+        description="HP up + speed up"
         quality="2"
         cache="speed"
         passivecache="true"
