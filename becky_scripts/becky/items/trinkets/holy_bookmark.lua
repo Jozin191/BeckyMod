@@ -31,6 +31,7 @@ HOLY_BOOKMARK.HolyList = {
         CollectibleType.COLLECTIBLE_MONSTRANCE,
         CollectibleType.COLLECTIBLE_PASCHAL_CANDLE,
         CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES,
+        CollectibleType.COLLECTIBLE_SACRED_ORB,
     },
 
     --Add non-seraphim but angel-realted actives in here
@@ -45,24 +46,14 @@ HOLY_BOOKMARK.HolyList = {
 
 --Function to add custom items to this (non-seraphim ones, for other mods)
 
-function HOLY_BOOKMARK:addItem(itemType, itemId)
-    if itemType == ItemType.ITEM_ACTIVE then
-        --[[
-        print(table.indexOf(HOLY_BOOKMARK.HolyList.Actives, itemId) == -1, itemId,
-            BeckyMod.itemconfig:GetCollectible(itemId).Name
-        )
-        ]]
+function HOLY_BOOKMARK:addItem(type, itemId)
+    if type == ItemType.ITEM_ACTIVE then
         if table.indexOf(HOLY_BOOKMARK.HolyList.Actives, itemId) == -1 then
-            HOLY_BOOKMARK.HolyList.Actives = BeckyMod:AppendTable(HOLY_BOOKMARK.HolyList.Actives, {itemId})
+            HOLY_BOOKMARK.HolyList.Actives[#HOLY_BOOKMARK.HolyList.Actives + 1] = itemId
         end
     else
-        --[[
-        print(table.indexOf(HOLY_BOOKMARK.HolyList.Passives, itemId) == -1, itemId,
-            BeckyMod.itemconfig:GetCollectible(itemId).Name
-        )
-        ]]
         if table.indexOf(HOLY_BOOKMARK.HolyList.Passives, itemId) == -1 then
-            HOLY_BOOKMARK.HolyList.Passives = BeckyMod:AppendTable(HOLY_BOOKMARK.HolyList.Passives, {itemId})
+            HOLY_BOOKMARK.HolyList.Passives[#HOLY_BOOKMARK.HolyList.Passives + 1] = itemId
         end
     end
 end
@@ -85,15 +76,13 @@ function HOLY_BOOKMARK:applyLuck(player, cacheFlags)
     if player:HasTrinket(HOLY_BOOKMARK.ID) and BeckyMod:HasBitFlags(cacheFlags, CacheFlag.CACHE_LUCK) then
         local holyStuffCount = player:GetTrinketMultiplier(HOLY_BOOKMARK.ID) --Counts itself
 
-        for _, item in ipairs(HOLY_BOOKMARK.HolyList.Passives) do
-            print(item)
-            if player:HasCollectible(item) then
+        for i = 1, #HOLY_BOOKMARK.HolyList.Passives do
+            if player:HasCollectible(HOLY_BOOKMARK.HolyList.Passives[i]) then
                 holyStuffCount = holyStuffCount + 1 --Count as 1 item (1 luck)
             end
         end
-        for _, item in ipairs(HOLY_BOOKMARK.HolyList.Actives) do
-            print(item)
-            if player:HasCollectible(item) then
+        for i = 1, #HOLY_BOOKMARK.HolyList.Actives do
+            if player:HasCollectible(HOLY_BOOKMARK.HolyList.Actives[i]) then
                 holyStuffCount = holyStuffCount + 2 --Count as 2 items (1 luck)
             end
         end

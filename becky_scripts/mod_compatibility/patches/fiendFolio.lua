@@ -1,10 +1,10 @@
 local loader = BeckyMod.PatchesLoader
 
 local function FiendFolioPatch()
-  local ff = FiendFolio
+    local ff = FiendFolio
 
-  BeckyMod:AppendTable(ff.ReferenceItems.Trinkets, {
-	{ ID = BeckyMod.Trinket.DEVILZON_PRIME.ID, Reference = "Amazon" }
+    BeckyMod:AppendTable(ff.ReferenceItems.Trinkets, {
+		{ ID = BeckyMod.Trinket.DEVILZON_PRIME.ID, Reference = "Amazon" }
 	})
 end
 
