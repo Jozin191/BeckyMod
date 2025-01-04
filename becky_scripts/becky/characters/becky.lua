@@ -99,7 +99,7 @@ function BECKY:OnInit(player)
         game:GetItemPool():RemoveCollectible(BECKY.POCKET_ITEM)
     end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit, 0)
 
 function BECKY:postNewRoom()
     local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
