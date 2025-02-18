@@ -49,6 +49,13 @@
         hearts="2"
         />
 
+        <passive id="5"
+        name="Scarecrow"
+        gfx="scarecrow.png"
+        description="Bonus murder"
+        quality="2"
+        />
+
         <!--TRINKETS-->
         <!--Burning Feather-->
 

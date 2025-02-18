@@ -53,3 +53,5 @@ end
 -- This has to be done after all mods are loaded
 -- Because otherwise mods that are loaded after Becky will not be detected
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_MODS_LOADED, CallbackPriority.LATE, loader.ApplyPatches)
+
+loader:ApplyPatches()

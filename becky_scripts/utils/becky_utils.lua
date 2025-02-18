@@ -114,3 +114,27 @@ function BeckyMod:IsAnyoneKeeper()
 		end
 	end
 end
+
+---Will attempt to find the player using the attached Entity, EntityRef, or EntityPtr.
+---Will return if its a player, the player's familiar, or loop again if it has a SpawnerEntity
+---@param ent Entity | EntityRef | EntityPtr
+---@param directOnly? boolean
+---@return EntityPlayer?
+function BeckyMod:TryGetPlayer(ent, directOnly)
+	if not ent then return end
+	if string.find(getmetatable(ent).__type, "EntityPtr") then
+		if ent.Ref then
+			return BeckyMod:TryGetPlayer(ent.Ref)
+		end
+	elseif string.find(getmetatable(ent).__type, "EntityRef") then
+		if ent.Entity then
+			return BeckyMod:TryGetPlayer(ent.Entity)
+		end
+	elseif ent:ToPlayer() then
+		return ent:ToPlayer()
+	elseif ent:ToFamiliar() and ent:ToFamiliar().Player and not directOnly then
+		return ent:ToFamiliar().Player
+	elseif ent.SpawnerEntity and not directOnly then
+		return BeckyMod:TryGetPlayer(ent.SpawnerEntity)
+	end
+end

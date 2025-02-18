@@ -22,6 +22,7 @@ include("becky_scripts.utils.bitmask_helper")
 Scheduler = include("becky_scripts.utils.schedule_data")
 
 BeckyMod.Game = Game()
+BeckyMod.Level = function() return BeckyMod.Game:GetLevel() end
 BeckyMod.itemconfig = Isaac.GetItemConfig()
 function BeckyMod:RefreshItemConfig()
 	BeckyMod.itemconfig = Isaac.GetItemConfig()
@@ -35,22 +36,24 @@ BeckyMod.Item = {}
 BeckyMod.Trinket = {}
 BeckyMod.Character = {}
 
-local f = Font()
-f:Load("font/terminus.fnt")
-BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
-    if not REPENTOGON then
+if not REPENTOGON then
+    local f = Font()
+    f:Load("font/terminus.fnt")
+    BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
         f:DrawString("REPENTOGON isn't installed", 60, 50, KColor(1,1,1,1),0,true)
         f:DrawString("Head to the REPENTOGON mod page for instructions!", 60, 70, KColor(1,1,1,1),0,true)
         f:DrawString("(Becky mod requires repentogon to work)", 60, 90, KColor(1,1,1,1),0,true)
-    end
-end)
-if not REPENTOGON then return end
+    end)
+    
+    return
+end
 
 --Changed the order since characters need to get actives. If the character loads first and the item later, it errors. 
 
 --collectibles
 include("becky_scripts.becky.items.passives.dream_banisher")
 include("becky_scripts.becky.items.passives.coxinha")
+include("becky_scripts.becky.items.passives.scarecrow")
 include("becky_scripts.becky.items.actives.hand_made_bible")
 
 --trinkets

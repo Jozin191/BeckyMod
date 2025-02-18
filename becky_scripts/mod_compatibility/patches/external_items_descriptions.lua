@@ -273,6 +273,15 @@ local function EIDPatch()
 				},
 			},
 		},
+		[Item.SCARECROW.ID] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Scarecrow",
+				Description = {
+					"{{Collectible117}} Hitting tears without missing or changing the target hit summons a Dead Bird to attack enemies for the room",
+					"#Can spawn multiple Dead Birds per room, up to 5"
+				},
+			},
+		},
 	}
 
 	for id, collectibleDescData in pairs(EID_Collectibles) do

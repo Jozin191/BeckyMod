@@ -14,7 +14,11 @@ local Mod = BeckyMod
 ---@return string
 ---@function
 function BeckyMod:GetPlayerString(player)
-	return "PLAYERID_" .. player:GetCollectibleRNG(1):GetSeed() .. "_" .. player:GetCollectibleRNG(2):GetSeed()
+	if player:GetPlayerType() == PlayerType.PLAYER_LAZARUS2_B then
+		return "PLAYERID_" .. player:GetCollectibleRNG(2):GetSeed() .. "_" .. player:GetCollectibleRNG(1):GetSeed()
+	else
+		return "PLAYERID_" .. player:GetCollectibleRNG(1):GetSeed() .. "_" .. player:GetCollectibleRNG(2):GetSeed()
+	end
 end
 
 ---Returns complete save data
