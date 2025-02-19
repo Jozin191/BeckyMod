@@ -1430,7 +1430,7 @@ local function InitFunctions()
 	---@param pos Vector
 	---@param hud HUDInfo_Active | HUDInfo_ActiveID
 	local function renderActiveHUDs(player, playerHUDIndex, hudLayout, pos, hud, i, isItem)
-		--if REPENTOGON then return end
+		if REPENTOGON then return end
 		for slot = ActiveSlot.SLOT_POCKET, ActiveSlot.SLOT_PRIMARY, -1 do
 			local cornerHUD = min(4, playerHUDIndex)
 			if slot == ActiveSlot.SLOT_POCKET
@@ -1920,11 +1920,11 @@ local function InitFunctions()
 	end
 
 	local function preRenderActiveHUDs_REPENTOGON(_, player, slot, offset, alpha, scale, chargebarOffset)
-		--renderActiveHUDs_REPENTOGON(_, player, slot, offset, alpha, scale, chargebarOffset, true)
+		renderActiveHUDs_REPENTOGON(_, player, slot, offset, alpha, scale, chargebarOffset, true)
 	end
 
 	local function postRenderActiveHUDs_REPENTOGON(_, player, slot, offset, alpha, scale, chargebarOffset)
-		--renderActiveHUDs_REPENTOGON(_, player, slot, offset, alpha, scale, chargebarOffset, false)
+		renderActiveHUDs_REPENTOGON(_, player, slot, offset, alpha, scale, chargebarOffset, false)
 	end
 
 	local function preRenderHUDs()
