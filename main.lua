@@ -1,3 +1,4 @@
+---@class ModReference
 BeckyMod = RegisterMod("Becky", 1)
 BeckyMod.RECOMMENDED_SHIFT_IDX = 35
 
@@ -18,6 +19,8 @@ include("becky_scripts.utils.saving_system")
 include("becky_scripts.utils.table_functions")
 
 include("becky_scripts.utils.bitmask_helper")
+
+include("becky_scripts.utils.hud_helper")
 
 Scheduler = include("becky_scripts.utils.schedule_data")
 
@@ -55,6 +58,7 @@ include("becky_scripts.becky.items.passives.dream_banisher")
 include("becky_scripts.becky.items.passives.coxinha")
 include("becky_scripts.becky.items.passives.scarecrow")
 include("becky_scripts.becky.items.actives.hand_made_bible")
+include("becky_scripts.becky.items.passives.dead_socket")
 
 --trinkets
 include("becky_scripts.becky.items.trinkets.burning_feather")

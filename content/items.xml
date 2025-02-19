@@ -56,6 +56,14 @@
         quality="2"
         />
 
+        <passive id="6"
+        name="Dead Socket"
+        gfx="dead_socket.png"
+        description="???"
+        quality="1"
+		persistent="true"
+        />
+
         <!--TRINKETS-->
         <!--Burning Feather-->
 
