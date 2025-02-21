@@ -1,6 +1,5 @@
 <items gfxroot="gfx/items/" version="1">
         <!--ACTIVE ITEMS-->
-        <!--Hand Made Bible-->
 
         <active id="1"
         name="Hand Made Bible"
@@ -14,20 +13,16 @@
         tags="book"
         />
 
-        <!--Bedtime Stories For Angels-->
-
         <active id="2"
-        name="Bedtime Stories For Angels"
-        gfx="bedtime_stories_for_angels.png"
-        description="Sleepy mimimimi woah what is that thing"
+        name="Night of the Slasher"
+        gfx="night_of_the_slasher.png"
+        description="Bloody shower"
         quality="2"
         maxcharges="4"
         chargetype="normal"
-        tags="book"
         />
 
         <!--PASSIVE ITEMS-->
-        <!--Dream Banisher-->
 
         <passive id="3"
         name="Coxinha"
@@ -59,13 +54,19 @@
         <passive id="6"
         name="Dead Socket"
         gfx="dead_socket.png"
-        description="???"
-        quality="1"
+        description="Soul-sucking charge"
+        quality="2"
 		persistent="true"
         />
 
+        <passive id="7"
+        name="Null Bombs"
+        gfx="null_bombs.png"
+        description="???"
+        quality="1"
+        />
+
         <!--TRINKETS-->
-        <!--Burning Feather-->
 
         <trinket id="1"
         name="Burning Feather"

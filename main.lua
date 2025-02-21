@@ -57,8 +57,10 @@ end
 include("becky_scripts.becky.items.passives.dream_banisher")
 include("becky_scripts.becky.items.passives.coxinha")
 include("becky_scripts.becky.items.passives.scarecrow")
-include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.passives.dead_socket")
+
+include("becky_scripts.becky.items.actives.hand_made_bible")
+include("becky_scripts.becky.items.actives.night_of_the_slasher")
 
 --trinkets
 include("becky_scripts.becky.items.trinkets.burning_feather")
