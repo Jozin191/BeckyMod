@@ -1,15 +1,20 @@
 local NOTS = {}
 
 NOTS.ID = Isaac.GetItemIdByName("Night of the Slasher")
+NOTS.Costume = Isaac.GetCostumeIdByPath("gfx/characters/night_of_the_slasher.anm2")
 
 BeckyMod.Item.NIGHT_OF_THE_SLASHER = NOTS
 
 NOTS.SpecialFunctions = {
     [100] = {
-        DestroyFunction = function (pickup, player, rng)
-            player:SetFullHearts()
-            player:AddBlackHearts(2)
-        end
+        DestroyFunction = function (pickup, player)
+            if pickup.SubType ~= CollectibleType.COLLECTIBLE_NULL then
+                player:SetFullHearts()
+                player:AddBlackHearts(2)
+            else
+                return true --do not remove the pedestal
+            end
+        end,
     },
     [300] = { -- Cards
         DestroyFunction = function (_, player)
@@ -45,14 +50,17 @@ NOTS.SpecialFunctions = {
 }
 
 function NOTS:UseItem(type, rng, player, useflags, activeslot)
-    for _, entity in ipairs(Isaac.GetRoomEntities()) do
+    for _, entity in ipairs(Isaac.FindInRadius(player.Position, 100)) do
         local pickup = entity:ToPickup()
         if pickup then
             local destroyLater = true
             local specialFunct = NOTS.SpecialFunctions[pickup.Variant]
             if specialFunct ~= nil then
                 if specialFunct ~= false then
-                    specialFunct.DestroyFunction(pickup, player, rng)
+                    local poop = specialFunct.DestroyFunction(pickup, player, rng)
+                    if poop then
+                        destroyLater = false
+                    end
                 else
                     destroyLater = false
                 end
@@ -77,3 +85,20 @@ function NOTS:UseItem(type, rng, player, useflags, activeslot)
 end
 
 BeckyMod:AddCallback(ModCallbacks.MC_USE_ITEM, NOTS.UseItem, NOTS.ID)
+
+function NOTS:HandleCostume(player)
+    local save = BeckyMod:RunSave(player)
+    if player:HasCollectible(NOTS.ID) then
+		if not save.NOTSCostume then
+			player:AddNullCostume(NOTS.Costume)
+			save.NOTSCostume = true
+		end
+	else
+		if save.NOTSCostume then
+			player:TryRemoveNullCostume(NOTS.Costume)
+			save.NOTSCostume = nil
+		end
+	end
+end
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, NOTS.HandleCostume)

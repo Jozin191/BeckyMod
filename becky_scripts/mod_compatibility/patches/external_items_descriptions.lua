@@ -282,6 +282,15 @@ local function EIDPatch()
 				},
 			},
 		},
+		[Item.NIGHT_OF_THE_SLASHER.ID] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Night of the Slasher",
+				Description = {
+					"{{HealingRed}} Consumes pickups close to Isaac and heals Isaac for half a heart",
+					"#Consuming a Collectible fully heals Isaac and grants a {{BlackHeart}} Black Heart"
+				},
+			},
+		},
 	}
 
 	for id, collectibleDescData in pairs(EID_Collectibles) do
