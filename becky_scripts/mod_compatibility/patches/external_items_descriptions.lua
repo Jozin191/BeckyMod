@@ -291,6 +291,15 @@ local function EIDPatch()
 				},
 			},
 		},
+		[Item.NULL_BOMBS.ID] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Null Bombs",
+				Description = {
+					"{{Bomb}} +5 Bombs",
+					"#{{Collectible399}} Isaac's bombs spawn Maw Of The Void rings"
+				},
+			},
+		},
 	}
 
 	for id, collectibleDescData in pairs(EID_Collectibles) do

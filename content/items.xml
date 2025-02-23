@@ -13,7 +13,7 @@
         tags="book"
         />
 
-        <active id="3"
+        <active id="2"
         name="Night of the Slasher"
         gfx="night_of_the_slasher.png"
         description="Bloody shower"
@@ -71,7 +71,7 @@
         name="Null Bombs"
         gfx="null_bombs.png"
         description="???"
-        quality="1"
+        quality="3"
 
         bombs="5"
         />
@@ -98,6 +98,13 @@
         name="Devilzon Prime"
         description="Premium subscription… at a price"
         gfx="devilzon_prime.png"
+        cache=""
+        />
+
+        <trinket id="4"
+        name="Corpse Tag"
+        description="John Moriah"
+        gfx="corpse_tag.png"
         cache=""
         />
 </items>
