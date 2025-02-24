@@ -43,7 +43,8 @@ local patches = {
     "custom_items",
     "epiphany",
 	"beckyPatch",
-	"fiendFolio"
+	"fiendFolio",
+	"pog_for_good_items"
 }
 
 for _, fileName in ipairs(patches) do

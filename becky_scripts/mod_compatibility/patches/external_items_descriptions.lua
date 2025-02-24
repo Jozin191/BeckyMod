@@ -300,6 +300,15 @@ local function EIDPatch()
 				},
 			},
 		},
+		[Item.DEAD_SOCKET.ID] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Dead Socket",
+				Description = {
+					"Clearing rooms with full charge on an active item adds one ghost charge to it",
+					"#{{Collectible634}} Uppon using an active, generate multiple ghosts depending on the ghost charges"
+				},
+			},
+		},
 	}
 
 	for id, collectibleDescData in pairs(EID_Collectibles) do
