@@ -22,6 +22,8 @@ include("becky_scripts.utils.bitmask_helper")
 
 include("becky_scripts.utils.hud_helper")
 
+include("becky_scripts.utils.custom_bomb_flags")
+
 Scheduler = include("becky_scripts.utils.schedule_data")
 
 BeckyMod.Game = Game()

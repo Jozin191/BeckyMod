@@ -5,7 +5,7 @@ NULL_BOMBS.BOMB_VARIANT = Isaac.GetEntityVariantByName("Null Bomb")
 
 NULL_BOMBS.MAW_TIMEOUT = 80
 NULL_BOMBS.MAW_RADIUS = 50
-NULL_BOMBS.REDUCE_DAMAGE_THRESHOLD = 2.5
+NULL_BOMBS.REDUCE_DAMAGE_THRESHOLD = 1.5
 NULL_BOMBS.REDUCED_SCATTER_RADIUS_MULT = 4
 NULL_BOMBS.REDUCED_SCATTER_DAMAGE_MULT = 7.5
 
@@ -46,7 +46,7 @@ function NULL_BOMBS:ReplaceSpritesheet(bomb)
         local anim = sprite:GetAnimation()
         local file = sprite:GetFilename()
 
-        sprite:Load("gfx/items/pick ups/bombs/null_copper/null_copper".. file:sub(file:len()-5), true)
+        sprite:Load("gfx/items/pick ups/bombs/null_copper".. file:sub(file:len()-5), true)
         sprite:Play(anim, true)
     end
 end

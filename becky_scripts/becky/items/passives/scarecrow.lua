@@ -11,11 +11,21 @@ SCARECROW.ID = Isaac.GetItemIdByName("Scarecrow")
 SCARECROW.HITS_NEEDED = 10
 SCARECROW.HITS_PER_SPAWNED_CROW = 5
 SCARECROW.MAX_CROWS_AT_A_TIME = 5
+local test = 0.5
+SCARECROW.MAX_COLOR = Color(0, 0, 0, 1.0, 244/255 * test, 241/255 * test, 134/255 * test)
 
 BeckyMod.Item.SCARECROW = SCARECROW
 
 local tearSaveThing = false
-local ptrSaves = {} --TODO: change to the save because I'm stupid and did it without it lol
+
+function SCARECROW:GetCurrentColor(percent, entity)
+    return Color(entity.Color.R, entity.Color.G, entity.Color.B, 1.0,
+                 SCARECROW.MAX_COLOR.RO*percent, SCARECROW.MAX_COLOR.GO*percent, SCARECROW.MAX_COLOR.BO*percent)
+    --[[
+    return Color(SCARECROW.MAX_COLOR.R*percent, SCARECROW.MAX_COLOR.G*percent, SCARECROW.MAX_COLOR.B*percent, 1.0,
+                 SCARECROW.MAX_COLOR.RO, SCARECROW.MAX_COLOR.GO, SCARECROW.MAX_COLOR.BO)
+    ]]
+end
 
 function SCARECROW:collideWithEnemy(EntityTear, Collider)
     local enemy = Collider:ToNPC()
@@ -33,18 +43,27 @@ function SCARECROW:collideWithEnemy(EntityTear, Collider)
     if not saveAll.ScareCrowCount then saveAll.ScareCrowCount = 0 end
     if saveAll.ScareCrowCount >= SCARECROW.MAX_CROWS_AT_A_TIME then goto continue end
 
-    if not ptrSaves[BeckyMod:GetPlayerString(player)] then
-        ptrSaves[BeckyMod:GetPlayerString(player)] = GetPtrHash(enemy)
-    end
-    
-    if ptrSaves[BeckyMod:GetPlayerString(player)] ~= GetPtrHash(enemy) then
+    if not saveAll.ScarecrowEnemyPtrSave then
+        saveAll.ScarecrowEnemyPtrSave = GetPtrHash(enemy)
+    elseif saveAll.ScarecrowEnemyPtrSave ~= GetPtrHash(enemy) then
         save.ScareCrowHits = 0
-        ptrSaves[BeckyMod:GetPlayerString(player)] = GetPtrHash(enemy)
+
+        for _, entity in ipairs(Isaac.GetRoomEntities()) do
+            if GetPtrHash(entity) == saveAll.ScarecrowEnemyPtrSave then
+                entity:SetColor(SCARECROW:GetCurrentColor(0, entity), 0, 1, false, false) --Idk man
+                --entity:SetColor(entity:GetColor(), -1, 1, false, false)
+                break
+            end
+        end
+
+        saveAll.ScarecrowEnemyPtrSave = GetPtrHash(enemy)
     end
 
     save.ScareCrowHits = save.ScareCrowHits and save.ScareCrowHits + 1 or 1
 
-    if save.ScareCrowHits >= (SCARECROW.HITS_NEEDED + SCARECROW.HITS_PER_SPAWNED_CROW * saveAll.ScareCrowCount) then
+    local neededHits = (SCARECROW.HITS_NEEDED + SCARECROW.HITS_PER_SPAWNED_CROW * saveAll.ScareCrowCount)
+
+    if save.ScareCrowHits >= neededHits then
         local ent = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.DEAD_BIRD, 0, BeckyMod.Game:GetRoom():GetRandomPosition(400), Vector.Zero, player)
         ent = ent:ToEffect()
         ent.Timeout = 1
@@ -54,6 +73,10 @@ function SCARECROW:collideWithEnemy(EntityTear, Collider)
         save.ScareCrowHits = 0
         saveAll.ScareCrowCount = saveAll.ScareCrowCount + 1
     end
+
+    local percent = save.ScareCrowHits/neededHits
+
+    enemy:SetColor(SCARECROW:GetCurrentColor(percent, enemy), -1, 1, false, false)
 
     tearSaveThing = true
 

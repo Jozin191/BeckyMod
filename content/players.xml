@@ -6,5 +6,6 @@
         portrait="playerportrait_becky.png"
         black="6"
         canShoot="false"
+        costumeSuffix="becky"
     />
 </players>
