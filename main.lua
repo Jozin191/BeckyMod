@@ -61,9 +61,12 @@ include("becky_scripts.becky.items.passives.coxinha")
 include("becky_scripts.becky.items.passives.scarecrow")
 include("becky_scripts.becky.items.passives.dead_socket")
 include("becky_scripts.becky.items.passives.null_bomb")
+include("becky_scripts.becky.items.passives.defiled_chalice")
 
 include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
+
+include("becky_scripts.becky.items.misc.dead_battery")
 
 --trinkets
 include("becky_scripts.becky.items.trinkets.burning_feather")

@@ -7,6 +7,8 @@
     <costume anm2path="scarecrow.anm2" type="passive" id="5" />
     <costume anm2path="dead_socket.anm2" type="passive" id="6" />
 
+    <costume anm2path="costume_chalice.anm2" type="passive" id="4" hasOverlay="true" hasSkinAlt="true" />
+
 
     <costume anm2path="costumes/pog/becky_pog.anm2" isFlying="true" priority="969" type="none"/>
 

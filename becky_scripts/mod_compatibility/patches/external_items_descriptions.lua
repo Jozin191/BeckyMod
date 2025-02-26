@@ -222,6 +222,7 @@ local function EIDPatch()
 	
 	if EID.HealingItemData then
 		EID.HealingItemData["5.100." .. tostring(Item.COXINHA.ID)] = true
+		EID.HealingItemData["5.100." .. tostring(Item.DEFILED_CHALICE.ID)] = true
 	end
 
 	--Actual Descriptions
@@ -306,6 +307,15 @@ local function EIDPatch()
 				Description = {
 					"Clearing rooms with full charge on an active item adds one ghost charge to it",
 					"#{{Collectible634}} Uppon using an active, generate multiple ghosts depending on the ghost charges"
+				},
+			},
+		},
+		[Item.DEFILED_CHALICE.ID] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Defiled Chalice",
+				Description = {
+					"{{HealingRed}} Heals 1 heart",
+					"#Killing an enemy drops creep that damages other enemies"
 				},
 			},
 		},
