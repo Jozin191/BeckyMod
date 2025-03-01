@@ -1,5 +1,4 @@
 if Poglite then
-    print('balls')
 	Poglite:AddPogCostume(
 		"Becky Pog",
 		BeckyMod.Character.BECKY.PLAYERTYPE,
