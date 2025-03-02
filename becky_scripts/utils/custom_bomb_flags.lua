@@ -138,9 +138,9 @@ CustomBombModifiersAPI.CallbackHandlers = {
 				local bombData = bomb:GetData()
 				local registeredBomb = Mod.RegisteredBombs[identificator]
 
-				if extraData.IsKamikaze and not bombData.IgnoreKamikaze then
+				if extraData.IsKamikaze and not registeredBomb.IgnoreKamikaze then
 					shouldFire = registeredBomb.HasModifier(player)
-				elseif extraData.IsEpicFetus and not bombData.IgnoreEpicFetus then
+				elseif extraData.IsEpicFetus and not registeredBomb.IgnoreEpicFetus then
 					local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_EPIC_FETUS)
 					if rng:RandomInt(100) > registeredBomb.FetusChance(player.Luck) then goto continue end
 
