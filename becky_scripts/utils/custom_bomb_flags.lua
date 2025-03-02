@@ -1,5 +1,8 @@
 ---@diagnostic disable
 
+--CBMAPI Created by [No need to credit directly on the page, though a thanks would be appreciated]:
+-- * Tiburones202
+
 CustomBombModifiersAPI = RegisterMod("CustomBombModifiersAPI", 1)
 CustomBombModifiersAPI.Version = 1 --v1.0.0 release
 
@@ -12,6 +15,23 @@ CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
     [BombVariant.BOMB_GIGA] = true,
     [BombVariant.BOMB_THROWABLE] = true,
 }
+--[[
+--TODO: List
+* Kamikaze support [OK]
+* Epic Fetus support [OK]
+	** Forgotten support [X]
+* War Locust support [OK]
+* BFF support [X]
+* Bob's Brain support [X]
+* Best Friend support [X]
+
+* Hot Potato support [X]
+
+* Base game callbacks with modifier limiters [X]
+
+* Epiphany Zip Bombs support (broken on Epiphany's side?) [X]
+
+]]
 
 CustomBombModifiersAPI.RegisteredBombs =
 {
@@ -22,8 +42,9 @@ CustomBombModifiersAPI.RegisteredBombs =
 		FetusChance = CustomBombModifiersAPI.DefaultFetusChance, --Shared with epic fetus. you can input a function to scale with luck
 		NancyChance = 5, --Whacky.
 
-		IgnoreKamikaze = false,
+		IgnoreKamikaze = false, --Shared with Swallowed M80
 		IgnoreEpicFetus = false,
+		IgnoreWarLocust = false,
 
 		Variant = Isaac.GetEntityVariantByName("Null Bomb"),
 		Path = "gfx/items/pick ups/bombs/null",
@@ -42,7 +63,8 @@ function CustomBombModifiersAPI:RegisterBombModifier(Identifier, BombData)
 		NancyChance = BombData.NancyChance or CustomBombModifiersAPI.DefaultNancyChance,
 
 		IgnoreKamikaze = BombData.IgnoreKamikaze or false,
-		IgnoreKamikaze = BombData.IgnoreEpicFetus or false,
+		IgnoreEpicFetus = BombData.IgnoreEpicFetus or false,
+		IgnoreWarLocust = BombData.IgnoreWarLocust or false,
 
 		Variant = BombData.Variant or nil,
 		Path = BombData.Path or nil,
@@ -139,6 +161,8 @@ CustomBombModifiersAPI.CallbackHandlers = {
 				local registeredBomb = Mod.RegisteredBombs[identificator]
 
 				if extraData.IsKamikaze and not registeredBomb.IgnoreKamikaze then
+					shouldFire = registeredBomb.HasModifier(player)
+				elseif extraData.IsWarLocust and not registeredBomb.IgnoreWarLocust then
 					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsEpicFetus and not registeredBomb.IgnoreEpicFetus then
 					local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_EPIC_FETUS)
@@ -290,6 +314,13 @@ function CustomBombModifiersAPI:BombUpdate(bomb)
 end
 Mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, CustomBombModifiersAPI.BombUpdate)
 
+--[[
+function CustomBombModifiersAPI:Poop1(bomb)
+	bomb:GetData()["Null Bomb"] = true
+end
+Mod:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, CustomBombModifiersAPI.Poop1)
+]]
+
 --#endregion
 
 --#region Kamikaze
@@ -328,6 +359,26 @@ end
 --#region Epic Fetus
 
 function CustomBombModifiersAPI:DetectEpicFetuseByUpdate(effect)
+	local player = Mod:TryGetPlayer(effect)
+
+	if not player then return end
+
+	if effect.FrameCount == 10 then
+		local extraData = {
+			IsEpicFetus = true
+		}
+		
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
+	end
+end
+
+Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, CustomBombModifiersAPI.DetectEpicFetuseByUpdate, EffectVariant.ROCKET)
+
+--#endregion
+
+--#region Locust of War
+
+function CustomBombModifiersAPI:DetectEpicFetuseByUpdate(effect)
 	local player = effect.SpawnerEntity:ToPlayer()
 
 	if not player then return end
@@ -349,8 +400,21 @@ end
 
 Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
 
-function CustomBombModifiersAPI:CustomBombInteractionsUpdateRocket(effect)
-	CustomBombModifiersAPI:DetectEpicFetuseByUpdate(effect) --Epic Fetus & Doctor's Remote
+function CustomBombModifiersAPI:CustomBombInteractionsFlyCollision(fly, Collider)
+	if fly.SubType == 1 then --War fly
+		local enemy = Collider:ToNPC()
+		
+		if not enemy then goto continue end
+		if (not enemy:IsVulnerableEnemy()) or (not enemy:IsActiveEnemy(false)) or enemy:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) then goto continue end
+
+		local extraData = {
+			IsWarLocust = true,
+			SmallExplosion = true,
+		}
+		
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, fly, Mod:TryGetPlayer(fly), extraData)
+	end
+	::continue::
 end
 
-Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, CustomBombModifiersAPI.CustomBombInteractionsUpdateRocket, EffectVariant.ROCKET)
+Mod:AddPriorityCallback(ModCallbacks.MC_PRE_FAMILIAR_COLLISION, CallbackPriority.LATE, CustomBombModifiersAPI.CustomBombInteractionsFlyCollision, FamiliarVariant.BLUE_FLY)
