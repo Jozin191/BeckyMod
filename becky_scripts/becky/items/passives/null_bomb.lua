@@ -25,7 +25,7 @@ function NULL_BOMBS:Explode(bomb, player, extraData)
     maw.Radius = NULL_BOMBS.MAW_RADIUS
     maw.CollisionDamage = player.Damage - max(0, player.Damage - NULL_BOMBS.REDUCE_DAMAGE_THRESHOLD) / 2
 
-    if extraData.IsSmallBomb then
+    if extraData.SmallExplosion then
         maw.Radius = maw.Radius / NULL_BOMBS.REDUCED_SCATTER_RADIUS_MULT
         maw.CollisionDamage = maw.CollisionDamage / NULL_BOMBS.REDUCED_SCATTER_DAMAGE_MULT
     end

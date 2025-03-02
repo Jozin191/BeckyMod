@@ -5,8 +5,9 @@ CustomBombModifiersAPI.Version = 1 --v1.0.0 release
 
 local Mod = CustomBombModifiersAPI
 
-CustomBombModifiersAPI.DefaultFetusChance = 5
+CustomBombModifiersAPI.DefaultFetusChance = function(luck) return 11 + (3 * luck) end --Brimstone bombs chance as a placeholder
 CustomBombModifiersAPI.DefaultNancyChance = 5
+
 CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
     [BombVariant.BOMB_GIGA] = true,
     [BombVariant.BOMB_THROWABLE] = true,
@@ -18,10 +19,11 @@ CustomBombModifiersAPI.RegisteredBombs =
 	{
 		HasModifier = function(player) return player:HasCollectible(Isaac.GetItemIdByName("Null Bombs")) end,
 
-		FetusChance = 10,
-		NancyChance = 5,
+		FetusChance = CustomBombModifiersAPI.DefaultFetusChance, --Shared with epic fetus. you can input a function to scale with luck
+		NancyChance = 5, --Whacky.
 
 		IgnoreKamikaze = false,
+		IgnoreEpicFetus = false,
 
 		Variant = Isaac.GetEntityVariantByName("Null Bomb"),
 		Path = "gfx/items/pick ups/bombs/null",
@@ -31,7 +33,7 @@ CustomBombModifiersAPI.RegisteredBombs =
 	}
 }
 
-function CustomBombModifiersAPI:RegisterBomb(Identifier, BombData)
+function CustomBombModifiersAPI:RegisterBombModifier(Identifier, BombData)
 	CustomBombModifiersAPI.RegisteredBombs[Identifier] =
 	{
 		HasModifier = BombData.HasModifier,
@@ -40,6 +42,7 @@ function CustomBombModifiersAPI:RegisterBomb(Identifier, BombData)
 		NancyChance = BombData.NancyChance or CustomBombModifiersAPI.DefaultNancyChance,
 
 		IgnoreKamikaze = BombData.IgnoreKamikaze or false,
+		IgnoreKamikaze = BombData.IgnoreEpicFetus or false,
 
 		Variant = BombData.Variant or nil,
 		Path = BombData.Path or nil,
@@ -117,6 +120,44 @@ function CustomBombModifiersAPI.Callbacks.RemoveCallback(id, func)
 		end
 	end
 end
+
+function CustomBombModifiersAPI.Callbacks.FireCallback(callbackId, ...)
+	local callbacks = Mod.Callbacks.RegisteredCallbacks[callbackId]
+	if callbacks ~= nil then
+		return Mod.CallbackHandlers[callbackId](callbacks, ...)
+	end
+end
+
+CustomBombModifiersAPI.CallbackHandlers = {
+	[Mod.Callbacks.ID.POST_BOMB_EXPLODE] = function(callbacks, bomb, player, extraData)
+		for i = 1, #callbacks do
+			local identificator = callbacks[i].Args[1]
+			local shouldFire = not identificator
+
+			if not shouldFire then
+				local bombData = bomb:GetData()
+				local registeredBomb = Mod.RegisteredBombs[identificator]
+
+				if extraData.IsKamikaze and not bombData.IgnoreKamikaze then
+					shouldFire = registeredBomb.HasModifier(player)
+				elseif extraData.IsEpicFetus and not bombData.IgnoreEpicFetus then
+					local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_EPIC_FETUS)
+					if rng:RandomInt(100) > registeredBomb.FetusChance(player.Luck) then goto continue end
+
+					shouldFire = registeredBomb.HasModifier(player)
+				else
+					shouldFire = bombData[identificator]
+				end
+			end
+
+			if shouldFire then
+				callbacks[i].Function(CustomBombModifiersAPI, bomb, player, extraData)
+			end
+
+			::continue::
+		end
+	end,
+}
 
 --#endregion
 
@@ -200,7 +241,7 @@ function CustomBombModifiersAPI:ProperBombInit(bomb, player)
 		    if bomb.IsFetus then
 		        local rng = bomb:GetDropRNG()
 
-		        if rng:RandomInt(100) > bombData.FetusChance then
+		        if rng:RandomInt(100) > bombData.FetusChance(player.Luck) then
 		            goto continue
 		        end
 		    end
@@ -241,25 +282,15 @@ function CustomBombModifiersAPI:BombUpdate(bomb)
 		local extraData = {}
 
 		if bomb:GetData().IsSmallBomb then
-			extraData.IsSmallBomb = true
+			extraData.SmallExplosion = true
 		end
 
-		local callbacks = Mod.Callbacks.RegisteredCallbacks[Mod.Callbacks.ID.POST_BOMB_EXPLODE]
-		for i = 1, #callbacks do
-			local args = callbacks[i].Args
-			local shouldFire = not args[1] or bomb:GetData()[args[1]]
-
-			if shouldFire then
-				callbacks[i].Function(CustomBombModifiersAPI, bomb, player, extraData)
-			end
-		end
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, bomb, player, extraData)
 	end
 end
 Mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, CustomBombModifiersAPI.BombUpdate)
 
 --#endregion
-
-
 
 --#region Kamikaze
 
@@ -267,7 +298,7 @@ function CustomBombModifiersAPI:UseKamikaze(_, _, player)
 	player:GetData().KamikazeUses = (player:GetData().KamikazeUses or 0) + 1
 end
 
-Mod:AddCallback(ModCallbacks.MC_USE_ITEM, CustomBombModifiersAPI.UseKamikaze, CollectibleType.COLLECTIBLE_KAMIKAZE)
+Mod:AddPriorityCallback(ModCallbacks.MC_PRE_USE_ITEM, CallbackPriority.LATE, CustomBombModifiersAPI.UseKamikaze, CollectibleType.COLLECTIBLE_KAMIKAZE)
 
 function CustomBombModifiersAPI:DetectKamikazeByInit(effect)
     local player = effect.SpawnerEntity
@@ -288,18 +319,38 @@ function CustomBombModifiersAPI:DetectKamikazeByInit(effect)
 			IsKamikaze = true
 		}
 
-        local callbacks = Mod.Callbacks.RegisteredCallbacks[Mod.Callbacks.ID.POST_BOMB_EXPLODE]
-		for i = 1, #callbacks do
-			local args = callbacks[i].Args
-			local shouldFire = not args[1] or Mod.RegisteredBombs[args[1]].HasModifier(player)
-
-			if shouldFire then
-				callbacks[i].Function(CustomBombModifiersAPI, effect, player, extraData)
-			end
-		end
+        Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
     end
 end
 
-Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.DetectKamikazeByInit, EffectVariant.BOMB_EXPLOSION)
+--#endregion
+
+--#region Epic Fetus
+
+function CustomBombModifiersAPI:DetectEpicFetuseByUpdate(effect)
+	local player = effect.SpawnerEntity:ToPlayer()
+
+	if not player then return end
+
+	if effect.FrameCount == 10 then
+		local extraData = {
+			IsEpicFetus = true
+		}
+		
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
+	end
+end
 
 --#endregion
+
+function CustomBombModifiersAPI:CustomBombInteractionsInit(effect)
+	CustomBombModifiersAPI:DetectKamikazeByInit(effect) --Kamikaze
+end
+
+Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
+
+function CustomBombModifiersAPI:CustomBombInteractionsUpdateRocket(effect)
+	CustomBombModifiersAPI:DetectEpicFetuseByUpdate(effect) --Epic Fetus & Doctor's Remote
+end
+
+Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, CustomBombModifiersAPI.CustomBombInteractionsUpdateRocket, EffectVariant.ROCKET)
