@@ -1,10 +1,12 @@
 ---@diagnostic disable
 
---CBMAPI Created by [No need to credit directly on the page, though a thanks would be appreciated]:
+--CBMAPI Created by [No need to credit directly on the mod page. Though, a thanks would be appreciated]:
 -- * Tiburones202
 
 CustomBombModifiersAPI = RegisterMod("CustomBombModifiersAPI", 1)
 CustomBombModifiersAPI.Version = 1 --v1.0.0 release
+
+local game = Game()
 
 local Mod = CustomBombModifiersAPI
 
@@ -17,7 +19,7 @@ CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
 }
 --[[
 --TODO: List
-* Kamikaze support [OK]
+* Kamikaze + Swallowed M80 support [OK]
 * Epic Fetus support [OK]
 	** Forgotten support [X]
 * War Locust support [OK]
@@ -26,11 +28,9 @@ CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
 * Best Friend support [X]
 * Bob's Rotten Head support [X]
 
-* Hot Potato support [X]
+* Hot Potato support [OK]
 
-* Base game callbacks with modifier limiters [X]
-
-* Epiphany Zip Bombs support (broken on Epiphany's side?) [X]
+* Base game callbacks with modifier as limiters [X]
 
 ]]
 
@@ -46,6 +46,8 @@ CustomBombModifiersAPI.RegisteredBombs =
 		IgnoreKamikaze = false, --Shared with Swallowed M80
 		IgnoreEpicFetus = false,
 		IgnoreWarLocust = false,
+
+		IgnoreHotPotato = false,
 
 		Variant = Isaac.GetEntityVariantByName("Null Bomb"),
 		Path = "gfx/items/pick ups/bombs/null",
@@ -66,6 +68,8 @@ function CustomBombModifiersAPI:RegisterBombModifier(Identifier, BombData)
 		IgnoreKamikaze = BombData.IgnoreKamikaze or false,
 		IgnoreEpicFetus = BombData.IgnoreEpicFetus or false,
 		IgnoreWarLocust = BombData.IgnoreWarLocust or false,
+
+		IgnoreHotPotato = BombData.IgnoreHotPotato or false,
 
 		Variant = BombData.Variant or nil,
 		Path = BombData.Path or nil,
@@ -164,6 +168,8 @@ CustomBombModifiersAPI.CallbackHandlers = {
 				if extraData.IsKamikaze and not registeredBomb.IgnoreKamikaze then
 					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsWarLocust and not registeredBomb.IgnoreWarLocust then
+					shouldFire = registeredBomb.HasModifier(player)
+				elseif extraData.IsHotPotato and not registeredBomb.IgnoreHotPotato then
 					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsEpicFetus and not registeredBomb.IgnoreEpicFetus then
 					local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_EPIC_FETUS)
@@ -395,8 +401,27 @@ end
 
 --#endregion
 
+--#region Hot Potato
+
+function CustomBombModifiersAPI:DetectHotPotatoByInit(effect)
+	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
+
+	local player = effect.SpawnerEntity:ToPlayer()
+
+	if not player then return end
+
+	local extraData = {
+		IsHotPotato = true
+	}
+
+	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
+end
+
+--#endregion
+
 function CustomBombModifiersAPI:CustomBombInteractionsInit(effect)
 	CustomBombModifiersAPI:DetectKamikazeByInit(effect) --Kamikaze
+	CustomBombModifiersAPI:DetectHotPotatoByInit(effect) --Hot Potato
 end
 
 Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
