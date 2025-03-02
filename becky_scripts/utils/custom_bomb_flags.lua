@@ -24,6 +24,7 @@ CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
 * BFF support [X]
 * Bob's Brain support [X]
 * Best Friend support [X]
+* Bob's Rotten Head support [X]
 
 * Hot Potato support [X]
 
