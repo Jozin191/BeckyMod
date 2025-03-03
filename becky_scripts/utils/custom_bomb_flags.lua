@@ -25,12 +25,10 @@ CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
 * War Locust support [OK]
 * BFF support [X]
 * Bob's Brain support [OK]
-	** Bomber Boy support [X]
 * Best Friend support [X]
 * Bob's Rotten Head support [X]
 
 * Hot Potato support [OK]
-	** Bomber Boy support [X]
 
 * Base game callbacks with modifier as limiters [X]
 
@@ -226,6 +224,25 @@ function Mod:TryGetPlayer(ent, directOnly)
 	end
 end
 
+---Executes given function for every player
+---Return anything to end the loop early
+---@param func fun(player: EntityPlayer, playerNum?: integer): any?
+function Mod:ForEachPlayer(func)
+	if REPENTOGON then
+		for i, player in ipairs(PlayerManager.GetPlayers()) do
+			if func(player, i) then
+				return true
+			end
+		end
+	else
+		for i = 0, Mod.game:GetNumPlayers() - 1 do
+			if func(Isaac.GetPlayer(i), i) then
+				return true
+			end
+		end
+	end
+end
+
 --endregion
 
 --#region Bomb States
@@ -391,68 +408,6 @@ Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, CustomBombModifiersAPI.Detec
 
 --#region Locust of War
 
-function CustomBombModifiersAPI:DetectEpicFetuseByUpdate(effect)
-	local player = effect.SpawnerEntity:ToPlayer()
-
-	if not player then return end
-
-	if effect.FrameCount == 10 then
-		local extraData = {
-			IsEpicFetus = true
-		}
-		
-		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
-	end
-end
-
---#endregion
-
---#region Hot Potato
-
-function CustomBombModifiersAPI:DetectHotPotatoByInit(effect)
-	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
-
-	local player = effect.SpawnerEntity:ToPlayer()
-
-	if not player then return end
-
-	local extraData = {
-		IsHotPotato = true
-	}
-
-	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
-end
-
---#endregion
-
---#region Bob's Brain
-
-function CustomBombModifiersAPI:DetectBobBrainByInit(effect)
-	local spawner = effect.SpawnerEntity
-
-	if spawner.Type ~= EntityType.ENTITY_FAMILIAR or spawner.Variant ~= FamiliarVariant.BOBS_BRAIN then return end
-
-	local player = Mod:TryGetPlayer(spawner)
-
-	if not player then return end
-
-	local extraData = {
-		IsBobsBrain = true
-	}
-
-	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
-end
-
---#endregion
-
-function CustomBombModifiersAPI:CustomBombInteractionsInit(effect)
-	CustomBombModifiersAPI:DetectKamikazeByInit(effect) --Kamikaze
-	CustomBombModifiersAPI:DetectHotPotatoByInit(effect) --Hot Potato
-	CustomBombModifiersAPI:DetectBobBrainByInit(effect) --Bob's Brain
-end
-
-Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
-
 function CustomBombModifiersAPI:CustomBombInteractionsFlyCollision(fly, Collider)
 	if fly.SubType == 1 then --War fly
 		local enemy = Collider:ToNPC()
@@ -471,3 +426,87 @@ function CustomBombModifiersAPI:CustomBombInteractionsFlyCollision(fly, Collider
 end
 
 Mod:AddPriorityCallback(ModCallbacks.MC_PRE_FAMILIAR_COLLISION, CallbackPriority.LATE, CustomBombModifiersAPI.CustomBombInteractionsFlyCollision, FamiliarVariant.BLUE_FLY)
+
+--#endregion
+
+--#region Bob's Brain
+
+function CustomBombModifiersAPI:CustomBombInteractionsBobsBrainCollision(BobsBrain, Collider)
+	local enemy = Collider:ToNPC()
+	
+	if not enemy then goto continue end
+	if (not enemy:IsVulnerableEnemy()) or (not enemy:IsActiveEnemy(false)) or enemy:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) then goto continue end
+
+	local extraData = {
+		IsBobsBrain = true
+	}
+	
+	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, BobsBrain, Mod:TryGetPlayer(BobsBrain), extraData)
+
+	::continue::
+end
+
+Mod:AddPriorityCallback(ModCallbacks.MC_PRE_FAMILIAR_COLLISION, CallbackPriority.LATE, CustomBombModifiersAPI.CustomBombInteractionsBobsBrainCollision, FamiliarVariant.BOBS_BRAIN)
+
+--#endregion
+
+--#region Hot Potato
+
+function CustomBombModifiersAPI:DetectHotPotatoByInit(effect)
+	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
+
+	local player = effect.SpawnerEntity:ToPlayer()
+
+	if not player then return end
+
+	print(player.FrameCount)
+
+	local extraData = {
+		IsHotPotato = true
+	}
+
+	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
+end
+
+--NEW
+function CustomBombModifiersAPI:HotPotatoForgorPEffectUpdate(player)
+	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
+
+	local FrameCountRoom = (player.FrameCount - (player:GetData().CBMAPIStartingFrames or 0))
+	if (FrameCountRoom % 73 == 0) and FrameCountRoom > 0 then 
+		print(player.FrameCount)
+
+		local extraData = {
+			IsHotPotato = true
+		}
+
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, player, player, extraData)
+	end
+end
+
+Mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, CustomBombModifiersAPI.HotPotatoForgorPEffectUpdate, PlayerType.PLAYER_THEFORGOTTEN_B)
+
+function CustomBombModifiersAPI:HotPotatoNewRoom() --Reset frames on new room
+	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
+
+	print('new room. Resetting frames')
+	Mod:ForEachPlayer(function(player)
+		if player:GetPlayerType() == PlayerType.PLAYER_THEFORGOTTEN_B then
+			player:GetData().CBMAPIStartingFrames = player.FrameCount - 1
+
+			print(player:GetData().CBMAPIStartingFrames)
+		end
+	end)
+end
+
+Mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CustomBombModifiersAPI.HotPotatoNewRoom)
+
+
+--#endregion
+
+function CustomBombModifiersAPI:CustomBombInteractionsInit(effect)
+	CustomBombModifiersAPI:DetectKamikazeByInit(effect) --Kamikaze
+	--CustomBombModifiersAPI:DetectHotPotatoByInit(effect) --Hot Potato
+end
+
+Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
