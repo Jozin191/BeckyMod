@@ -24,11 +24,13 @@ CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
 	** Forgotten support [X]
 * War Locust support [OK]
 * BFF support [X]
-* Bob's Brain support [X]
+* Bob's Brain support [OK]
+	** Bomber Boy support [X]
 * Best Friend support [X]
 * Bob's Rotten Head support [X]
 
 * Hot Potato support [OK]
+	** Bomber Boy support [X]
 
 * Base game callbacks with modifier as limiters [X]
 
@@ -46,6 +48,7 @@ CustomBombModifiersAPI.RegisteredBombs =
 		IgnoreKamikaze = false, --Shared with Swallowed M80
 		IgnoreEpicFetus = false,
 		IgnoreWarLocust = false,
+		IgnoreBobsBrain = false,
 
 		IgnoreHotPotato = false,
 
@@ -68,6 +71,7 @@ function CustomBombModifiersAPI:RegisterBombModifier(Identifier, BombData)
 		IgnoreKamikaze = BombData.IgnoreKamikaze or false,
 		IgnoreEpicFetus = BombData.IgnoreEpicFetus or false,
 		IgnoreWarLocust = BombData.IgnoreWarLocust or false,
+		IgnoreBobsBrain = BombData.IgnoreBobsBrain or false,
 
 		IgnoreHotPotato = BombData.IgnoreHotPotato or false,
 
@@ -168,6 +172,8 @@ CustomBombModifiersAPI.CallbackHandlers = {
 				if extraData.IsKamikaze and not registeredBomb.IgnoreKamikaze then
 					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsWarLocust and not registeredBomb.IgnoreWarLocust then
+					shouldFire = registeredBomb.HasModifier(player)
+				elseif extraData.IsBobsBrain and not registeredBomb.IgnoreBobsBrain then
 					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsHotPotato and not registeredBomb.IgnoreHotPotato then
 					shouldFire = registeredBomb.HasModifier(player)
@@ -419,9 +425,30 @@ end
 
 --#endregion
 
+--#region Bob's Brain
+
+function CustomBombModifiersAPI:DetectBobBrainByInit(effect)
+	local spawner = effect.SpawnerEntity
+
+	if spawner.Type ~= EntityType.ENTITY_FAMILIAR or spawner.Variant ~= FamiliarVariant.BOBS_BRAIN then return end
+
+	local player = Mod:TryGetPlayer(spawner)
+
+	if not player then return end
+
+	local extraData = {
+		IsBobsBrain = true
+	}
+
+	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
+end
+
+--#endregion
+
 function CustomBombModifiersAPI:CustomBombInteractionsInit(effect)
 	CustomBombModifiersAPI:DetectKamikazeByInit(effect) --Kamikaze
 	CustomBombModifiersAPI:DetectHotPotatoByInit(effect) --Hot Potato
+	CustomBombModifiersAPI:DetectBobBrainByInit(effect) --Bob's Brain
 end
 
 Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
