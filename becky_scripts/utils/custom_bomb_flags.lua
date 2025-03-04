@@ -11,7 +11,7 @@ local game = Game()
 local Mod = CustomBombModifiersAPI
 
 CustomBombModifiersAPI.DefaultFetusChance = function(luck) return 11 + (3 * luck) end --Brimstone bombs chance as a placeholder
-CustomBombModifiersAPI.DefaultNancyChance = 5
+CustomBombModifiersAPI.DefaultNancyChance = -1 --Disabled normally. Will have a base chance once I figure out how it works.
 
 CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
     [BombVariant.BOMB_GIGA] = true,
@@ -21,12 +21,12 @@ CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
 --TODO: List
 * Kamikaze + Swallowed M80 support [OK]
 * Epic Fetus support [OK]
-	** Forgotten support [X]
+	** Forgotten support [OK]
 * War Locust support [OK]
 * BFF support [X]
 * Bob's Brain support [OK]
 * Best Friend support [X]
-* Bob's Rotten Head support [X]
+* Bob's Rotten Head support [OK]
 
 * Hot Potato support [OK]
 
@@ -47,6 +47,9 @@ CustomBombModifiersAPI.RegisteredBombs =
 		IgnoreEpicFetus = false,
 		IgnoreWarLocust = false,
 		IgnoreBobsBrain = false,
+		IgnoreBobsRottenHead = false,
+		IgnoreBFF = false,
+		IgnoreBestFriend = false,
 
 		IgnoreHotPotato = false,
 
@@ -70,6 +73,9 @@ function CustomBombModifiersAPI:RegisterBombModifier(Identifier, BombData)
 		IgnoreEpicFetus = BombData.IgnoreEpicFetus or false,
 		IgnoreWarLocust = BombData.IgnoreWarLocust or false,
 		IgnoreBobsBrain = BombData.IgnoreBobsBrain or false,
+		IgnoreBobsRottenHead = BombData.IgnoreBobsRottenHead or false,
+		IgnoreBFF = BombData.IgnoreBFF or false,
+		IgnoreBestFriend = BombData.IgnoreBestFriend or false,
 
 		IgnoreHotPotato = BombData.IgnoreHotPotato or false,
 
@@ -173,6 +179,12 @@ CustomBombModifiersAPI.CallbackHandlers = {
 					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsBobsBrain and not registeredBomb.IgnoreBobsBrain then
 					shouldFire = registeredBomb.HasModifier(player)
+				elseif extraData.IsBestFriend and not registeredBomb.IgnoreBestFriend then
+					shouldFire = registeredBomb.HasModifier(player)
+				elseif extraData.IsBFF and not registeredBomb.IgnoreBFF then
+					shouldFire = registeredBomb.HasModifier(player)
+				elseif extraData.IsBobsRottenHead and not registeredBomb.IgnoreBobsRottenHead then
+					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsHotPotato and not registeredBomb.IgnoreHotPotato then
 					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsEpicFetus and not registeredBomb.IgnoreEpicFetus then
@@ -241,6 +253,11 @@ function Mod:ForEachPlayer(func)
 			end
 		end
 	end
+end
+
+---Explosion will always be in the same position
+function Mod:IsNotBomberBoyExplosion(effect, spawner)
+	return (effect.Position.X == spawner.Position.X) and (effect.Position.Y == spawner.Position.Y)
 end
 
 --endregion
@@ -344,13 +361,6 @@ function CustomBombModifiersAPI:BombUpdate(bomb)
 end
 Mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, CustomBombModifiersAPI.BombUpdate)
 
---[[
-function CustomBombModifiersAPI:Poop1(bomb)
-	bomb:GetData()["Null Bomb"] = true
-end
-Mod:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, CustomBombModifiersAPI.Poop1)
-]]
-
 --#endregion
 
 --#region Kamikaze
@@ -361,12 +371,8 @@ end
 
 Mod:AddPriorityCallback(ModCallbacks.MC_PRE_USE_ITEM, CallbackPriority.LATE, CustomBombModifiersAPI.UseKamikaze, CollectibleType.COLLECTIBLE_KAMIKAZE)
 
-function CustomBombModifiersAPI:DetectKamikazeByInit(effect)
-    local player = effect.SpawnerEntity
-
-    if not player then return end
-
-    player = player:ToPlayer()
+function CustomBombModifiersAPI:DetectKamikazeByInit(effect, spawner)
+    local player = spawner:ToPlayer()
 
     if not player then return end
 
@@ -388,93 +394,90 @@ end
 
 --#region Epic Fetus
 
-function CustomBombModifiersAPI:DetectEpicFetuseByUpdate(effect)
-	local player = Mod:TryGetPlayer(effect)
+function CustomBombModifiersAPI:DetectEpicFetusByInit(effect, spawner)
+	if spawner.Variant == EffectVariant.ROCKET or spawner.Variant == EffectVariant.SMALL_ROCKET then
+		local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
+		if IsNotBomberBoy then
+			local extraData = {
+				IsEpicFetus = true
+			}
 
-	if not player then return end
-
-	if effect.FrameCount == 10 then
-		local extraData = {
-			IsEpicFetus = true
-		}
-		
-		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
+			Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, Mod:TryGetPlayer(spawner), extraData)
+		end
 	end
 end
-
-Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, CustomBombModifiersAPI.DetectEpicFetuseByUpdate, EffectVariant.ROCKET)
 
 --#endregion
 
 --#region Locust of War
 
-function CustomBombModifiersAPI:CustomBombInteractionsFlyCollision(fly, Collider)
-	if fly.SubType == 1 then --War fly
-		local enemy = Collider:ToNPC()
-		
-		if not enemy then goto continue end
-		if (not enemy:IsVulnerableEnemy()) or (not enemy:IsActiveEnemy(false)) or enemy:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) then goto continue end
+function CustomBombModifiersAPI:DetectWarLocustByInit(effect, spawner)
+	if spawner.Type ~= EntityType.ENTITY_FAMILIAR or
+		spawner.Variant ~= FamiliarVariant.BLUE_FLY or spawner.SubType ~= 1
+	then return end
 
+	local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
+
+	if IsNotBomberBoy then
 		local extraData = {
 			IsWarLocust = true,
 			SmallExplosion = true,
 		}
 		
-		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, fly, Mod:TryGetPlayer(fly), extraData)
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, Mod:TryGetPlayer(spawner), extraData)
 	end
-	::continue::
 end
-
-Mod:AddPriorityCallback(ModCallbacks.MC_PRE_FAMILIAR_COLLISION, CallbackPriority.LATE, CustomBombModifiersAPI.CustomBombInteractionsFlyCollision, FamiliarVariant.BLUE_FLY)
 
 --#endregion
 
 --#region Bob's Brain
 
-function CustomBombModifiersAPI:CustomBombInteractionsBobsBrainCollision(BobsBrain, Collider)
-	local enemy = Collider:ToNPC()
-	
-	if not enemy then goto continue end
-	if (not enemy:IsVulnerableEnemy()) or (not enemy:IsActiveEnemy(false)) or enemy:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) then goto continue end
+function CustomBombModifiersAPI:DetectBobsBrainByInit(effect, spawner)
+	if spawner.Type ~= EntityType.ENTITY_FAMILIAR or spawner.Variant ~= FamiliarVariant.BOBS_BRAIN then return end
 
-	local extraData = {
-		IsBobsBrain = true
-	}
-	
-	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, BobsBrain, Mod:TryGetPlayer(BobsBrain), extraData)
+	local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
 
-	::continue::
+	if IsNotBomberBoy then
+		local extraData = {
+			IsBobsBrain = true
+		}
+		
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, Mod:TryGetPlayer(spawner), extraData)
+	end
 end
 
-Mod:AddPriorityCallback(ModCallbacks.MC_PRE_FAMILIAR_COLLISION, CallbackPriority.LATE, CustomBombModifiersAPI.CustomBombInteractionsBobsBrainCollision, FamiliarVariant.BOBS_BRAIN)
+--#endregion
+
+--#region Bob's Rotten Head
+
+function CustomBombModifiersAPI:DetectBobsRottenHeadtByInit(effect)
+	local player = effect.SpawnerEntity
+	if not player then return end
+	player = player:ToPlayer()
+	if not player then return end
+
+	local bobsRottenHead = Isaac.FindInRadius(effect.Position, 0)[1]:ToTear()
+
+	if not bobsRottenHead then return end
+
+	local extraData = {
+		IsBobsRottenHead = true
+	}
+	
+	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, bobsRottenHead, player, extraData)
+end
+
+Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.DetectBobsRottenHeadtByInit, EffectVariant.SMOKE_CLOUD)
 
 --#endregion
 
 --#region Hot Potato
-
-function CustomBombModifiersAPI:DetectHotPotatoByInit(effect)
-	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
-
-	local player = effect.SpawnerEntity:ToPlayer()
-
-	if not player then return end
-
-	local extraData = {
-		IsHotPotato = true,
-	}
-
-	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
-end
-
---NEW
 
 function CustomBombModifiersAPI:HotPotatoForgorPEffectUpdate(player)
 	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
 
 	local FrameCountRoom = (player.FrameCount - (player:GetData().CBMAPIStartingFrames or 0))
 	if (FrameCountRoom % 73 == 0) and FrameCountRoom > 0 then 
-		print(player.FrameCount)
-
 		local extraData = {
 			IsHotPotato = true
 		}
@@ -502,8 +505,15 @@ Mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CustomBombModifiersAPI.HotPotatoN
 --#endregion
 
 function CustomBombModifiersAPI:CustomBombInteractionsInit(effect)
-	CustomBombModifiersAPI:DetectKamikazeByInit(effect) --Kamikaze
-	--CustomBombModifiersAPI:DetectHotPotatoByInit(effect) --Hot Potato
+	local spawner = effect.SpawnerEntity
+
+	if spawner then
+		CustomBombModifiersAPI:DetectKamikazeByInit(effect, spawner) --Kamikaze
+		--CustomBombModifiersAPI:DetectHotPotatoByInit(effect) --Hot Potato
+		CustomBombModifiersAPI:DetectEpicFetusByInit(effect, spawner) --Epic Fetus
+		CustomBombModifiersAPI:DetectBobsBrainByInit(effect, spawner) --Bob's Brain
+		CustomBombModifiersAPI:DetectWarLocustByInit(effect, spawner) --War Locust
+	end
 end
 
 Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
