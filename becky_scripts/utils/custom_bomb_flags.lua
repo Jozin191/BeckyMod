@@ -459,16 +459,15 @@ function CustomBombModifiersAPI:DetectHotPotatoByInit(effect)
 
 	if not player then return end
 
-	print(player.FrameCount)
-
 	local extraData = {
-		IsHotPotato = true
+		IsHotPotato = true,
 	}
 
 	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, player, extraData)
 end
 
 --NEW
+
 function CustomBombModifiersAPI:HotPotatoForgorPEffectUpdate(player)
 	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
 
@@ -489,7 +488,6 @@ Mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, CustomBombModifiersAPI.HotP
 function CustomBombModifiersAPI:HotPotatoNewRoom() --Reset frames on new room
 	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
 
-	print('new room. Resetting frames')
 	Mod:ForEachPlayer(function(player)
 		if player:GetPlayerType() == PlayerType.PLAYER_THEFORGOTTEN_B then
 			player:GetData().CBMAPIStartingFrames = player.FrameCount - 1
@@ -500,7 +498,6 @@ function CustomBombModifiersAPI:HotPotatoNewRoom() --Reset frames on new room
 end
 
 Mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CustomBombModifiersAPI.HotPotatoNewRoom)
-
 
 --#endregion
 
