@@ -289,6 +289,10 @@ function BombLib:ChangeVariant(bomb, identifier, bombData)
 	local variant = bombData.Variant
 	local isCopper = CopperBombSprite and FiendFolio and (bomb.Variant == FiendFolio.BOMB.COPPER)
 
+	local sprite = bomb:GetSprite()
+    local file = sprite:GetFilename()
+	local endingString = file:sub(file:len()-5)
+
     if (isCopper or bomb.Variant == 0) and variant then --Change skin if normal bomb
 		if not isCopper then 
 			bomb.Variant = variant
@@ -298,10 +302,6 @@ function BombLib:ChangeVariant(bomb, identifier, bombData)
 
 		if not path then goto continue end
 
-		local sprite = bomb:GetSprite()
-        local anim = sprite:GetAnimation()
-        local file = sprite:GetFilename()
-
         local spritesheetSuffix = ""
 
 		if isCopper then
@@ -310,12 +310,15 @@ function BombLib:ChangeVariant(bomb, identifier, bombData)
 			spritesheetSuffix = "_gold"
 		end
 
-        sprite:Load(path .. spritesheetSuffix .. file:sub(file:len()-5), true)
+		local anim = sprite:GetAnimation()
+
+        sprite:Load(path .. spritesheetSuffix .. endingString, true)
         sprite:Play(anim, true)
     end
 
 	::continue::
 
+	bomb:GetData().BombLibEndingString = endingString
     bomb:GetData()[identifier] = true
 end
 
