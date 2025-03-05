@@ -19,7 +19,7 @@ local CBMAPICallbacks = BombLib.Callbacks
 
 BombLib:RegisterBombModifier("Null Bomb",
     {
-		HasModifier = function(player) return player:HasCollectible(Isaac.GetItemIdByName("Null Bombs")) end,
+		HasModifier = function(player) return player:HasCollectible(NULL_BOMBS.ID) end,
 
 		FetusChance = BombLib.DefaultFetusChance, --Shared with epic fetus. you can input a function to scale with luck
 		NancyChance = -1, --Whacky.
