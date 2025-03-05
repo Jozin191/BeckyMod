@@ -33,14 +33,16 @@ CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
 * Base game callbacks with modifier as limiters [Later?]
 ]]
 
-CustomBombModifiersAPI.RegisteredBombs =
-{
-	["Null Bomb"] =
-	{
-		HasModifier = function(player) return player:HasCollectible(Isaac.GetItemIdByName("Null Bombs")) end,
+CustomBombModifiersAPI.RegisteredBombs = { }
 
-		FetusChance = CustomBombModifiersAPI.DefaultFetusChance, --Shared with epic fetus. you can input a function to scale with luck
-		NancyChance = 5, --Whacky.
+--[[
+	--BOMB EXAMPLE:
+
+	RegisterBombModifier("My Custom Bomb", {
+		HasModifier = function(player) return player:HasCollectible(Isaac.GetItemIdByName("My Bomb")) end,
+
+		FetusChance = CustomBombModifiersAPI.DefaultFetusChance, --Shared with epic fetus. input a function. luck is offered as a parameter
+		NancyChance = -1, --Not recommended until I find a "vanilla" way to include custom bombs
 
 		IgnoreKamikaze = false, --Shared with Swallowed M80
 		IgnoreEpicFetus = false,
@@ -51,13 +53,13 @@ CustomBombModifiersAPI.RegisteredBombs =
 
 		IgnoreHotPotato = false,
 
-		Variant = Isaac.GetEntityVariantByName("Null Bomb"),
-		Path = "gfx/items/pick ups/bombs/null",
+		Variant = Isaac.GetEntityVariantByName("My Bomb Variant"),
+		Path = "gfx/items/pick ups/bombs/custom",
 		AddPathSuffixOnGolden = true,
 
-		CopperBombSprite = true,
-	}
-}
+		CopperBombSprite = false,
+	})
+]]
 
 function CustomBombModifiersAPI:RegisterBombModifier(Identifier, BombData)
 	CustomBombModifiersAPI.RegisteredBombs[Identifier] =
@@ -270,7 +272,7 @@ function Mod:ForEachPlayer(func)
 	end
 end
 
----Explosion will always be in the same position
+---Explosion will (almsot) always be in the same position
 function Mod:IsNotBomberBoyExplosion(effect, spawner)
 	return (effect.Position.X == spawner.Position.X) and (effect.Position.Y == spawner.Position.Y)
 end
@@ -567,12 +569,7 @@ end
 
 Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
 
---#region Base Game callbacks, passing a modifier
+--#region Base Game callbacks, passing a modifier [Add later?]
 
-
-
-if REPENTOGON then
-	
-end
 
 --#endregion

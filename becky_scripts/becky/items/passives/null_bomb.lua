@@ -17,6 +17,30 @@ BeckyMod.Item.NULL_BOMBS = NULL_BOMBS
 local max = math.max
 local CBMAPICallbacks = CustomBombModifiersAPI.Callbacks
 
+CustomBombModifiersAPI:RegisterBombModifier("Null Bomb",
+    {
+		HasModifier = function(player) return player:HasCollectible(Isaac.GetItemIdByName("Null Bombs")) end,
+
+		FetusChance = CustomBombModifiersAPI.DefaultFetusChance, --Shared with epic fetus. you can input a function to scale with luck
+		NancyChance = -1, --Whacky.
+
+		IgnoreKamikaze = false, --Shared with Swallowed M80
+		IgnoreEpicFetus = false,
+		IgnoreWarLocust = false,
+		IgnoreBobsBrain = false,
+		IgnoreBobsRottenHead = false,
+		IgnoreBBF = false,
+
+		IgnoreHotPotato = false,
+
+		Variant = Isaac.GetEntityVariantByName("Null Bomb"),
+		Path = "gfx/items/pick ups/bombs/null",
+		AddPathSuffixOnGolden = true,
+
+		CopperBombSprite = true,
+	}
+)
+
 function NULL_BOMBS:Explode(bomb, player, extraData)
     local pos = bomb.Position
     local maw = player:SpawnMawOfVoid(NULL_BOMBS.MAW_TIMEOUT)
@@ -33,16 +57,3 @@ function NULL_BOMBS:Explode(bomb, player, extraData)
 end
 
 CBMAPICallbacks.AddCallback(CBMAPICallbacks.ID.POST_BOMB_EXPLODE, NULL_BOMBS.Explode, "Null Bomb")
-
-function NULL_BOMBS:Pre(bomb, player)
-    print('pre')
-end
-
-CBMAPICallbacks.AddCallback(CBMAPICallbacks.ID.PRE_PROPER_BOMB_INIT, NULL_BOMBS.Pre, "Null Bomb")
-
-
-function NULL_BOMBS:Post(bomb, player)
-    print('post')
-end
-
-CBMAPICallbacks.AddCallback(CBMAPICallbacks.ID.POST_PROPER_BOMB_INIT, NULL_BOMBS.Post, "Null Bomb")
