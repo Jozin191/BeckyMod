@@ -15,6 +15,7 @@ NULL_BOMBS.NANCY_BOMBS_CHANCE = 5
 BeckyMod.Item.NULL_BOMBS = NULL_BOMBS
 
 local max = math.max
+local CBMAPICallbacks = CustomBombModifiersAPI.Callbacks
 
 function NULL_BOMBS:Explode(bomb, player, extraData)
     local pos = bomb.Position
@@ -31,4 +32,17 @@ function NULL_BOMBS:Explode(bomb, player, extraData)
     end
 end
 
-CustomBombModifiersAPI.Callbacks.AddCallback(CustomBombModifiersAPI.Callbacks.ID.POST_BOMB_EXPLODE, NULL_BOMBS.Explode, "Null Bomb")
+CBMAPICallbacks.AddCallback(CBMAPICallbacks.ID.POST_BOMB_EXPLODE, NULL_BOMBS.Explode, "Null Bomb")
+
+function NULL_BOMBS:Pre(bomb, player)
+    print('pre')
+end
+
+CBMAPICallbacks.AddCallback(CBMAPICallbacks.ID.PRE_PROPER_BOMB_INIT, NULL_BOMBS.Pre, "Null Bomb")
+
+
+function NULL_BOMBS:Post(bomb, player)
+    print('post')
+end
+
+CBMAPICallbacks.AddCallback(CBMAPICallbacks.ID.POST_PROPER_BOMB_INIT, NULL_BOMBS.Post, "Null Bomb")

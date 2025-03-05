@@ -23,15 +23,14 @@ CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
 * Epic Fetus support [OK]
 	** Forgotten support [OK]
 * War Locust support [OK]
-* BFF support [X]
+* BBF support [OK]
 * Bob's Brain support [OK]
-* Best Friend support [X]
+* Best Friend support [OK]
 * Bob's Rotten Head support [OK]
 
 * Hot Potato support [OK]
 
-* Base game callbacks with modifier as limiters [X]
-
+* Base game callbacks with modifier as limiters [Later?]
 ]]
 
 CustomBombModifiersAPI.RegisteredBombs =
@@ -48,8 +47,7 @@ CustomBombModifiersAPI.RegisteredBombs =
 		IgnoreWarLocust = false,
 		IgnoreBobsBrain = false,
 		IgnoreBobsRottenHead = false,
-		IgnoreBFF = false,
-		IgnoreBestFriend = false,
+		IgnoreBBF = false,
 
 		IgnoreHotPotato = false,
 
@@ -74,8 +72,7 @@ function CustomBombModifiersAPI:RegisterBombModifier(Identifier, BombData)
 		IgnoreWarLocust = BombData.IgnoreWarLocust or false,
 		IgnoreBobsBrain = BombData.IgnoreBobsBrain or false,
 		IgnoreBobsRottenHead = BombData.IgnoreBobsRottenHead or false,
-		IgnoreBFF = BombData.IgnoreBFF or false,
-		IgnoreBestFriend = BombData.IgnoreBestFriend or false,
+		IgnoreBBF = BombData.IgnoreBBF or false,
 
 		IgnoreHotPotato = BombData.IgnoreHotPotato or false,
 
@@ -96,9 +93,10 @@ CustomBombModifiersAPI.Callbacks.ID = {
 	--"New" callbacks
 	POST_BOMB_EXPLODE = 0, --No pre because it just kinda doesn't exist lmfao
 
-	--Old modified ones, having to pass the identifier
-
+	PRE_PROPER_BOMB_INIT = 1, --Before adding modifiers and changing sprite
+	POST_PROPER_BOMB_INIT = 2, --After doing that thingy
 }
+
 for _, v in pairs(CustomBombModifiersAPI.Callbacks.ID) do
 	if not CustomBombModifiersAPI.Callbacks.RegisteredCallbacks[v] then
 		CustomBombModifiersAPI.Callbacks.RegisteredCallbacks[v] = {}
@@ -179,9 +177,7 @@ CustomBombModifiersAPI.CallbackHandlers = {
 					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsBobsBrain and not registeredBomb.IgnoreBobsBrain then
 					shouldFire = registeredBomb.HasModifier(player)
-				elseif extraData.IsBestFriend and not registeredBomb.IgnoreBestFriend then
-					shouldFire = registeredBomb.HasModifier(player)
-				elseif extraData.IsBFF and not registeredBomb.IgnoreBFF then
+				elseif extraData.IsBBF and not registeredBomb.IgnoreBBF then
 					shouldFire = registeredBomb.HasModifier(player)
 				elseif extraData.IsBobsRottenHead and not registeredBomb.IgnoreBobsRottenHead then
 					shouldFire = registeredBomb.HasModifier(player)
@@ -204,11 +200,30 @@ CustomBombModifiersAPI.CallbackHandlers = {
 			::continue::
 		end
 	end,
+
+	[Mod.Callbacks.ID.PRE_PROPER_BOMB_INIT] = function (callbacks, bomb, player)
+		for i = 1, #callbacks do --No extra parameters
+			callbacks[i].Function(CustomBombModifiersAPI, bomb, player)
+		end
+	end,
+
+	[Mod.Callbacks.ID.POST_PROPER_BOMB_INIT] = function (callbacks, bomb, player)
+		for i = 1, #callbacks do
+			local identificator = callbacks[i].Args[1]
+			local shouldFire = not identificator
+
+			if not shouldFire then
+				shouldFire = bomb:GetData()[identificator]
+			end
+
+			if shouldFire then
+				callbacks[i].Function(CustomBombModifiersAPI, bomb, player)
+			end
+		end
+	end
 }
 
 --#endregion
-
-
 
 --#region Utils
 
@@ -259,6 +274,21 @@ end
 function Mod:IsNotBomberBoyExplosion(effect, spawner)
 	return (effect.Position.X == spawner.Position.X) and (effect.Position.Y == spawner.Position.Y)
 end
+
+---Decoy from Best Friend is LITERALLY a bomb (4.2.0, lmfao)
+---
+---But it doesn't have an explode animation, so I have to check for the last frame manually :P
+function Mod:DecoyExplosion(decoy)
+	if decoy.Variant ~= BombVariant.BOMB_DECOY then return false end
+
+	return (decoy:GetData().ReEnter and 45 or 151) - decoy.FrameCount == 0
+end
+
+function Mod:DecoyReInit(decoy)
+	decoy:GetData().ReEnter = decoy.SpawnerEntity == nil --SpawnerEntity is nil for one frame only on re enter (lol?)
+end
+
+Mod:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, Mod.DecoyReInit, BombVariant.BOMB_DECOY)
 
 --endregion
 
@@ -319,7 +349,7 @@ function CustomBombModifiersAPI:ProperBombInit(bomb, player)
 
 		    CustomBombModifiersAPI:ChangeVariant(bomb, identifier, bombData)
 		elseif HasNancy then
-		    if false then return end --TODO: Check if unlocked
+		    --TODO: Better way to add modifiers by nancy bombs
 
 		    if NancyRNG:RandomInt(100) > bombData.NancyChance then
 		        goto continue
@@ -337,11 +367,13 @@ function CustomBombModifiersAPI:BombUpdate(bomb)
     local player = Mod:TryGetPlayer(bomb)
 
 	if bomb.FrameCount == 1 then
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.PRE_PROPER_BOMB_INIT, bomb, player)
 		CustomBombModifiersAPI:ProperBombInit(bomb, player)
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_PROPER_BOMB_INIT, bomb, player)
 	end
 
     local sprite = bomb:GetSprite()
-	if sprite:IsPlaying("Explode") then
+	if (sprite:IsPlaying("Explode") or Mod:DecoyExplosion(bomb)) then
 		if bomb:HasTearFlags(TearFlags.TEAR_SCATTER_BOMB) then
             for _, scatterBomb in ipairs(Isaac.FindByType(EntityType.ENTITY_BOMB)) do
 				if scatterBomb.FrameCount == 0 then --Just created bomb
@@ -412,9 +444,7 @@ end
 --#region Locust of War
 
 function CustomBombModifiersAPI:DetectWarLocustByInit(effect, spawner)
-	if spawner.Type ~= EntityType.ENTITY_FAMILIAR or
-		spawner.Variant ~= FamiliarVariant.BLUE_FLY or spawner.SubType ~= 1
-	then return end
+	if spawner.Variant ~= FamiliarVariant.BLUE_FLY or spawner.SubType ~= 1 then return end
 
 	local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
 
@@ -433,7 +463,7 @@ end
 --#region Bob's Brain
 
 function CustomBombModifiersAPI:DetectBobsBrainByInit(effect, spawner)
-	if spawner.Type ~= EntityType.ENTITY_FAMILIAR or spawner.Variant ~= FamiliarVariant.BOBS_BRAIN then return end
+	if spawner.Variant ~= FamiliarVariant.BOBS_BRAIN then return end
 
 	local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
 
@@ -471,6 +501,24 @@ Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.DetectB
 
 --#endregion
 
+--#region BBF
+
+function CustomBombModifiersAPI:DetectBBFByInit(effect, spawner)
+	if spawner.Variant ~= FamiliarVariant.BBF then return end
+
+	local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
+
+	if IsNotBomberBoy then
+		local extraData = {
+			IsBBF = true
+		}
+
+		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, effect, Mod:TryGetPlayer(spawner), extraData)
+	end
+end
+
+--#endregion
+
 --#region Hot Potato
 
 function CustomBombModifiersAPI:HotPotatoForgorPEffectUpdate(player)
@@ -494,8 +542,6 @@ function CustomBombModifiersAPI:HotPotatoNewRoom() --Reset frames on new room
 	Mod:ForEachPlayer(function(player)
 		if player:GetPlayerType() == PlayerType.PLAYER_THEFORGOTTEN_B then
 			player:GetData().CBMAPIStartingFrames = player.FrameCount - 1
-
-			print(player:GetData().CBMAPIStartingFrames)
 		end
 	end)
 end
@@ -511,9 +557,22 @@ function CustomBombModifiersAPI:CustomBombInteractionsInit(effect)
 		CustomBombModifiersAPI:DetectKamikazeByInit(effect, spawner) --Kamikaze
 		--CustomBombModifiersAPI:DetectHotPotatoByInit(effect) --Hot Potato
 		CustomBombModifiersAPI:DetectEpicFetusByInit(effect, spawner) --Epic Fetus
-		CustomBombModifiersAPI:DetectBobsBrainByInit(effect, spawner) --Bob's Brain
-		CustomBombModifiersAPI:DetectWarLocustByInit(effect, spawner) --War Locust
+		if spawner.Type == EntityType.ENTITY_FAMILIAR then
+			CustomBombModifiersAPI:DetectBobsBrainByInit(effect, spawner) --Bob's Brain
+			CustomBombModifiersAPI:DetectWarLocustByInit(effect, spawner) --War Locust
+			CustomBombModifiersAPI:DetectBBFByInit(effect, spawner) --BBF
+		end
 	end
 end
 
 Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
+
+--#region Base Game callbacks, passing a modifier
+
+
+
+if REPENTOGON then
+	
+end
+
+--#endregion
