@@ -1,39 +1,28 @@
 ---@diagnostic disable
 
---CBMAPI Created by [No need to credit directly on the mod page. Though, a thanks would be appreciated]:
+--BombLib Created by [No need to credit directly on the mod page. Though, a thanks would be appreciated]:
 -- * Tiburones202
 
-CustomBombModifiersAPI = RegisterMod("CustomBombModifiersAPI", 1)
-CustomBombModifiersAPI.Version = 1 --v1.0.0 release
+BombLib = RegisterMod("BombLibrary", 1)
+BombLib.Version = 1 --v1.0.0 release
 
 local game = Game()
 
-local Mod = CustomBombModifiersAPI
+local Mod = BombLib
 
-CustomBombModifiersAPI.DefaultFetusChance = function(luck) return 11 + (3 * luck) end --Brimstone bombs chance as a placeholder
-CustomBombModifiersAPI.DefaultNancyChance = -1 --Disabled normally. Will have a base chance once I figure out how it works.
+BombLib.DefaultFetusChance = function(luck) return 11 + (3 * luck) end --Brimstone bombs chance as a placeholder
+BombLib.DefaultNancyChance = -1 --Disabled normally. Will have a base chance once I figure out how it works.
 
-CustomBombModifiersAPI.BLACKLISTED_VARIANTS = {
+BombLib.BLACKLISTED_VARIANTS = {
     [BombVariant.BOMB_GIGA] = true,
     [BombVariant.BOMB_THROWABLE] = true,
 }
 --[[
---TODO: List
-* Kamikaze + Swallowed M80 support [OK]
-* Epic Fetus support [OK]
-	** Forgotten support [OK]
-* War Locust support [OK]
-* BBF support [OK]
-* Bob's Brain support [OK]
-* Best Friend support [OK]
-* Bob's Rotten Head support [OK]
-
-* Hot Potato support [OK]
-
+--TODO:
 * Base game callbacks with modifier as limiters [Later?]
 ]]
 
-CustomBombModifiersAPI.RegisteredBombs = { }
+BombLib.RegisteredBombs = { }
 
 --[[
 	--BOMB EXAMPLE:
@@ -41,7 +30,7 @@ CustomBombModifiersAPI.RegisteredBombs = { }
 	RegisterBombModifier("My Custom Bomb", {
 		HasModifier = function(player) return player:HasCollectible(Isaac.GetItemIdByName("My Bomb")) end,
 
-		FetusChance = CustomBombModifiersAPI.DefaultFetusChance, --Shared with epic fetus. input a function. luck is offered as a parameter
+		FetusChance = BombLib.DefaultFetusChance, --Shared with epic fetus. input a function. luck is offered as a parameter
 		NancyChance = -1, --Not recommended until I find a "vanilla" way to include custom bombs
 
 		IgnoreKamikaze = false, --Shared with Swallowed M80
@@ -61,13 +50,13 @@ CustomBombModifiersAPI.RegisteredBombs = { }
 	})
 ]]
 
-function CustomBombModifiersAPI:RegisterBombModifier(Identifier, BombData)
-	CustomBombModifiersAPI.RegisteredBombs[Identifier] =
+function BombLib:RegisterBombModifier(Identifier, BombData)
+	BombLib.RegisteredBombs[Identifier] =
 	{
 		HasModifier = BombData.HasModifier,
 
-		FetusChance = BombData.FetusChance or CustomBombModifiersAPI.DefaultFetusChance,
-		NancyChance = BombData.NancyChance or CustomBombModifiersAPI.DefaultNancyChance,
+		FetusChance = BombData.FetusChance or BombLib.DefaultFetusChance,
+		NancyChance = BombData.NancyChance or BombLib.DefaultNancyChance,
 
 		IgnoreKamikaze = BombData.IgnoreKamikaze or false,
 		IgnoreEpicFetus = BombData.IgnoreEpicFetus or false,
@@ -88,10 +77,10 @@ end
 
 --#region Callbacks
 
-CustomBombModifiersAPI.Callbacks = {}
-CustomBombModifiersAPI.Callbacks.RegisteredCallbacks = {}
+BombLib.Callbacks = {}
+BombLib.Callbacks.RegisteredCallbacks = {}
 
-CustomBombModifiersAPI.Callbacks.ID = {
+BombLib.Callbacks.ID = {
 	--"New" callbacks
 	POST_BOMB_EXPLODE = 0, --No pre because it just kinda doesn't exist lmfao
 
@@ -99,13 +88,13 @@ CustomBombModifiersAPI.Callbacks.ID = {
 	POST_PROPER_BOMB_INIT = 2, --After doing that thingy
 }
 
-for _, v in pairs(CustomBombModifiersAPI.Callbacks.ID) do
-	if not CustomBombModifiersAPI.Callbacks.RegisteredCallbacks[v] then
-		CustomBombModifiersAPI.Callbacks.RegisteredCallbacks[v] = {}
+for _, v in pairs(BombLib.Callbacks.ID) do
+	if not BombLib.Callbacks.RegisteredCallbacks[v] then
+		BombLib.Callbacks.RegisteredCallbacks[v] = {}
 	end
 end
 
-CustomBombModifiersAPI.CallbackPriority = {
+BombLib.CallbackPriority = {
 	HIGHEST = 0,
 	HIGH = 10,
 	NORMAL = 20,
@@ -117,8 +106,8 @@ CustomBombModifiersAPI.CallbackPriority = {
 ---@param priority integer
 ---@param func function
 ---@param ... any
-function CustomBombModifiersAPI.Callbacks.AddPriorityCallback(id, priority, func, ...)
-	local callbacks = CustomBombModifiersAPI.Callbacks.RegisteredCallbacks[id]
+function BombLib.Callbacks.AddPriorityCallback(id, priority, func, ...)
+	local callbacks = BombLib.Callbacks.RegisteredCallbacks[id]
 	local callback = {
 		Priority = priority,
 		Function = func,
@@ -141,14 +130,14 @@ end
 ---@param id number
 ---@param func function
 ---@param ... any
-function CustomBombModifiersAPI.Callbacks.AddCallback(id, func, ...)
-	CustomBombModifiersAPI.Callbacks.AddPriorityCallback(id, CustomBombModifiersAPI.CallbackPriority.NORMAL, func, ...)
+function BombLib.Callbacks.AddCallback(id, func, ...)
+	BombLib.Callbacks.AddPriorityCallback(id, BombLib.CallbackPriority.NORMAL, func, ...)
 end
 
 ---@param id string
 ---@param func function
-function CustomBombModifiersAPI.Callbacks.RemoveCallback(id, func)
-	local callbacks = CustomBombModifiersAPI.Callbacks.RegisteredCallbacks[id]
+function BombLib.Callbacks.RemoveCallback(id, func)
+	local callbacks = BombLib.Callbacks.RegisteredCallbacks[id]
 	for i = #callbacks, 1, -1 do
 		if callbacks[i].Function == func then
 			table.remove(callbacks, i)
@@ -156,14 +145,14 @@ function CustomBombModifiersAPI.Callbacks.RemoveCallback(id, func)
 	end
 end
 
-function CustomBombModifiersAPI.Callbacks.FireCallback(callbackId, ...)
+function BombLib.Callbacks.FireCallback(callbackId, ...)
 	local callbacks = Mod.Callbacks.RegisteredCallbacks[callbackId]
 	if callbacks ~= nil then
 		return Mod.CallbackHandlers[callbackId](callbacks, ...)
 	end
 end
 
-CustomBombModifiersAPI.CallbackHandlers = {
+BombLib.CallbackHandlers = {
 	[Mod.Callbacks.ID.POST_BOMB_EXPLODE] = function(callbacks, bomb, player, extraData)
 		for i = 1, #callbacks do
 			local identificator = callbacks[i].Args[1]
@@ -196,7 +185,7 @@ CustomBombModifiersAPI.CallbackHandlers = {
 			end
 
 			if shouldFire then
-				callbacks[i].Function(CustomBombModifiersAPI, bomb, player, extraData)
+				callbacks[i].Function(BombLib, bomb, player, extraData)
 			end
 
 			::continue::
@@ -205,7 +194,7 @@ CustomBombModifiersAPI.CallbackHandlers = {
 
 	[Mod.Callbacks.ID.PRE_PROPER_BOMB_INIT] = function (callbacks, bomb, player)
 		for i = 1, #callbacks do --No extra parameters
-			callbacks[i].Function(CustomBombModifiersAPI, bomb, player)
+			callbacks[i].Function(BombLib, bomb, player)
 		end
 	end,
 
@@ -219,7 +208,7 @@ CustomBombModifiersAPI.CallbackHandlers = {
 			end
 
 			if shouldFire then
-				callbacks[i].Function(CustomBombModifiersAPI, bomb, player)
+				callbacks[i].Function(BombLib, bomb, player)
 			end
 		end
 	end
@@ -283,11 +272,11 @@ end
 function Mod:DecoyExplosion(decoy)
 	if decoy.Variant ~= BombVariant.BOMB_DECOY then return false end
 
-	return (decoy:GetData().ReEnter and 45 or 151) - decoy.FrameCount == 0
+	return (decoy:GetData().BombLibReEnter and 45 or 151) - decoy.FrameCount == 0
 end
 
 function Mod:DecoyReInit(decoy)
-	decoy:GetData().ReEnter = decoy.SpawnerEntity == nil --SpawnerEntity is nil for one frame only on re enter (lol?)
+	decoy:GetData().BombLibReEnter = decoy.SpawnerEntity == nil --SpawnerEntity is nil for one frame only on re enter (lol?)
 end
 
 Mod:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, Mod.DecoyReInit, BombVariant.BOMB_DECOY)
@@ -296,7 +285,7 @@ Mod:AddCallback(ModCallbacks.MC_POST_BOMB_INIT, Mod.DecoyReInit, BombVariant.BOM
 
 --#region Bomb States
 
-function CustomBombModifiersAPI:ChangeVariant(bomb, identifier, bombData)
+function BombLib:ChangeVariant(bomb, identifier, bombData)
 	local variant = bombData.Variant
 	local isCopper = CopperBombSprite and FiendFolio and (bomb.Variant == FiendFolio.BOMB.COPPER)
 
@@ -331,15 +320,15 @@ function CustomBombModifiersAPI:ChangeVariant(bomb, identifier, bombData)
 end
 
 ---@param bomb EntityBomb
-function CustomBombModifiersAPI:ProperBombInit(bomb, player)
+function BombLib:ProperBombInit(bomb, player)
     if not player then return end
-    if CustomBombModifiersAPI.BLACKLISTED_VARIANTS[bomb.Variant] then return end
+    if BombLib.BLACKLISTED_VARIANTS[bomb.Variant] then return end
 
 	local HasNancy = player:HasCollectible(CollectibleType.COLLECTIBLE_NANCY_BOMBS)
 	local NancyRNG = HasNancy and player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_NANCY_BOMBS) or nil
 
     --Detect nancy bombs anddddd the dr fetus from SMB yeah
-	for identifier, bombData in pairs(CustomBombModifiersAPI.RegisteredBombs) do
+	for identifier, bombData in pairs(BombLib.RegisteredBombs) do
 		if bombData.HasModifier(player, bomb) then
 		    if bomb.IsFetus then
 		        local rng = bomb:GetDropRNG()
@@ -349,7 +338,7 @@ function CustomBombModifiersAPI:ProperBombInit(bomb, player)
 		        end
 		    end
 
-		    CustomBombModifiersAPI:ChangeVariant(bomb, identifier, bombData)
+		    BombLib:ChangeVariant(bomb, identifier, bombData)
 		elseif HasNancy then
 		    --TODO: Better way to add modifiers by nancy bombs
 
@@ -357,7 +346,7 @@ function CustomBombModifiersAPI:ProperBombInit(bomb, player)
 		        goto continue
 		    end
 
-		    CustomBombModifiersAPI:ChangeVariant(bomb, identifier, bombData)
+		    BombLib:ChangeVariant(bomb, identifier, bombData)
 		end
 
 		::continue::
@@ -365,12 +354,12 @@ function CustomBombModifiersAPI:ProperBombInit(bomb, player)
 end
 
 ---@param bomb EntityBomb
-function CustomBombModifiersAPI:BombUpdate(bomb)
+function BombLib:BombUpdate(bomb)
     local player = Mod:TryGetPlayer(bomb)
 
 	if bomb.FrameCount == 1 then
 		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.PRE_PROPER_BOMB_INIT, bomb, player)
-		CustomBombModifiersAPI:ProperBombInit(bomb, player)
+		BombLib:ProperBombInit(bomb, player)
 		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_PROPER_BOMB_INIT, bomb, player)
 	end
 
@@ -379,41 +368,41 @@ function CustomBombModifiersAPI:BombUpdate(bomb)
 		if bomb:HasTearFlags(TearFlags.TEAR_SCATTER_BOMB) then
             for _, scatterBomb in ipairs(Isaac.FindByType(EntityType.ENTITY_BOMB)) do
 				if scatterBomb.FrameCount == 0 then --Just created bomb
-					scatterBomb:GetData().IsSmallBomb = true
+					scatterBomb:GetData().BombLibIsSmallBomb = true
 				end
 			end
         end
 
 		local extraData = {}
 
-		if bomb:GetData().IsSmallBomb then
+		if bomb:GetData().BombLibIsSmallBomb then
 			extraData.SmallExplosion = true
 		end
 
 		Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, bomb, player, extraData)
 	end
 end
-Mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, CustomBombModifiersAPI.BombUpdate)
+Mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, BombLib.BombUpdate)
 
 --#endregion
 
 --#region Kamikaze
 
-function CustomBombModifiersAPI:UseKamikaze(_, _, player)
-	player:GetData().KamikazeUses = (player:GetData().KamikazeUses or 0) + 1
+function BombLib:UseKamikaze(_, _, player)
+	player:GetData().BombLibKamikazeUses = (player:GetData().BombLibKamikazeUses or 0) + 1
 end
 
-Mod:AddPriorityCallback(ModCallbacks.MC_PRE_USE_ITEM, CallbackPriority.LATE, CustomBombModifiersAPI.UseKamikaze, CollectibleType.COLLECTIBLE_KAMIKAZE)
+Mod:AddPriorityCallback(ModCallbacks.MC_PRE_USE_ITEM, CallbackPriority.LATE, BombLib.UseKamikaze, CollectibleType.COLLECTIBLE_KAMIKAZE)
 
-function CustomBombModifiersAPI:DetectKamikazeByInit(effect, spawner)
+function BombLib:DetectKamikazeByInit(effect, spawner)
     local player = spawner:ToPlayer()
 
     if not player then return end
 
-    if player:GetData().KamikazeUses then
-        player:GetData().KamikazeUses = player:GetData().KamikazeUses - 1
-        if player:GetData().KamikazeUses <= 0 then
-            player:GetData().KamikazeUses = nil
+    if player:GetData().BombLibKamikazeUses then
+        player:GetData().BombLibKamikazeUses = player:GetData().BombLibKamikazeUses - 1
+        if player:GetData().BombLibKamikazeUses <= 0 then
+            player:GetData().BombLibKamikazeUses = nil
         end
 
 		local extraData = {
@@ -428,7 +417,7 @@ end
 
 --#region Epic Fetus
 
-function CustomBombModifiersAPI:DetectEpicFetusByInit(effect, spawner)
+function BombLib:DetectEpicFetusByInit(effect, spawner)
 	if spawner.Variant == EffectVariant.ROCKET or spawner.Variant == EffectVariant.SMALL_ROCKET then
 		local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
 		if IsNotBomberBoy then
@@ -445,7 +434,7 @@ end
 
 --#region Locust of War
 
-function CustomBombModifiersAPI:DetectWarLocustByInit(effect, spawner)
+function BombLib:DetectWarLocustByInit(effect, spawner)
 	if spawner.Variant ~= FamiliarVariant.BLUE_FLY or spawner.SubType ~= 1 then return end
 
 	local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
@@ -464,7 +453,7 @@ end
 
 --#region Bob's Brain
 
-function CustomBombModifiersAPI:DetectBobsBrainByInit(effect, spawner)
+function BombLib:DetectBobsBrainByInit(effect, spawner)
 	if spawner.Variant ~= FamiliarVariant.BOBS_BRAIN then return end
 
 	local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
@@ -482,7 +471,7 @@ end
 
 --#region Bob's Rotten Head
 
-function CustomBombModifiersAPI:DetectBobsRottenHeadtByInit(effect)
+function BombLib:DetectBobsRottenHeadtByInit(effect)
 	local player = effect.SpawnerEntity
 	if not player then return end
 	player = player:ToPlayer()
@@ -499,13 +488,13 @@ function CustomBombModifiersAPI:DetectBobsRottenHeadtByInit(effect)
 	Mod.Callbacks.FireCallback(Mod.Callbacks.ID.POST_BOMB_EXPLODE, bobsRottenHead, player, extraData)
 end
 
-Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.DetectBobsRottenHeadtByInit, EffectVariant.SMOKE_CLOUD)
+Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, BombLib.DetectBobsRottenHeadtByInit, EffectVariant.SMOKE_CLOUD)
 
 --#endregion
 
 --#region BBF
 
-function CustomBombModifiersAPI:DetectBBFByInit(effect, spawner)
+function BombLib:DetectBBFByInit(effect, spawner)
 	if spawner.Variant ~= FamiliarVariant.BBF then return end
 
 	local IsNotBomberBoy = Mod:IsNotBomberBoyExplosion(effect, spawner)
@@ -523,10 +512,10 @@ end
 
 --#region Hot Potato
 
-function CustomBombModifiersAPI:HotPotatoForgorPEffectUpdate(player)
+function BombLib:HotPotatoForgorPEffectUpdate(player)
 	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
 
-	local FrameCountRoom = (player.FrameCount - (player:GetData().CBMAPIStartingFrames or 0))
+	local FrameCountRoom = (player.FrameCount - (player:GetData().BombLibStartingFrames or 0))
 	if (FrameCountRoom % 73 == 0) and FrameCountRoom > 0 then 
 		local extraData = {
 			IsHotPotato = true
@@ -536,38 +525,38 @@ function CustomBombModifiersAPI:HotPotatoForgorPEffectUpdate(player)
 	end
 end
 
-Mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, CustomBombModifiersAPI.HotPotatoForgorPEffectUpdate, PlayerType.PLAYER_THEFORGOTTEN_B)
+Mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, BombLib.HotPotatoForgorPEffectUpdate, PlayerType.PLAYER_THEFORGOTTEN_B)
 
-function CustomBombModifiersAPI:HotPotatoNewRoom() --Reset frames on new room
+function BombLib:HotPotatoNewRoom() --Reset frames on new room
 	if game.Challenge ~= Challenge.CHALLENGE_HOT_POTATO then return end
 
 	Mod:ForEachPlayer(function(player)
 		if player:GetPlayerType() == PlayerType.PLAYER_THEFORGOTTEN_B then
-			player:GetData().CBMAPIStartingFrames = player.FrameCount - 1
+			player:GetData().BombLibStartingFrames = player.FrameCount - 1
 		end
 	end)
 end
 
-Mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, CustomBombModifiersAPI.HotPotatoNewRoom)
+Mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BombLib.HotPotatoNewRoom)
 
 --#endregion
 
-function CustomBombModifiersAPI:CustomBombInteractionsInit(effect)
+function BombLib:CustomBombInteractionsInit(effect)
 	local spawner = effect.SpawnerEntity
 
 	if spawner then
-		CustomBombModifiersAPI:DetectKamikazeByInit(effect, spawner) --Kamikaze
-		--CustomBombModifiersAPI:DetectHotPotatoByInit(effect) --Hot Potato
-		CustomBombModifiersAPI:DetectEpicFetusByInit(effect, spawner) --Epic Fetus
+		BombLib:DetectKamikazeByInit(effect, spawner) --Kamikaze
+		--BombLib:DetectHotPotatoByInit(effect) --Hot Potato
+		BombLib:DetectEpicFetusByInit(effect, spawner) --Epic Fetus
 		if spawner.Type == EntityType.ENTITY_FAMILIAR then
-			CustomBombModifiersAPI:DetectBobsBrainByInit(effect, spawner) --Bob's Brain
-			CustomBombModifiersAPI:DetectWarLocustByInit(effect, spawner) --War Locust
-			CustomBombModifiersAPI:DetectBBFByInit(effect, spawner) --BBF
+			BombLib:DetectBobsBrainByInit(effect, spawner) --Bob's Brain
+			BombLib:DetectWarLocustByInit(effect, spawner) --War Locust
+			BombLib:DetectBBFByInit(effect, spawner) --BBF
 		end
 	end
 end
 
-Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, CustomBombModifiersAPI.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
+Mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, BombLib.CustomBombInteractionsInit, EffectVariant.BOMB_EXPLOSION)
 
 --#region Base Game callbacks, passing a modifier [Add later?]
 

@@ -15,13 +15,13 @@ NULL_BOMBS.NANCY_BOMBS_CHANCE = 5
 BeckyMod.Item.NULL_BOMBS = NULL_BOMBS
 
 local max = math.max
-local CBMAPICallbacks = CustomBombModifiersAPI.Callbacks
+local CBMAPICallbacks = BombLib.Callbacks
 
-CustomBombModifiersAPI:RegisterBombModifier("Null Bomb",
+BombLib:RegisterBombModifier("Null Bomb",
     {
 		HasModifier = function(player) return player:HasCollectible(Isaac.GetItemIdByName("Null Bombs")) end,
 
-		FetusChance = CustomBombModifiersAPI.DefaultFetusChance, --Shared with epic fetus. you can input a function to scale with luck
+		FetusChance = BombLib.DefaultFetusChance, --Shared with epic fetus. you can input a function to scale with luck
 		NancyChance = -1, --Whacky.
 
 		IgnoreKamikaze = false, --Shared with Swallowed M80
