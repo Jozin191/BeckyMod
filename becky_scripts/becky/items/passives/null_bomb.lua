@@ -33,7 +33,7 @@ BombLib:RegisterBombModifier("Null Bomb",
 
 		IgnoreHotPotato = false,
 
-		Variant = Isaac.GetEntityVariantByName("Null Bomb"),
+		Variant = NULL_BOMBS.BOMB_VARIANT,
 		Path = "gfx/items/pick ups/bombs/null",
 		AddPathSuffixOnGolden = true,
 
