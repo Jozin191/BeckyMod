@@ -62,6 +62,7 @@ include("becky_scripts.becky.items.passives.scarecrow")
 include("becky_scripts.becky.items.passives.dead_socket")
 include("becky_scripts.becky.items.passives.null_bomb")
 include("becky_scripts.becky.items.passives.defiled_chalice")
+include("becky_scripts.becky.items.passives.dead_battery")
 
 include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
@@ -72,6 +73,7 @@ include("becky_scripts.becky.items.misc.dead_battery")
 include("becky_scripts.becky.items.trinkets.burning_feather")
 include("becky_scripts.becky.items.trinkets.holy_bookmark")
 include("becky_scripts.becky.items.trinkets.devilzon_prime")
+include("becky_scripts.becky.items.trinkets.corpse_tag")
 
 --characters
 include("becky_scripts.becky.characters.becky")
