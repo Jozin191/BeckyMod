@@ -67,8 +67,6 @@ include("becky_scripts.becky.items.passives.dead_battery")
 include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
 
-include("becky_scripts.becky.items.misc.dead_battery")
-
 --trinkets
 include("becky_scripts.becky.items.trinkets.burning_feather")
 include("becky_scripts.becky.items.trinkets.holy_bookmark")
@@ -80,3 +78,6 @@ include("becky_scripts.becky.characters.becky")
 
 --Mod compatibility! (all patches are loaded in this file)
 include("becky_scripts.mod_compatibility.load_patches")
+
+--pickups
+include("becky_scripts.becky.pickups.dead_battery")

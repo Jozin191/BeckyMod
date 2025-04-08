@@ -83,14 +83,6 @@
         quality="2"
         />
 
-        <passive id="9"
-        name="Dead Battery"
-        gfx="dead_battery.png"
-        description="???"
-        quality="0"
-        tags="offensive"
-        />
-
         <!--TRINKETS-->
 
         <trinket id="1"
