@@ -40,6 +40,7 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_MODS_LOADED, CallbackPriority.
 BeckyMod.Item = {}
 BeckyMod.Trinket = {}
 BeckyMod.Character = {}
+BeckyMod.Pickup = {}
 
 if not REPENTOGON then
     local f = Font()

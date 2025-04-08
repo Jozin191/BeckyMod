@@ -1,5 +1,7 @@
 local t = {}
 
+BeckyMod.Pickup.DEAD_BATTERY = t
+
 t.SUBTYPE = Isaac.GetEntitySubTypeByName("Dead Battery")
 t.REPLACE_CHANCE = 0.1
 
@@ -15,7 +17,7 @@ end, PickupVariant.PICKUP_LIL_BATTERY)
 ---@param subtype BatterySubType
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_SELECTION, function (_, _, variant, subtype)
     if variant ~= PickupVariant.PICKUP_LIL_BATTERY or subtype == t.SUBTYPE then return end
-    local room = BeckyMod.Game:GetRoom() if not room:IsFirstVisit() and room:GetFrameCount() == -1 then return end
-    if Isaac.GetPlayer():GetCollectibleRNG(BeckyMod.Item.DEAD_SOCKET.ID):RandomFloat() > t.REPLACE_CHANCE then return end
+    local room = BeckyMod.Game:GetRoom() if not (room:IsFirstVisit() and room:GetFrameCount() == -1)
+    or Isaac.GetPlayer():GetCollectibleRNG(BeckyMod.Item.DEAD_SOCKET.ID):RandomFloat() > t.REPLACE_CHANCE then return end
     return {variant, t.SUBTYPE}
 end)
