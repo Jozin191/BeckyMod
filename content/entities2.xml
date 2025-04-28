@@ -1,6 +1,7 @@
 <entities anm2root="gfx/" version="5" deathanm2="gfx/death enemies.anm2">
     <!-- FAMILIAR -->
     <entity id="3" name="Becky Ghost" collisionRadius="10" friction="1" shadowSize="11" anm2path="familiar/BeckyGhostSheet.anm2"/>
+    <entity id="3" name="Tainted Becky" collisionRadius="10" friction="1" shadowSize="11" anm2path="familiar/TBecky.anm2"/>
 
     <entity anm2path="items/pick ups/bombs/null_copper0.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" id="4" variant="1510" name="Null Bomb" numGridCollisionPoints="12" shadowSize="18" stageHP="0">
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />

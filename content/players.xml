@@ -8,4 +8,14 @@
         canShoot="false"
         costumeSuffix="becky"
     />
+    <player name="Becky's Ghost"
+        skin="character_ghostb.png"
+        skinColor="0" modcostume="0"
+        nameimage="playername_ghost.png"
+        portrait="playerportrait_ghost.png"
+        black="6"
+        costumeSuffix="becky_ghost"
+        bSkinParent="Becky"
+    />
+    <player name="Tainted Becky Helper" skin="" skinColor="-1" nameimage="" portrait="" black="6" hidden="true"/>
 </players>
