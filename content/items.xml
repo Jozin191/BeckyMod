@@ -114,4 +114,12 @@
         gfx="corpse_tag.png"
         cache=""
         />
+
+        <!-- Null Items -->
+
+        <null id="1" 
+        name="NULL_BECKY_GHOST" 
+        persistent="true" 
+        cache="familiars" 
+        />
 </items>

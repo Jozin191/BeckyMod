@@ -1,7 +1,6 @@
 local BECKY = {}
 
 BECKY.PLAYERTYPE = Isaac.GetPlayerTypeByName("Becky", false)
-BECKY.POCKET_ITEM = BeckyMod.Item.HAND_MADE_BIBLE.ID
 
 BECKY.HAIR_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_hair.anm2")
 BECKY.BODY_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_body.anm2")
@@ -84,9 +83,6 @@ function BECKY:OnInit(player)
     if player:GetPlayerType() == BECKY.PLAYERTYPE then
         player:AddNullCostume(BECKY.HAIR_COSTUME)
         player:AddNullCostume(BECKY.BODY_COSTUME)
-
-        player:SetPocketActiveItem(BECKY.POCKET_ITEM, ActiveSlot.SLOT_POCKET, true)
-
         Scheduler.Schedule( --Needs to wait for a frame to spawn the ghost haha
 	    	1,
 	    	function()
@@ -95,8 +91,6 @@ function BECKY:OnInit(player)
 	    	end,
 	    	{ player }
 	    )
-
-        game:GetItemPool():RemoveCollectible(BECKY.POCKET_ITEM)
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit, 0)
