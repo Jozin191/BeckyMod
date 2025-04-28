@@ -76,6 +76,8 @@ include("becky_scripts.becky.items.trinkets.corpse_tag")
 
 --characters
 include("becky_scripts.becky.characters.becky")
+include("becky_scripts.becky.characters.ghost.becky_ghost")
+
 include("becky_scripts.becky.characters.becky_b")
 
 --Mod compatibility! (all patches are loaded in this file)
