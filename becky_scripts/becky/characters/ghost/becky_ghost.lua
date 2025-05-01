@@ -9,7 +9,7 @@ BECKY_GHOST.BECKY_GHOST_VARIANT = Isaac.GetEntityVariantByName("Becky Ghost")
 BECKY_GHOST.CALLBACKS = include("becky_scripts.becky.characters.ghost.becky_ghost_callbacks")
 local synergyCallbacks = BECKY_GHOST.CALLBACKS
 
-BECKY_GHOST.CHARGEBAR_SCRIPT = "becky_scripts.becky.UI.chargebar"
+BECKY_GHOST.CHARGEBAR = include("becky_scripts.becky.UI.chargebar")
 BECKY_GHOST.GHOST_DAMAGE_COOLDOWN = 3
 BECKY_GHOST.GHOST_FIRE_DELAY_MULT = 1
 BECKY_GHOST.GHOST_SHOT_SPEED_MULT = 10
@@ -117,11 +117,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
         -- Original Chargebar code that I'm copying over
         local chargeBar = familiarData.chargeBar
         if (not chargeBar) or (chargeBar and not chargeBar.charge) then
-            chargeBar = include(BECKY_GHOST.CHARGEBAR_SCRIPT)
-            familiarData.chargeBar = chargeBar
+            familiarData.chargeBar = BECKY_GHOST.CHARGEBAR
+            chargeBar = familiarData.chargeBar
+            chargeBar:chargeBarInit()
         elseif chargeBar.initCallbacks then
             BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, chargeBar.chargeBarInit)
-            chargeBar.chargeBarInit()
+            chargeBar:chargeBarInit()
             BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, chargeBar.chargeBarRender)
             chargeBar.initCallbacks = false
         else
