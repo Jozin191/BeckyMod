@@ -79,8 +79,10 @@ BeckyMod.Character.BECKY = BECKY
 
 --End of deal modifiers
 
+---@param player EntityPlayer
 function BECKY:OnInit(player)
     if player:GetPlayerType() == BECKY.PLAYERTYPE then
+        PlayerAnimLib:SetDefaultAnm2(player, "gfx/player_becky.anm2")
         player:AddNullCostume(BECKY.HAIR_COSTUME)
         player:AddNullCostume(BECKY.BODY_COSTUME)
         Scheduler.Schedule( --Needs to wait for a frame to spawn the ghost haha
