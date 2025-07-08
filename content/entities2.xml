@@ -7,4 +7,5 @@
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
     </entity>
     <entity name="Dead Battery" id="5" variant="90" subtype="145" anm2path="pickup_becky_deadbattery.anm2" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17"/>
+    <entity id="3" name="Becky Sinner" anm2path="familiar/SinBat.anm2" collisionInterval="2" collisionMass="3" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="8" tags="cansacrifice"/>
 </entities>

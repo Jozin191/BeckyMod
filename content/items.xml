@@ -83,6 +83,14 @@
         quality="2"
         />
 
+        <familiar id="9"
+        name="Sinner"
+        gfx="sinner.png"
+        description="???"
+        quality="2"
+        tags="offensive summonable monstermanual"
+        />
+
         <!--TRINKETS-->
 
         <trinket id="1"

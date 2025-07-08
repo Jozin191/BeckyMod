@@ -66,6 +66,7 @@ include("becky_scripts.becky.items.passives.dead_socket")
 include("becky_scripts.becky.items.passives.null_bomb")
 include("becky_scripts.becky.items.passives.defiled_chalice")
 include("becky_scripts.becky.items.passives.dead_battery")
+include("becky_scripts.becky.items.passives.sinner")
 
 include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
