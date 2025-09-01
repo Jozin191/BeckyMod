@@ -67,6 +67,7 @@ include("becky_scripts.becky.items.passives.null_bomb")
 include("becky_scripts.becky.items.passives.defiled_chalice")
 include("becky_scripts.becky.items.passives.dead_battery")
 include("becky_scripts.becky.items.passives.sinner")
+include("becky_scripts.becky.items.passives.ghost_amulet")
 
 include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
@@ -79,9 +80,6 @@ include("becky_scripts.becky.items.trinkets.corpse_tag")
 
 --characters
 include("becky_scripts.becky.characters.becky")
-include("becky_scripts.becky.characters.ghost.becky_ghost")
-
-include("becky_scripts.becky.characters.becky_b")
 
 --Mod compatibility! (all patches are loaded in this file)
 include("becky_scripts.mod_compatibility.load_patches")

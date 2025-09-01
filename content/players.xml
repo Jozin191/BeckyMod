@@ -4,7 +4,7 @@
         skinColor = "1"
         nameimage="playername_becky.png"
         portrait="playerportrait_becky.png"
-        black="6"
+        black="4"
         canShoot="false"
         costumeSuffix="becky"
     />

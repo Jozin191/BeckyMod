@@ -91,6 +91,15 @@
         tags="offensive summonable monstermanual"
         />
 
+        <familiar id="10"
+        name="Ghost Amulet"
+        gfx="ghost_amulet.png"
+        description="???"
+        quality="4"
+        cache="familiars"
+        tags="offensive summonable"
+        />
+
         <!--TRINKETS-->
 
         <trinket id="1"
