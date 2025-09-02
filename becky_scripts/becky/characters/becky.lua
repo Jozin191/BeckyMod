@@ -13,11 +13,10 @@ BeckyMod.Character.BECKY = BECKY
 
 ---@param player EntityPlayer
 function BECKY:OnInit(player)
-    if player:GetPlayerType() == BECKY.PLAYERTYPE then
-        PlayerAnimLib:SetDefaultAnm2(player, "gfx/player_becky.anm2")
-        player:AddNullCostume(BECKY.HAIR_COSTUME)
-        player:AddNullCostume(BECKY.BODY_COSTUME)
-        player:AddCollectible(ITEM_GHOST_AMULET)
-    end
+    if player:GetPlayerType() ~= BECKY.PLAYERTYPE then return end
+    PlayerAnimLib:SetDefaultAnm2(player, "gfx/player_becky.anm2")
+    player:AddNullCostume(BECKY.HAIR_COSTUME)
+    player:AddNullCostume(BECKY.BODY_COSTUME)
+    player:AddCollectible(ITEM_GHOST_AMULET)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit, 0)
