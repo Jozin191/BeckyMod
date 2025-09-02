@@ -5,7 +5,7 @@
 
 --Debug [DO NOT MODIFY]
 local VERSION = 1
-local FORCE_VERSION_UPDATE = false
+local FORCE_VERSION_UPDATE = false 
 
 local game = Game()
 local Mod = BombLib or nil
