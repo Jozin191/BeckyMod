@@ -33,6 +33,29 @@ local function interpolateVector2D(vectorA, vectorB, t)
     return Vector(minT * vectorA.X + t * vectorB.X, minT * vectorA.Y + t * vectorB.Y)
 end
 
+--- Helper function to convert a given amount of angle degrees into the corresponding `Direction` enum (From Library of Isaac, tweaked a bit)
+---@param angleDegrees number
+---@return Direction
+local function AngleToDirection(angleDegrees)
+    local normalizedDegrees = angleDegrees % 360
+    if normalizedDegrees < 45 or normalizedDegrees >= 315 then
+        return Direction.RIGHT
+    elseif normalizedDegrees < 135 then
+        return Direction.DOWN
+    elseif normalizedDegrees < 225 then
+        return Direction.LEFT
+    else
+        return Direction.UP
+    end
+end
+
+--- Returns a direction corresponding to the direction the provided vector is pointing (from Library of Isaac)
+---@param vector Vector
+---@return Direction
+local function VectorToDirection(vector)
+	return AngleToDirection(vector:GetAngleDegrees())
+end
+
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function (_, player)
     if not player:HasCollectible(ITEM_GHOST_AMULET) then return end
@@ -123,6 +146,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
         
         familiar:AddVelocity((Vector(VectorX, VectorY) * 1.2):Resized(2.5))
+
+        local dir = (familiar.Position - player.Position):Normalized() 
+
+        player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
     end
 
     local gridCollisionAtPos = room:GetGridCollisionAtPos(familiar.Position + familiar.Velocity)
