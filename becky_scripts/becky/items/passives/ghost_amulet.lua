@@ -186,12 +186,38 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
     end
 
-    local gridCollisionAtPos = room:GetGridCollisionAtPos(famPos + famVel)
-    
+    local gridCollisionAtPos = room:GetGridCollisionAtPos(famPos + famVel)    
+    local gridFromPos = room:GetGridEntityFromPos(famPos)
+
+    if familiar.FrameCount % 10 == 0 then
+        if gridFromPos then
+            local hurtVal = 1
+            local casts = {
+                Fire = gridFromPos:ToFire(),
+                Poop = gridFromPos:ToTNT(),
+            }
+
+            if casts.Poop and gridFromPos:GetVariant() == 3 then
+                hurtVal = gridFromPos:GetRNG():RandomInt(2) 
+            end
+
+            gridFromPos:Hurt(hurtVal)
+        else
+
+        end
+    end
+
     if gridCollisionAtPos == GridCollisionClass.COLLISION_WALL then
         familiar:AddVelocity(-famVel * 2.4)
     end
 end, GHOST_BALL_VAR)
+
+local DestroyableFireplaces = {
+    [0] = true,
+    [1] = true,
+    [10] = true,
+    [11] = true,
+}
 
 ---@param familiar EntityFamiliar
 ---@param collider Entity
@@ -200,12 +226,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     local player = familiar.Player
     local baseDamage = GHOST_BALL_DMG * player.Damage
 
+    if collider.Type == EntityType.ENTITY_MOVABLE_TNT or (collider.Type == EntityType.ENTITY_FIREPLACE and DestroyableFireplaces[collider.Variant]) then
+        collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
+    end
+
     if not npc then return end
     if not IsValidEnemy(npc) then return end
-
     familiar:GetSprite():Play("Hit")
     npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
     TriggerPush(npc, familiar, 20 * familiar.Player.ShotSpeed)
     TriggerPush(familiar, npc, 20)
     SFXManager():Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
-end, GHOST_BALL_VAR)
+end, GHOST_BALL_VAR) 
