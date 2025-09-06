@@ -1,6 +1,6 @@
 <costumes anm2root="gfx/characters/">
 
-    <costume anm2path="becky_hair.anm2" type="none" priority="100" />
+    <costume anm2path="becky_hair.anm2" type="none" priority="99" />
     <costume anm2path="becky_body.anm2" type="none" priority="0" />
     <costume id="0" anm2path="ghostheadstuff.anm2" type="none" priority="100"/>
 
