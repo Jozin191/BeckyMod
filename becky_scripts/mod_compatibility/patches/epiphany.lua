@@ -25,6 +25,7 @@ local function EpiphanyPatch()
         }
     })]]
 
+    --[[
     BeckyMod.Character.BECKY.AddDealModifiers({
         {
             identificator = "TARNISHED JUDAS",
@@ -44,6 +45,7 @@ local function EpiphanyPatch()
             end,
         },
     })
+    ]]
 
     --mother's shadow curse of darkness thing
 
