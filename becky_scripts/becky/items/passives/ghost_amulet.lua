@@ -24,13 +24,8 @@ local function IsPlayerShooting(player)
     local k_down = Input.IsActionPressed(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex)
     local k_left = Input.IsActionPressed(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex)
     local k_right = Input.IsActionPressed(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex)
-	
-    return (k_down or k_right or k_left or k_up) or false
-end
 
-local function interpolateVector2D(vectorA, vectorB, t)
-	local minT = (1 - t)
-    return Vector(minT * vectorA.X + t * vectorB.X, minT * vectorA.Y + t * vectorB.Y)
+    return (k_down or k_right or k_left or k_up) or false
 end
 
 --- Rounds a number to the closest number of decimal places given.
@@ -68,27 +63,11 @@ local function VectorToDirection(vector)
 	return AngleToDirection(vector:GetAngleDegrees())
 end
 
----@param familiar EntityFamiliar
----@param player EntityPlayer
-local function TriggerGhostDrag(familiar, player)
-    TriggerPush(familiar, player, -(familiar.Position:Distance(player.Position)) / 4)
-    familiar:GetData().IsDraggedByDropPress = true -- Im using vanilla's Entity:GetData() because idk if we have a reimplementation of it, if so, please replace it with that
-end
-
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function (_, player)
     if not player:HasCollectible(ITEM_GHOST_AMULET) then return end
     player:SetCanShoot(false)
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
-
-    if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
-
-    for _, Ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOST_BALL_VAR)) do
-        local fam = Ghost:ToFamiliar() ---@cast fam EntityFamiliar
-        if GetPtrHash(fam.Player) ~= GetPtrHash(player) then goto continue end
-        TriggerGhostDrag(fam, player)
-        ::continue::
-    end
 end)
 
 ---@param player EntityPlayer
@@ -124,6 +103,48 @@ local Anims = {
     [2] = "Anim2",
     [3] = "Anim3",
 }
+
+---@param familiar EntityFamiliar
+BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
+    local player = familiar.Player
+    local isShooting = IsPlayerShooting(player)
+    local famPos = familiar.Position
+    local playerPos = player.Position
+    local shotSpeed = player.ShotSpeed
+    local posDif = famPos - playerPos
+    local posDifLenght = posDif:Length()	
+    local maxDistMove = ((player.TearRange / 6.5) * 2) * (1 / shotSpeed)
+    local maxDistIdle = 40
+
+    if isShooting and not player:AreOpposingShootDirectionsPressed() then
+        familiar.State = 1
+        local input = {
+			up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
+			down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
+			left = Input.GetActionValue(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex),
+			right = Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex),
+		}
+
+        local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0)
+		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
+        local resizer = 1.5 * shotSpeed
+
+        familiar.Velocity = familiar.Velocity + (Vector(VectorX, VectorY):Normalized():Resized(resizer))
+
+        if posDifLenght >= maxDistMove then
+			familiar.Velocity = familiar.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
+		end
+
+        local dir = (famPos - playerPos):Normalized()
+        player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
+    else
+        familiar.State = 0    
+        if posDifLenght > maxDistIdle then 
+            familiar.Velocity = familiar.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
+        end
+    end
+end)
+
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local GhostSprite = familiar:GetSprite()
@@ -131,18 +152,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local room = BeckyMod.Game:GetRoom()
     local currentAnim = GhostSprite:GetAnimation()
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
-    local famData = familiar:GetData()
-    local RangeSizeMult = (player.TearRange / 40) / 6.5 
-    local GhostSize = Vector.One * exp(RangeSizeMult, 1, 1.6)
-    local isShooting = IsPlayerShooting(player)
-    local famVel = familiar.Velocity
-    local famPos = familiar.Position
-    local playerPos = player.Position
+    local GhostSize = Vector.One * exp((player.Damage / 3.5), 1, 1.5)
+    local gridFromPos = room:GetGridEntityFromPos(familiar.Position)
 
     familiar.SizeMulti = GhostSize
     familiar.SpriteScale = GhostSize
-
-    room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, famPos, 0.6))
 
     if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then
         local rng = player:GetCollectibleRNG(ITEM_GHOST_AMULET)
@@ -153,62 +167,18 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         end
     end
 
-    if famData.IsDraggedByDropPress then
-        familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
-        
-        if famVel:Length() <= 5 then
-            familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
-            famData.IsDraggedByDropPress = false
-        end
-    end
-
     if not IsPlayingRegTear1 and GhostSprite:IsFinished(currentAnim) then
         GhostSprite:Play("RegularTear1")
     end
 
-    if isShooting and not player:AreOpposingShootDirectionsPressed() then
-        local input = {
-			up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
-			down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
-			left = Input.GetActionValue(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex),
-			right = Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex),
-		}
+    if gridFromPos and familiar.FrameCount % 10 == 0 then
+        local hurtVal = 1
 
-        local TearsMult = Round(BeckyMod:toTearsPerSecond(player.MaxFireDelay), 2) / 2.73
-        local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0)
-		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
-        local resizer = 4.2 * exp(TearsMult, 0.9, 1.175)
-
-        familiar:AddVelocity((Vector(VectorX, VectorY) * 1.2):Resized(resizer))
-        familiar:MultiplyFriction(0.9)
-
-        local dir = (famPos - playerPos):Normalized()
-        player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
-    end
-
-    local gridCollisionAtPos = room:GetGridCollisionAtPos(famPos + famVel)    
-    local gridFromPos = room:GetGridEntityFromPos(famPos)
-
-    if familiar.FrameCount % 10 == 0 then
-        if gridFromPos then
-            local hurtVal = 1
-            local casts = {
-                Fire = gridFromPos:ToFire(),
-                Poop = gridFromPos:ToTNT(),
-            }
-
-            if casts.Poop and gridFromPos:GetVariant() == 3 then
-                hurtVal = gridFromPos:GetRNG():RandomInt(2) 
-            end
-
-            gridFromPos:Hurt(hurtVal)
-        else
-
+        if gridFromPos:ToPoop() and gridFromPos:GetVariant() == 3 then
+            hurtVal = gridFromPos:GetRNG():RandomInt(2) 
         end
-    end
 
-    if gridCollisionAtPos == GridCollisionClass.COLLISION_WALL then
-        familiar:AddVelocity(-famVel * 2.4)
+        gridFromPos:Hurt(hurtVal)
     end
 end, GHOST_BALL_VAR)
 
@@ -222,9 +192,12 @@ local DestroyableFireplaces = {
 ---@param familiar EntityFamiliar
 ---@param collider Entity
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, familiar, collider)
+    if familiar.State == 0 then return true end
+
     local npc = collider and collider:ToNPC()
     local player = familiar.Player
     local baseDamage = GHOST_BALL_DMG * player.Damage
+    local tearsMult = Round(BeckyMod:toTearsPerSecond(player.MaxFireDelay), 2) / 2.73
 
     if collider.Type == EntityType.ENTITY_MOVABLE_TNT or (collider.Type == EntityType.ENTITY_FIREPLACE and DestroyableFireplaces[collider.Variant]) then
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
@@ -234,7 +207,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if not IsValidEnemy(npc) then return end
     familiar:GetSprite():Play("Hit")
     npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
-    TriggerPush(npc, familiar, 20 * familiar.Player.ShotSpeed)
-    TriggerPush(familiar, npc, 20)
+    TriggerPush(npc, familiar, 20 * tearsMult)
+    TriggerPush(familiar, npc, 10)
     SFXManager():Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
-end, GHOST_BALL_VAR) 
+end, GHOST_BALL_VAR)
