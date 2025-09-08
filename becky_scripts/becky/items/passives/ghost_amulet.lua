@@ -90,7 +90,6 @@ local function RemoveTrail(entity)
     entData.GhostTrail = nil
 end
 
-
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function (_, player)
     if not player:HasCollectible(ITEM_GHOST_AMULET) then return end
@@ -141,7 +140,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
     local shotSpeed = player.ShotSpeed
     local posDif = famPos - playerPos
     local posDifLenght = posDif:Length()	
-    local maxDistMove = ((player.TearRange / 6.5) * 2) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
+    local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
     local maxDistIdle = 40
 
     -- SpawnTrail(familiar)
