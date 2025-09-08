@@ -63,6 +63,34 @@ local function VectorToDirection(vector)
 	return AngleToDirection(vector:GetAngleDegrees())
 end
 
+---@param entity Entity
+local function SpawnTrail(entity)
+    local entData = entity:GetData()
+
+    if entData.GhostTrail then return end
+
+    local entityParent = entity -- Set this to the parent of the trail
+    local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, entityParent.Position, Vector.Zero, entityParent):ToEffect() ---@cast trail EntityEffect
+    trail:FollowParent(entityParent)
+    trail.Color = Color(1, 1, 1, 1)
+    trail.MinRadius = 0.1
+    trail.SpriteScale = Vector.One * 2
+    entData.GhostTrail = trail
+
+    local sprite = trail:GetSprite()
+    local blendMode = sprite:GetLayer(0):GetBlendMode()
+    blendMode:SetMode(BlendType.NORMAL)
+end
+
+local function RemoveTrail(entity)
+    local entData = entity:GetData()
+    if not entData.GhostTrail then return end
+
+    entData.GhostTrail:Remove()
+    entData.GhostTrail = nil
+end
+
+
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function (_, player)
     if not player:HasCollectible(ITEM_GHOST_AMULET) then return end
@@ -113,11 +141,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
     local shotSpeed = player.ShotSpeed
     local posDif = famPos - playerPos
     local posDifLenght = posDif:Length()	
-    local maxDistMove = ((player.TearRange / 6.5) * 2) * (1 / shotSpeed)
+    local maxDistMove = ((player.TearRange / 6.5) * 2) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
     local maxDistIdle = 40
 
-    if isShooting and not player:AreOpposingShootDirectionsPressed() then
-        familiar.State = 1
+    -- SpawnTrail(familiar)
+
+    if isShooting then
+        SpawnTrail(familiar)
+        if not player:AreOpposingShootDirectionsPressed() then
+            familiar.State = 1
         local input = {
 			up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
 			down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
@@ -137,13 +169,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
 
         local dir = (famPos - playerPos):Normalized()
         player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
+        end
+        
     else
         familiar.State = 0    
-        if posDifLenght > maxDistIdle then 
+        if posDifLenght > maxDistIdle then
             familiar.Velocity = familiar.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
+        else
+            RemoveTrail(familiar)
         end
     end
-end)
+end, GHOST_BALL_VAR)
 
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
@@ -192,7 +228,7 @@ local DestroyableFireplaces = {
 ---@param familiar EntityFamiliar
 ---@param collider Entity
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, familiar, collider)
-    if familiar.State == 0 then return true end
+    
 
     local npc = collider and collider:ToNPC()
     local player = familiar.Player
@@ -206,8 +242,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if not npc then return end
     if not IsValidEnemy(npc) then return end
     familiar:GetSprite():Play("Hit")
-    npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
     TriggerPush(npc, familiar, 20 * tearsMult)
     TriggerPush(familiar, npc, 10)
     SFXManager():Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
+
+    if familiar.State == 0 then return true end
+    npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
 end, GHOST_BALL_VAR)

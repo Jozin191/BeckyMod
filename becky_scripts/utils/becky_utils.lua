@@ -83,7 +83,9 @@ function BeckyMod:FireHolyBeam(beamType, pos, spawner, parent, damage)
 end
 
 ---Deal chances are stupid.
----@return Float
+---@param chance number
+---@param percent number
+---@return number	
 function BeckyMod:addPercentToDealChance(chance, percent)
 	return chance * (1 + percent/100)
 end
