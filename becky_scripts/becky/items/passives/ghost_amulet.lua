@@ -155,11 +155,15 @@ local Anims = {
     [3] = "Anim3",
 }
 
----@param familiar EntityFamiliar
-BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
-    local player = familiar.Player
+---@param player EntityPlayer
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+    local playerData = player:GetData()
+    local ghost = playerData.GhostBall ---@cast ghost EntityFamiliar
+
+    if not ghost then return end
+    
     local isShooting = IsPlayerShooting(player)
-    local famPos = familiar.Position
+    local famPos = ghost.Position
     local playerPos = player.Position
     local shotSpeed = player.ShotSpeed
     local posDif = famPos - playerPos
@@ -170,9 +174,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
     -- SpawnTrail(familiar)
 
     if isShooting then
-        SpawnTrail(familiar)
+        SpawnTrail(ghost)
         if not player:AreOpposingShootDirectionsPressed() then
-            familiar.State = 1
+            ghost.State = 1
         local input = {
 			up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
 			down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
@@ -184,11 +188,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
 		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
         local resizer = 1.5 * shotSpeed
 
-        familiar.Velocity = familiar.Velocity + (Vector(VectorX, VectorY):Normalized():Resized(resizer))
+        ghost.Velocity = ghost.Velocity + (Vector(VectorX, VectorY):Normalized():Resized(resizer))
 
 
         if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
-			familiar.Velocity = familiar.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
+			ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
 		end
 
         if BeckyHasBirthright(player) then
@@ -199,14 +203,34 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
         player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
         end
     else
-        familiar.State = 0    
+        ghost.State = 0    
         if posDifLenght > maxDistIdle then
-            familiar.Velocity = familiar.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
+            ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
         else
-            RemoveTrail(familiar)
+            RemoveTrail(ghost)
         end
     end
+
+    local sprite = player:GetSprite()
+
+    if sprite:GetAnimation() == "Appear" then
+        ghost.Velocity = Vector.Zero
+    end
+
+    -- print(player:GetSprite():GetAnimation())
+end)
+
+---@param familiar EntityFamiliar
+BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
+    if BeckyMod.Game:GetRoom():GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
 end, GHOST_BALL_VAR)
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
+    for _, ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOST_BALL_VAR)) do
+        local fam = ghost:ToFamiliar() ---@cast fam EntityFamiliar
+        fam.Position = fam.Player.Position
+    end
+end)
 
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
@@ -220,6 +244,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 
     familiar.SizeMulti = GhostSize
     familiar.SpriteScale = GhostSize
+
+    local playerData = player:GetData()
+
+    playerData.GhostBall = familiar
 
     if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then
         local rng = player:GetCollectibleRNG(ITEM_GHOST_AMULET)
