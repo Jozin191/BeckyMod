@@ -79,14 +79,14 @@
         <passive id="8"
         name="Dream Banisher"
         gfx="dream_banisher.png"
-        description="???"
+        description="Curse the cursed"
         quality="2"
         />
 
         <familiar id="9"
         name="Sinner"
         gfx="sinner.png"
-        description="???"
+        description="Sinful buddy"
         quality="2"
         tags="offensive summonable monstermanual"
         />
@@ -94,7 +94,7 @@
         <familiar id="10"
         name="Ghost Amulet"
         gfx="ghost_amulet.png"
-        description="???"
+        description="Bouncy buddy!!!"
         quality="4"
         cache="familiars"
         tags="offensive summonable"
@@ -127,7 +127,7 @@
 
         <trinket id="4"
         name="Corpse Tag"
-        description="John Moriah"
+        description="A bone to pick"
         gfx="corpse_tag.png"
         cache=""
         />
