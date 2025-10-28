@@ -1,11 +1,26 @@
 local ITEM_GHOST_AMULET = Isaac.GetItemIdByName("Ghost Amulet")
+local BeckyPlayerType = Isaac.GetPlayerTypeByName("Becky", false)
 local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
 local GHOST_BALL_DMG = 1.5
+
+BeckyMod.Callbacks = {}
+BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY = "BeckyMod_ON_GHOST_HIT_ENEMY"
 
 ---@param npc EntityNPC
 ---@return boolean
 local function IsValidEnemy(npc)
     return (npc:IsEnemy() and npc:IsActiveEnemy() and npc:IsVulnerableEnemy())
+end
+
+---@param player EntityPlayer
+---@return boolean
+local function HasGhostAmulet(player)
+    return player:HasCollectible(ITEM_GHOST_AMULET)
+end
+
+---@param player EntityPlayer
+local function BeckyHasBirthright(player)
+    return player:GetPlayerType() == BeckyPlayerType and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 end
 
 ---Triggers a push to `pushed` from `pusher`
@@ -90,9 +105,18 @@ local function RemoveTrail(entity)
     entData.GhostTrail = nil
 end
 
+---@param vectorA Vector
+---@param vectorB Vector
+---@param t number
+---@return Vector
+local function interpolateVector2D(vectorA, vectorB, t)
+	local minT = (1 - t)
+    return Vector(minT * vectorA.X + t * vectorB.X, minT * vectorA.Y + t * vectorB.Y)
+end
+
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function (_, player)
-    if not player:HasCollectible(ITEM_GHOST_AMULET) then return end
+    if not HasGhostAmulet(player) then return end
     player:SetCanShoot(false)
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
@@ -100,7 +124,7 @@ end)
 ---@param player EntityPlayer
 ---@param cacheflag CacheFlag
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player, cacheflag)
-    if not player:HasCollectible(ITEM_GHOST_AMULET) then return end
+    if not HasGhostAmulet(player) then return end
     local rng = RNG()
     local seed = math.max(Random(), 1)
     rng:SetSeed(seed, 35)
@@ -142,7 +166,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
     local posDifLenght = posDif:Length()	
     local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
     local maxDistIdle = 40
-
+    local room = BeckyMod.Game:GetRoom()
     -- SpawnTrail(familiar)
 
     if isShooting then
@@ -162,14 +186,18 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
 
         familiar.Velocity = familiar.Velocity + (Vector(VectorX, VectorY):Normalized():Resized(resizer))
 
-        if posDifLenght >= maxDistMove then
+
+        if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
 			familiar.Velocity = familiar.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
 		end
+
+        if BeckyHasBirthright(player) then
+            room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, famPos, 0.6))
+        end
 
         local dir = (famPos - playerPos):Normalized()
         player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
         end
-        
     else
         familiar.State = 0    
         if posDifLenght > maxDistIdle then
@@ -227,8 +255,6 @@ local DestroyableFireplaces = {
 ---@param familiar EntityFamiliar
 ---@param collider Entity
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, familiar, collider)
-    
-
     local npc = collider and collider:ToNPC()
     local player = familiar.Player
     local baseDamage = GHOST_BALL_DMG * player.Damage
@@ -238,6 +264,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
     end
 
+    if familiar.State == 0 then return true end
+
     if not npc then return end
     if not IsValidEnemy(npc) then return end
     familiar:GetSprite():Play("Hit")
@@ -245,6 +273,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     TriggerPush(familiar, npc, 10)
     SFXManager():Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
 
-    if familiar.State == 0 then return true end
+    Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider)
+
     npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
 end, GHOST_BALL_VAR)

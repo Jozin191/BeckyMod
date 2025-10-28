@@ -11,19 +11,12 @@ BeckyMod.SaveManager = include("becky_scripts.utils.save_manager")
 BeckyMod.SaveManager.Init(BeckyMod)
 
 include("becky_scripts.utils.lua_overrides")
-
 include("becky_scripts.utils.becky_utils")
-
 include("becky_scripts.utils.saving_system")
-
 include("becky_scripts.utils.table_functions")
-
 include("becky_scripts.utils.bitmask_helper")
-
 include("becky_scripts.utils.hud_helper")
-
 include("becky_scripts.utils.BombLib")
-
 include("becky_scripts.utils.player_anim_lib")
 
 Scheduler = include("becky_scripts.utils.schedule_data")
@@ -86,3 +79,8 @@ include("becky_scripts.mod_compatibility.load_patches")
 
 --pickups
 include("becky_scripts.becky.pickups.dead_battery")
+
+--ghost synergies
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.CSection")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.DrFetus")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechZero")
