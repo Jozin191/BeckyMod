@@ -8,6 +8,7 @@
         hp="2"
         canShoot="false"
         costumeSuffix="becky"
+        modcostume="1"
     />
     <player name="Becky's Ghost"
         skin="character_ghostb.png"
