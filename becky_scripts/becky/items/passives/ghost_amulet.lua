@@ -4,6 +4,9 @@ local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
 local GHOST_BALL_DMG = 1.5
 
 BeckyMod.Callbacks = {}
+--- Called every time the ghost hits an enemy
+--- * Familiar: The ghost entity
+--- * Entity: The entity hit by the ghost
 BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY = "BeckyMod_ON_GHOST_HIT_ENEMY"
 
 ---@param npc EntityNPC
@@ -184,7 +187,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 			right = Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex),
 		}
 
-        local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0)
+        local MirrorInversor = room:IsMirrorWorld() and -1 or 1
+
+        local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * MirrorInversor
 		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
         local resizer = 1.5 * shotSpeed
 
@@ -216,14 +221,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     if sprite:GetAnimation() == "Appear" then
         ghost.Velocity = Vector.Zero
     end
-
-    -- print(player:GetSprite():GetAnimation())
 end)
-
----@param familiar EntityFamiliar
-BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
-    if BeckyMod.Game:GetRoom():GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
-end, GHOST_BALL_VAR)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
     for _, ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOST_BALL_VAR)) do
@@ -262,11 +260,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         GhostSprite:Play("RegularTear1")
     end
 
-    if gridFromPos and familiar.FrameCount % 10 == 0 then
+    if gridFromPos and familiar.FrameCount % 5 == 0 then
         local hurtVal = 1
 
         if gridFromPos:ToPoop() and gridFromPos:GetVariant() == 3 then
-            hurtVal = gridFromPos:GetRNG():RandomInt(2) 
+            hurtVal = gridFromPos:GetRNG():RandomInt(3) + 1 
         end
 
         gridFromPos:Hurt(hurtVal)

@@ -1,20 +1,22 @@
--- local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
+local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
 
--- ---@param familiar EntityFamiliar
--- BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
---     local player = familiar.Player
---     local posDif = (familiar.Position - player.Position)
---     local laser 
+---@param familiar EntityFamiliar
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, familiar, collider)
 
---     if not player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY_ZERO) then return end
+    local player = familiar.Player
+    local posDif = (familiar.Position - player.Position)
+    -- local laser 
 
---     if laser then return end
+    -- if not player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY_ZERO) then return end
+
+    -- if laser then return end
     
---     laser = player:FireTechLaser(player.Position, LaserOffset.LASER_SHOOP_OFFSET, posDif:Normalized())
+    print("a[sodk[aksd[pk]]]")
 
---     -- lo
-    
+    local laser = player:FireTechLaser(player.Position, LaserOffset.LASER_TECH1_OFFSET, posDif:Normalized(), false, true, player, 1) 
+    laser:SetMaxDistance(posDif:Length())
+    print(laser.Variant)
 
 
---     laser:SetMaxDistance(posDif:Length())
--- end, GHOST_BALL_VAR)
+    -- laser:SetMaxDistance(posDif:Length())
+end)
