@@ -310,6 +310,15 @@ local function EIDPatch()
 				},
 			},
 		},
+		[Item.SINNER.ID] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Sinner",
+				Description = {
+					"Orbital that changes speed each rotation",
+					"#The faster it is, the more damage it does"
+				},
+			},
+		},
 		[Item.DEFILED_CHALICE.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Defiled Chalice",
