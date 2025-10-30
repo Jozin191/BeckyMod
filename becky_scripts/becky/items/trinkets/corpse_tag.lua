@@ -1,6 +1,6 @@
 local CORPSE_TAG = {}
 
-BeckyMod.Item.CORPSE_TAG = CORPSE_TAG
+BeckyMod.Trinket.CORPSE_TAG = CORPSE_TAG
 
 CORPSE_TAG.ID = Isaac.GetTrinketIdByName("Corpse Tag")
 CORPSE_TAG.MIN = -1

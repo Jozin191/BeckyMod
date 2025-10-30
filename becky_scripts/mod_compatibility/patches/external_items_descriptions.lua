@@ -422,6 +422,14 @@ local function EIDPatch()
 					end,
 				}
 			}
+		},
+		[Trinket.CORPSE_TAG.ID] = {
+			en_us = {
+				Name = "Corpse Tag",
+				Description = {
+					"Chance to get some bone spurs when clearing a room"
+				}
+			}
 		}
 	}
 
