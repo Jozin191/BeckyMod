@@ -152,12 +152,6 @@ local function exp(number, coeffcient, power)
     return number ~= 0 and coeffcient * number ^ (power - 1) or 0
 end
 
----@param player EntityPlayer
----@return number
-local function GetTPS(player)
-    return Round(30 / (player.MaxFireDelay + 1), 2)
-end
-
 local Anims = {
     [1] = "Anim1",
     [2] = "Anim2",
@@ -285,8 +279,9 @@ local DestroyableFireplaces = {
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, familiar, collider)
     local npc = collider and collider:ToNPC()
     local player = familiar.Player
-    local baseDamage = GHOST_BALL_DMG * player.Damage
     local tearsMult = Round(BeckyMod:toTearsPerSecond(player.MaxFireDelay), 2) / 2.73
+    local baseDamage = (GHOST_BALL_DMG * player.Damage) * tearsMult
+    
 
     if collider.Type == EntityType.ENTITY_MOVABLE_TNT or (collider.Type == EntityType.ENTITY_FIREPLACE and DestroyableFireplaces[collider.Variant]) then
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
