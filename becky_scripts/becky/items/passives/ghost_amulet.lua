@@ -1,7 +1,7 @@
 local ITEM_GHOST_AMULET = Isaac.GetItemIdByName("Ghost Amulet")
 local BeckyPlayerType = Isaac.GetPlayerTypeByName("Becky", false)
 local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
-local GHOST_BALL_DMG = 1.5
+local GHOST_BALL_DMG = 1.25
 
 BeckyMod.Callbacks = {}
 --- Called every time the ghost hits an enemy
@@ -139,7 +139,7 @@ end, CacheFlag.CACHE_FAMILIARS)
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
     familiar:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
-	familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
+	-- familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
     familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS 
 end, GHOST_BALL_VAR)
 
@@ -150,6 +150,12 @@ end, GHOST_BALL_VAR)
 ---@return integer
 local function exp(number, coeffcient, power)
     return number ~= 0 and coeffcient * number ^ (power - 1) or 0
+end
+
+---@param player EntityPlayer
+---@return number
+local function GetTPS(player)
+    return Round(30 / (player.MaxFireDelay + 1), 2)
 end
 
 local Anims = {
@@ -200,10 +206,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 			ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
 		end
 
-        if BeckyHasBirthright(player) then
-            room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, famPos, 0.6))
-        end
-
         local dir = (famPos - playerPos):Normalized()
         player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
         end
@@ -237,9 +239,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local room = BeckyMod.Game:GetRoom()
     local currentAnim = GhostSprite:GetAnimation()
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
-    local GhostSize = Vector.One * exp((player.Damage / 3.5), 1, 1.5)
+    local GhostSize = Vector.One * exp((player.Damage / 4.2), 1, 1.2)
     local gridFromPos = room:GetGridEntityFromPos(familiar.Position)
-
+    
     familiar.SizeMulti = GhostSize
     familiar.SpriteScale = GhostSize
 
@@ -291,6 +293,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     end
 
     if familiar.State == 0 then return true end
+
+    if collider.Type == EntityType.ENTITY_BOMB then
+        TriggerPush(collider, familiar, 10)
+    end
 
     if not npc then return end
     if not IsValidEnemy(npc) then return end

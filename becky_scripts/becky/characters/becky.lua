@@ -28,6 +28,10 @@ local game = BeckyMod.Game
 BECKY.DealModifiers = {}
 BECKY.OldDealModifiers = {}
 
+local function CollectiblesInRoom()
+    return Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE)
+end
+
 ---Add a custom deal modifiers. Can add multiple at the same time.
 ---Sorts them later after adding them, lower priority meaning that it goes before!
 function BECKY.AddDealModifiers(toAddDealModifiers)
@@ -52,26 +56,16 @@ end
 
 BECKY.AddDealModifiers({
     {
-        identificator = "KEEPER",
-        priority = -100,
-        condition = function(_)
-            return BeckyMod:IsAnyoneKeeper()
-        end,
-        modification = function(pickup, price)
-            local newPickup = pickup
-            newPickup.Price = price*15
-            return newPickup
-        end,
-    },
-    {
-        identificator = "BLUE BABY",
+        identificator = "BECKY",
         priority = 500,
         condition = function(_)
-            return PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY)
+            return PlayerManager.AnyoneIsPlayerType(BECKY.PLAYERTYPE)
         end,
+        ---@param pickup EntityPickup
+        ---@param price number
         modification = function(pickup, price)
             local newPickup = pickup
-            newPickup.Price = (price == 1) and PickupPrice.PRICE_ONE_SOUL_HEART or PickupPrice.PRICE_TWO_SOUL_HEARTS
+            newPickup.Price = (price == 1) and PickupPrice.PRICE_ONE_HEART or PickupPrice.PRICE_TWO_HEARTS
             return newPickup
         end,
     },
@@ -94,29 +88,33 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit, 0)
 function BECKY:postNewRoom()
     local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
 
-    if player then
-        local room = game:GetRoom()
-        if room:GetType() == RoomType.ROOM_DEVIL and room:IsFirstVisit() then
-            for _, entity in ipairs(Isaac.GetRoomEntities()) do
-                local pickup = entity:ToPickup()
-                if pickup and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE and pickup.Price ~= PickupPrice.PRICE_FREE then
-                    local pos = pickup.Position
-                    local subType = pickup.SubType
-                    local newPickup = Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, subType, pos, Vector(0, 0), nil):ToPickup()
-                    if newPickup then
-                        newPickup.OptionsPickupIndex = 1
-                    end
-                    pickup:Remove()
-                end
+    if not player then return end
+    local room = game:GetRoom()
+    local roomType = room:GetType()
+
+    if roomType == RoomType.ROOM_DEVIL and room:IsFirstVisit() then
+        for _, entity in ipairs(CollectiblesInRoom()) do
+            local pickup = entity:ToPickup()
+
+            if not pickup then goto continue end
+            if pickup.Price == PickupPrice.PRICE_FREE then goto continue end
+
+            local pos = pickup.Position
+            local subType = pickup.SubType
+            local newPickup = Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, subType, pos, Vector(0, 0), nil):ToPickup()
+            if newPickup then
+                newPickup.OptionsPickupIndex = 1
             end
+            pickup:Remove()
+            ::continue::
         end
+    end
 
-        if room:GetType() == RoomType.ROOM_ANGEL then
-            local runSave = BeckyMod:RunSave(player)
+    if roomType == RoomType.ROOM_ANGEL then
+        local runSave = BeckyMod:RunSave(player)
 
-            game:GetLevel():AddAngelRoomChance(50)
-            runSave.ENTERED_ANGEL_ROOM = true
-        end
+        game:GetLevel():AddAngelRoomChance(50)
+        runSave.ENTERED_ANGEL_ROOM = true
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, BECKY.postNewRoom)
@@ -171,97 +169,53 @@ function BECKY:updateAngelDealPrice(pickup)
     end
 end
 
+---@param pickup EntityPickup
 function BECKY:initAngelPickupPrices(pickup)
     local becky = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
     local room = game:GetRoom()
 
-    if becky
-        and room:GetType() == RoomType.ROOM_ANGEL 
-        and pickup.SubType ~= CollectibleType.COLLECTIBLE_NULL
-		and pickup:Exists()
-		and (pickup.Price < 0 or room:GetFrameCount() <= 1)
-        and pickup.FrameCount <= 1
-    then
-        local pData = BeckyMod:GetRerollPersistentData(pickup)
+    if not becky then return end
+    if room:GetType() ~= RoomType.ROOM_ANGEL then return end
+    if pickup.SubType == CollectibleType.COLLECTIBLE_NULL then return end
+    if not (pickup.Price < 0 or room:GetFrameCount() <= 1) then return end
+    if pickup.FrameCount > 1 then return end
 
-        if pickup.FrameCount <= 1 and not pData.beckyPassiveChecked then
-            pData.beckyPassiveChecked = true
+    local pData = BeckyMod:GetRerollPersistentData(pickup)
 
-            if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
-                BECKY:updateAngelDealPrice(pickup)
-            else
-                if not BECKY.ExcludeSpikePickupVariants[pickup.Variant] then
-                    pickup.Price = PickupPrice.PRICE_SPIKES
-                end
-            end
+    if pData.beckyPassiveChecked then return end
 
-            pickup.AutoUpdatePrice = false
+    pData.beckyPassiveChecked = true
 
-            Scheduler.Schedule(1, function()
-                pickup.OptionsPickupIndex = 0
-            end)
-        end
+    if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then
+        BECKY:updateAngelDealPrice(pickup)
+    elseif not BECKY.ExcludeSpikePickupVariants[pickup.Variant] then
+        pickup.Price = PickupPrice.PRICE_SPIKES
     end
-end
 
+    pickup.AutoUpdatePrice = false
+
+    Scheduler.Schedule(1, function()
+        pickup.OptionsPickupIndex = 0
+    end)
+end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, BECKY.initAngelPickupPrices)
 
-function BECKY:updateAngelItemPrices()
-    local becky = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
-
-    if becky
-    and game:GetRoom():GetType() == RoomType.ROOM_ANGEL 
-    then
-        for _, entity in ipairs(Isaac.GetRoomEntities()) do
-            local pickup = entity:ToPickup()
-            if pickup 
-            and pickup.SubType ~= CollectibleType.COLLECTIBLE_NULL
-            and pickup:Exists()
-            and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE
-            then
-                BECKY:updateAngelDealPrice(pickup)
-            end
-        end
-    end
-end
-
-BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_ADD_HEARTS, BECKY.updateAngelItemPrices)
-
 --checks if the player ever made a deal with in a angel room
-
-function BECKY:checkAngelItem(_, player)
+function BECKY:checkAngelItem(pickup, player)
     local player = player:ToPlayer()
 
-    if player
-        and player:GetPlayerType() == BECKY.PLAYERTYPE
-        and game:GetRoom():GetType() == RoomType.ROOM_ANGEL
-        and player:CanPickupItem()
-        and player:IsExtraAnimationFinished()
-    then
-        local firstBecky = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE) --Mod only checks the first becky for everything else
-        BeckyMod:RunSave(firstBecky).GOT_ANGEL_ITEM = true
+    if not player then return end
+    if player:GetPlayerType() ~= BECKY.PLAYERTYPE then return end
+    if not game:GetRoom():GetType() == RoomType.ROOM_ANGEL then return end
+    if not player:IsExtraAnimationFinished() then return end
 
-        Scheduler.Schedule(
-	    	1,
-	    	function()
-                for _, entity in ipairs(Isaac.GetRoomEntities()) do
-                    local pickup = entity:ToPickup()
-                    if pickup 
-                    and pickup.SubType ~= CollectibleType.COLLECTIBLE_NULL
-                    and pickup:Exists()
-                    and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE
-                    then
-                        BECKY:updateAngelDealPrice(pickup)
-                    end
-                end
-            end
-	    )
-    end
+    local firstBecky = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE) --Mod only checks the first becky for everything else
+    BeckyMod:RunSave(firstBecky).GOT_ANGEL_ITEM = true
+
+    BECKY:updateAngelDealPrice(pickup)
 end
-
---Needs to run late in case a mod says "nuh uh" and stops you from colliding with it
-
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, CallbackPriority.LATE, BECKY.checkAngelItem, PickupVariant.PICKUP_COLLECTIBLE)
+--Needs to run late in case a mod says "nuh uh" and stops you from colliding with it
 
 function BECKY:onBossDeath(entity)
     local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
@@ -273,19 +227,28 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, BECKY.onBossDeath)
 
 function BECKY:checkAngelRoomGen()
     local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
+    if not player then return end
 
-    if player then
-        local runSave = BeckyMod:RunSave(player)
-        local floorSave = BeckyMod:FloorSave(player)
+    local runSave = BeckyMod:RunSave(player)
+    local floorSave = BeckyMod:FloorSave(player)
 
-        if floorSave.bossIsDead then
-            local level = game:GetLevel()
-            local currentRoomDesc = level:GetRoomByIdx(GridRooms.ROOM_DEVIL_IDX)
-            if currentRoomDesc.Data ~= nil then
-                runSave.FIRST_DEAL_RUN = false
-                floorSave.bossIsDead = false
-            end
-        end
-    end
+    if not floorSave.bossIsDead then return end
+    local level = game:GetLevel()
+    local currentRoomDesc = level:GetRoomByIdx(GridRooms.ROOM_DEVIL_IDX)
+
+    if currentRoomDesc.Data then return end
+    runSave.FIRST_DEAL_RUN = false
+    floorSave.bossIsDead = false
 end
+-- end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BECKY.checkAngelRoomGen)
+
+function BECKY:DamageMult(player)
+    player.Damage = player.Damage * 1.2
+end
+BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BECKY.DamageMult, CacheFlag.CACHE_DAMAGE)
+
+function BeckyMod:SetItemPrice(pickup)
+    
+end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, BeckyMod.SetItemPrice, PickupVariant.PICKUP_COLLECTIBLE)
