@@ -39,6 +39,7 @@ end
 local root = "becky_scripts.mod_compatibility.patches"
 
 local patches = {
+	"future",
     "external_items_descriptions",
     "custom_items",
     "epiphany",
