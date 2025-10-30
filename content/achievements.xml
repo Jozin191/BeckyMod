@@ -1,0 +1,22 @@
+<achievements gfxroot="gfx/ui/achievement/">
+	
+	<!-- Becky Unlocks -->
+	<achievement name="Devilzon Prime" text='Becky Moms Heart' gfx="achievement_devilzon_prime.png" />
+	<achievement name="Night of the Slasher" text='Becky Bossrush' gfx="achievement_night_of_the_slasher.png" />
+	<achievement name="Dream Banisher" text='Becky Satan' gfx="achievement_dream_banisher.png" />
+	<achievement name="Sinner" text='Becky Isaac' gfx="achievement_sinner.png" />
+	<achievement name="Holy Bookmark" text='Becky ???' gfx="achievement_holy_bookmark.png" />
+	<achievement name="Chalice" text='Becky The Lamb' gfx="achievement_chalice.png" />
+	<achievement name="Dead Socket" text='Becky Hush' gfx="achievement_dead_socket.png" />
+	<achievement name="Dead Battery" text='Becky Mega Satan' gfx="achievement_dead_battery.png" />
+	<achievement name="Coxinha" text='Becky Ultra Greed' gfx="achievement_coxinha.png" />
+	<achievement name="Corpse Tag" text='Becky Ultra Greedier' gfx="achievement_corpse_tag.png" />
+	<achievement name="Butchers Cookbook" text='Becky Delirium' gfx="achievement_butchers_cookbook.png" />
+	<achievement name="Scarecrow" text='Becky Mother' gfx="achievement_scarecrow.png" />
+	<achievement name="Null Bombs" text='Becky The Beast' gfx="achievement_null_bombs.png" />
+	<achievement name="Ghost Amulet" text='Becky All' gfx="achievement_ghost_amulet.png" />
+	
+	<!-- Tainted shit so it's locked -->
+	<achievement name="Tainted Becky" text='' gfx="achievement_placeholder.png" />
+	
+</achievements>
