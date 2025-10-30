@@ -9,6 +9,7 @@
         canShoot="false"
         costumeSuffix="becky"
         modcostume="1"
+		birthright="Freedom!!!"
     />
     <player name="Becky's Ghost"
         skin="character_ghostb.png"

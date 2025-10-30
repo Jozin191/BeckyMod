@@ -540,4 +540,7 @@ local function EIDPatch()
 	--EID._currentMod = "" --So items added after this with no set mod don't display as the becky mod
 end
 
+local myPlayerID = Isaac.GetPlayerTypeByName("Becky")
+EID:addBirthright(myPlayerID, "The Ghost's range becomes unlimited.")
+
 loader:RegisterPatch("EID", EIDPatch)
