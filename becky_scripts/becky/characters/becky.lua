@@ -244,6 +244,7 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BECKY.checkAngelRoomGen)
 
 function BECKY:DamageMult(player)
+    if player:GetPlayerType() ~= BECKY.PLAYERTYPE then return end
     player.Damage = player.Damage * 1.2
 end
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BECKY.DamageMult, CacheFlag.CACHE_DAMAGE)
