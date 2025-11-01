@@ -24,6 +24,15 @@
         tags="nolostbr nocantrip"
         />
 
+        <active id="11"
+        name="Butcher's Cookbook"
+        gfx="butchers_cookbook.png"
+        description="I'm the butcher and this is my cookbook!"
+        quality="2"
+        maxcharges="4"
+        chargetype="normal"
+        />
+
         <!--PASSIVE ITEMS-->
 
         <passive id="3"
