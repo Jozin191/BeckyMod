@@ -51,7 +51,7 @@ function MenuProvider.SaveMenuKeybindSetting(var)
 end
 
 function MenuProvider.GetMenuHintSetting()
-    return BeckyMod.mod.SaveManager.GetDeadSeaScrollsSave().MenuHint
+    return BeckyMod.SaveManager.GetDeadSeaScrollsSave().MenuHint
 end
 
 function MenuProvider.SaveMenuHintSetting(var)
