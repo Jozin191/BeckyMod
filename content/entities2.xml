@@ -11,4 +11,7 @@
 
     <!--Ghost Ball-->
     <entity name = "Ghost Ball" id = "3" anm2path = "items/GHOST_BALL.anm2" shadowSize="10" collisionRadius="17" friction = "0.8"/>
+
+    <!--Effect entities-->
+    <entity name="Butcher's Cookbook Sawblade" id="1000" anm2path="familiar/sawblade.anm2"/>
 </entities>
