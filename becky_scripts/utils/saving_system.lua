@@ -169,3 +169,8 @@ function pData:GetPickupData(pickup)
 	BeckyMod:Log(msg)
 	return BeckyMod:GetPickupData(pickup)
 end
+
+--putting this here since.... i dunno where else to put it sorry jozin/other modders
+
+BeckyAchievementSystem = include("becky_scripts.utils.achievements")
+

@@ -1,6 +1,8 @@
 --luacheck: no max line length
 -- Markdown guide https://github.com/wofsauge/External-Item-Descriptions/wiki
 
+if not EID then return end
+
 local loader = BeckyMod.PatchesLoader
 
 local function EIDPatch()

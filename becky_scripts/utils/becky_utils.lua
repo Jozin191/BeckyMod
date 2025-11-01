@@ -54,6 +54,62 @@ function BeckyMod:Log(...)
 	Isaac.DebugString(str)
 end
 
+--Checks if something is in a table
+---@param table Table
+---@param element any
+function BeckyMod:CheckTableContents(table, element)
+	for _, value in pairs(table) do
+	  	if value == element then
+			return true
+	  	end
+	end
+	return false
+end
+
+-- thanks bobbymod (i cvs added this so this is self promo)
+
+function BeckyMod:NestVariable(tab, variable, ... )
+	if not tab or type(tab) ~= "table" then
+		error("Did not give Table!")
+	end
+
+	local keys = { ... }
+
+
+	for i, key in ipairs(keys) do
+
+		key = tostring(key)
+
+		if i < #keys+1 and (type(tab) == "table") then
+			if not tab[key] or (tab and type(tab[key]) ~= "table") then
+				tab[key] = i < #keys and {} or variable
+			else
+				tab[key] = i < #keys and tab[key] or variable
+			end
+
+			tab = tab[key]
+		end
+
+	end	--return tab
+end
+
+function BeckyMod:GetNestedVariable(tab, ... )
+    
+	if not tab or type(tab) ~= "table" then
+		error("Did not give Table!")
+	end
+
+	local keys = { ... }
+
+	for i = 1, #keys do
+		if not tab[tostring(keys[i])] then
+			return false
+		end
+		tab = tab[tostring(keys[i])]
+	end
+	return tab
+end
+
 ---Equivalent to BeckyMod:Log, but only prints if mod.FLAGS.Debug is set to true.
 ---@function
 function BeckyMod:DebugLog(...)

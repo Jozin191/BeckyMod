@@ -4,4 +4,10 @@
         <sample weight="1" path="ghostNoise (2).wav" />
         <sample weight="1" path="ghostNoise (1).wav" />
     </sound>
+    <sound name="deadseascrolls_pop">
+        <sample weight="1" path="deadseascrolls/pop.wav" />
+    </sound>
+    <sound name="deadseascrolls_whoosh">
+        <sample weight="1" path="deadseascrolls/whoosh.wav" />
+    </sound>
 </sounds>

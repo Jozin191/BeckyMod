@@ -18,8 +18,11 @@ include("becky_scripts.utils.bitmask_helper")
 include("becky_scripts.utils.hud_helper")
 include("becky_scripts.utils.BombLib")
 include("becky_scripts.utils.player_anim_lib")
+include("becky_scripts.utils.deadseascrolls.dssmain")
 
 Scheduler = include("becky_scripts.utils.schedule_data")
+
+
 
 BeckyMod.Game = Game()
 BeckyMod.Level = function() return BeckyMod.Game:GetLevel() end
