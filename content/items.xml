@@ -113,14 +113,6 @@
 
         <!--TRINKETS-->
 
-        <trinket id="1"
-        name="Burning Feather"
-        description="A broken dream"
-        gfx="burning_feather.png"
-        cache="flying"
-        passivecache="true"
-        />
-
         <trinket id="2"
         name="Holy Bookmark"
         description="With lightness come luck"
