@@ -55,6 +55,7 @@
         quality="1"
         cache=""
         hearts="2"
+        devilprice="1"
         />
 
         <passive id="5"
@@ -81,7 +82,7 @@
         gfx="null_bombs.png"
         description="Abyssal blast +5 bombs"
         quality="3"
-
+        devilprice="2"
         bombs="5"
         />
 
@@ -98,6 +99,7 @@
         description="Sinful buddy"
         quality="2"
         tags="offensive summonable monstermanual"
+        devilprice="1"
         />
 
         <familiar id="10"

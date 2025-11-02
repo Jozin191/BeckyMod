@@ -1,0 +1,69 @@
+<ItemPools>
+    <Pool Name="treasure">
+        <Item Name="Sinner" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Scarecrow" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Night of the Slasher" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Butcher's Cookbook" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+    <Pool Name="greedTreasure">
+        <Item Name="Sinner" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Scarecrow" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Night of the Slasher" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Butcher's Cookbook" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+
+
+    <Pool Name="boss">
+        <Item Name="Coxinha" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+    <Pool Name="greedBoss">
+        <Item Name="Coxinha" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+
+
+    <Pool Name="shop">
+        <Item Name="Dream Banisher" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Dead Socket" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Night of the Slasher" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+
+
+    <Pool Name="devil">
+        <Item Name="Sinner" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Defiled Chalice" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Null Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+    <Pool Name="greedDevil">
+        <Item Name="Sinner" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Defiled Chalice" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Null Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+
+
+    <Pool Name="angel">
+        <Item Name="Ghost Amulet" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+    <Pool Name="greedAngel">
+        <Item Name="Ghost Amulet" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+
+    <Pool Name="secret">
+        <Item Name="Dead Socket" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+
+    <Pool Name="demonBeggar">
+        <Item Name="Defiled Chalice" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+
+    <Pool Name="babyShop">
+        <Item Name="Sinner" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+
+    <Pool Name="library">
+        <Item Name="Butcher's Cookbook" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+
+    <Pool Name="bombBum">
+        <Item Name="Null Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+</ItemPools>
