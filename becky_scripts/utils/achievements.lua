@@ -68,6 +68,7 @@ BeckyMod.ACHIEVEMENT = {
 		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Mega Satan"},
 		Tags = {"Becky", "Mother"}
 	},
+	{
 		ID = "NIGHT_OF_THE_SLASHER",
 		Note = {"night", "of", "the", "slasher"},
 		Item = Isaac.GetItemIdByName("Night of the Slasher"),
