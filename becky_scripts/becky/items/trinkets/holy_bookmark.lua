@@ -4,15 +4,14 @@
         ART: Nerfexus
         CODE: Tiburones202
 ]]
-
+local mod = BeckyMod
+local enums = mod.Enums
+local trinkets = enums.TrinketType
 local HOLY_BOOKMARK = {}
-
-HOLY_BOOKMARK.ID = Isaac.GetTrinketIdByName("Holy Bookmark")
 
 BeckyMod.Trinket.HOLY_BOOKMARK = HOLY_BOOKMARK
 
 HOLY_BOOKMARK.LUCK_PER_ITEM = 0.5
-
 HOLY_BOOKMARK.HolyList = {
     --Add non-seraphim but angel-realted passives in here
     Passives = {
@@ -45,7 +44,6 @@ HOLY_BOOKMARK.HolyList = {
 }
 
 --Function to add custom items to this (non-seraphim ones, for other mods)
-
 function HOLY_BOOKMARK:addItem(type, itemId)
     if type == ItemType.ITEM_ACTIVE then
         if table.indexOf(HOLY_BOOKMARK.HolyList.Actives, itemId) == -1 then
@@ -61,6 +59,7 @@ end
 --Holy bookmark items (added after all mods have loaded)
 
 function HOLY_BOOKMARK:addAllItems()
+---@diagnostic disable-next-line: undefined-field
     for itemId = 1, BeckyMod.itemconfig:GetCollectibles().Size - 1 do
         local cfg = BeckyMod.itemconfig:GetCollectible(itemId)
         -- auto mod compatibility??? real...
@@ -69,48 +68,39 @@ function HOLY_BOOKMARK:addAllItems()
         end
     end
 end
-
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_MODS_LOADED, CallbackPriority.LATE, HOLY_BOOKMARK.addAllItems)
 
 function HOLY_BOOKMARK:applyLuck(player, cacheFlags)
-    if player:HasTrinket(HOLY_BOOKMARK.ID) and BeckyMod:HasBitFlags(cacheFlags, CacheFlag.CACHE_LUCK) then
-        local holyStuffCount = player:GetTrinketMultiplier(HOLY_BOOKMARK.ID) --Counts itself
+    if not player:HasTrinket(trinkets.HOLY_BOOKMARK) then return end
+    local holyStuffCount = player:GetTrinketMultiplier(trinkets.HOLY_BOOKMARK) --Counts itself
 
-        for i = 1, #HOLY_BOOKMARK.HolyList.Passives do
-            if player:HasCollectible(HOLY_BOOKMARK.HolyList.Passives[i]) then
-                holyStuffCount = holyStuffCount + 1 --Count as 1 item (1 luck)
-            end
+    for i = 1, #HOLY_BOOKMARK.HolyList.Passives do
+        if player:HasCollectible(HOLY_BOOKMARK.HolyList.Passives[i]) then
+            holyStuffCount = holyStuffCount + 1 --Count as 1 item (1 luck)
         end
-        for i = 1, #HOLY_BOOKMARK.HolyList.Actives do
-            if player:HasCollectible(HOLY_BOOKMARK.HolyList.Actives[i]) then
-                holyStuffCount = holyStuffCount + 2 --Count as 2 items (1 luck)
-            end
-        end
-
-        player.Luck = player.Luck + holyStuffCount * HOLY_BOOKMARK.LUCK_PER_ITEM
     end
-end
+    for i = 1, #HOLY_BOOKMARK.HolyList.Actives do
+        if player:HasCollectible(HOLY_BOOKMARK.HolyList.Actives[i]) then
+            holyStuffCount = holyStuffCount + 2 --Count as 2 items (1 luck)
+        end
+    end
 
-BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, HOLY_BOOKMARK.applyLuck)
+    player.Luck = player.Luck + holyStuffCount * HOLY_BOOKMARK.LUCK_PER_ITEM
+end
+BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, HOLY_BOOKMARK.applyLuck, CacheFlag.CACHE_LUCK)
 
 --Cache luck when picking up an item
 
 function HOLY_BOOKMARK:refresLuckOnPickup(_, _, _, _, _, player)
-    if player:HasTrinket(HOLY_BOOKMARK.ID) then
-        player:AddCacheFlags(CacheFlag.CACHE_LUCK)
-        player:EvaluateItems()
-    end
+    if not player:HasTrinket(trinkets.HOLY_BOOKMARK) then return end
+    player:AddCacheFlags(CacheFlag.CACHE_LUCK, true)
 end
-
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, HOLY_BOOKMARK.refresLuckOnPickup)
 
 --Cache luck when dropping up an item
 
 function HOLY_BOOKMARK:refresLuckOnDrop(player)
-    if player:HasTrinket(HOLY_BOOKMARK.ID) then
-        player:AddCacheFlags(CacheFlag.CACHE_LUCK)
-        player:EvaluateItems()
-    end
+    if not player:HasTrinket(trinkets.HOLY_BOOKMARK) then return end
+    player:AddCacheFlags(CacheFlag.CACHE_LUCK, true)
 end
-
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, HOLY_BOOKMARK.refresLuckOnDrop)
