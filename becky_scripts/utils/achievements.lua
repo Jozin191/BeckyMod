@@ -12,6 +12,109 @@ BeckyMod.ACHIEVEMENT = {
 		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Mom's Heart"},
 		Tags = {"Becky", "Mom's Heart"}
 	},
+	{ 
+		ID = "SINNER",
+		Note = {"sinner"},
+		Item = Isaac.GetItemIdByName("Sinner"),
+		Tooltip = {"beat", "satan", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Satan"},
+		Tags = {"Becky", "Satan"}
+	},
+	{ 
+		ID = "DREAM_BANISHER",
+		Note = {"dream", "banisher"},
+		Item = Isaac.GetItemIdByName("Dream Banisher"),
+		Tooltip = {"beat", "isaac", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Isaac"},
+		Tags = {"Becky", "Isaac"}
+	},
+	{ 
+		ID = "DEAD_SOCKET",
+		Note = {"dead", "socket"},
+		Item = Isaac.GetItemIdByName("Dead Socket"),
+		Tooltip = {"beat", "hush", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Hush"},
+		Tags = {"Becky", "Hush"}
+	},
+		{ 
+		ID = "COXINHA",
+		Note = {"coxinha"},
+		Item = Isaac.GetItemIdByName("Coxinha"),
+		Tooltip = {"beat", "ultra greed", "on greed", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Ultra Greed"},
+		Tags = {"Becky", "Ultra Greed"}
+	},
+	{ 
+		ID = "CORPSE_TAG",
+		Note = {"corpse", "tag"},
+		Trinket = Isaac.GetTrinketIdByName("Corpse Tag"),
+		Tooltip = {"beat", "ultra greed", "on greedier", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Ultra Greed"},
+		Tags = {"Becky", "Ultra Greed"}
+	},
+	{ 
+		ID = "SCARECROW",
+		Note = {"scarecrow"},
+		Item = Isaac.GetItemIdByName("Scarecrow"),
+		Tooltip = {"beat", "mother", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Mother"},
+		Tags = {"Becky", "Mother"}
+	},
+	{ 
+		ID = "DEAD_BATTERY",
+		Note = {"dead", "battery"},
+		Item = Isaac.GetPickupIdByName("Dead Battery"),
+		Tooltip = {"beat", "mother", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Mega Satan"},
+		Tags = {"Becky", "Mother"}
+	},
+		ID = "NIGHT_OF_THE_SLASHER",
+		Note = {"night", "of", "the", "slasher"},
+		Item = Isaac.GetItemIdByName("Night of the Slasher"),
+		Tooltip = {"beat", "boss rush", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Boss Rush"},
+		Tags = {"Becky", "Boss Rush"}
+	},
+	{ 
+		ID = "DEFILED_CHALICE",
+		Note = {"defiled", "chalice"},
+		Item = Isaac.GetItemIdByName("Defiled Chalice"),
+		Tooltip = {"beat", "lamb", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Lamb"},
+		Tags = {"Becky", "Lamb"}
+	},
+	{ 
+		ID = "HOLY_BOOKMARK",
+		Note = {"holy", "bookmark"},
+		Trinket = Isaac.GetTrinketIdByName("Holy Bookmark"),
+		Tooltip = {"beat", "???", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "???"},
+		Tags = {"Becky", "???"}
+	},
+	{ 
+		ID = "BUTCHERS",
+		Note = {"butcher's", "cookbook"},
+		Item = Isaac.GetItemIdByName("Butcher's Cookbook"),
+		Tooltip = {"beat", "dellirium", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Dellirium"},
+		Tags = {"Becky", "Dellirium"}
+	},
+	{ 
+		ID = "NULL_BOMBS",
+		Note = {"null", "bombs"},
+		Item = Isaac.GetItemIdByName("Null Bombs"),
+		Tooltip = {"beat", "beast", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Beast"},
+		Tags = {"Becky", "Beast"}
+	},
+	{ 
+		ID = "GHOST_AMULET",
+		Note = {"ghost", "amulet"},
+		Item = Isaac.GetItemIdByName("Ghost Amulet"),
+		Tooltip = {"beat", "all", "on hard", "as becky"},
+		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "All"},
+		Tags = {"Becky", "All"}
+	},
 }
 
 -- setting it up reminiscent of Fiend Folio (except for the dss ig)
@@ -345,6 +448,19 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 	local entTab = {
 		{{78, 1}, "Becky", BeckyAchmnts.TRINKET_DEVILZON_PRIME},
 		{{78, 0}, "Becky", BeckyAchmnts.TRINKET_DEVILZON_PRIME},
+		{{84, 10}, "Becky", BeckyAchmnts.ITEM_SINNER},
+		{{102, 0}, "Becky", BeckyAchmnts.ITEM_DREAM_BANISHER},
+		{{407, 0}, "Becky", BeckyAchmnts.ITEM_DEAD_SOCKET},
+		{{406, 0}, "Becky", BeckyAchmnts.ITEM_COXINHA},
+		{{406, 1}, "Becky", BeckyAchmnts.TRINKET_CORPSE_TAG},
+		{{912, 10}, "Becky", BeckyAchmnts.ITEM_SCARECROW},
+		{{275, 0}, "Becky", BeckyAchmnts.PICKUP_DEAD_BATTERY},
+	--{{275, 0}, "Becky", BeckyAchmnts.ITEM_NIGHT_OF_THE_SLASHER},
+		{{273, 10}, "Becky", BeckyAchmnts.PICKUP_DEFILED_CHALICE},
+		{{102, 1}, "Becky", BeckyAchmnts.TRINKET_HOLY_BOOKMARK},
+		{{412, 0}, "Becky", BeckyAchmnts.ITEM_BUTCHERS},
+		{{951, 0}, "Becky", BeckyAchmnts.ITEM_NULL_BOMBS},
+	--{{951, 0}, "Becky", BeckyAchmnts.ITEM_GHOST_AMULET},
 	}
 
 	for _, v in ipairs(entTab) do
