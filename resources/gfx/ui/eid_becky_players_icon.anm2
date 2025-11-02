@@ -1,5 +1,5 @@
 <AnimatedActor>
-    <Info CreatedBy="CVS" CreatedOn="16/09/2025 03:46:23 p. m." Version="11" Fps="30"/>
+    <Info CreatedBy="CVS" CreatedOn="16/09/2025 03:46:23 p. m." Version="13" Fps="30"/>
     <Content>
         <Spritesheets>
             <Spritesheet Path="..\..\..\content\gfx\coop_icon_becky.png" Id="0"/>
@@ -10,8 +10,8 @@
         <Nulls/>
         <Events/>
     </Content>
-    <Animations DefaultAnimation="Bobby">
-        <Animation Name="Bobby" FrameNum="1" Loop="false">
+    <Animations DefaultAnimation="Becky">
+        <Animation Name="Becky" FrameNum="1" Loop="false">
             <RootAnimation>
                 <Frame XPosition="0" YPosition="0" XPivot="0" YPivot="0" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
             </RootAnimation>
