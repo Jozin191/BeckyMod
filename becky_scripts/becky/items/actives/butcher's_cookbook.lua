@@ -2,6 +2,7 @@ local BUTCHERS_ID = Isaac.GetItemIdByName("Butcher's Cookbook")
 local SAW_VARIANT = Isaac.GetEntityVariantByName("Butcher's Cookbook Sawblade")
 local SAW_LIFETIME = 20 --in seconds
 local SAW_DPS = 20
+local BUTCHERS = {}
 
 ---@param player EntityPlayer
 local function butchersUse(_, collectibleID, rngObj, player, useFlags, activeSlot, varData)
@@ -42,4 +43,7 @@ local function sawUpdate(_, effect)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, sawUpdate, SAW_VARIANT)
 
-BeckyMod.Item.BUTCHERS_COOKBOOK.ID = BUTCHERS_ID
+BUTCHERS.ID = BUTCHERS_ID
+BeckyMod.Item.BUTCHERS_COOKBOOK = BUTCHERS
+
+return BUTCHERS
