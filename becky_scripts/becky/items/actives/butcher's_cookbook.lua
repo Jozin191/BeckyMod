@@ -41,3 +41,5 @@ local function sawUpdate(_, effect)
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, sawUpdate, SAW_VARIANT)
+
+BeckyMod.Item.BUTCHERS_COOKBOOK.ID = BUTCHERS_ID
