@@ -1,8 +1,7 @@
-local mod = BeckyMod
-local enums = mod.Enums
-local items = enums.CollectibleType
-local variants = enums.Variants
 local NULL_BOMBS = {}
+
+NULL_BOMBS.ID = Isaac.GetItemIdByName("Null Bombs")
+NULL_BOMBS.BOMB_VARIANT = Isaac.GetEntityVariantByName("Null Bomb")
 
 NULL_BOMBS.MAW_TIMEOUT = 80
 NULL_BOMBS.MAW_RADIUS = 50
@@ -13,14 +12,14 @@ NULL_BOMBS.REDUCED_SCATTER_DAMAGE_MULT = 7.5
 NULL_BOMBS.DR_FETUS_CHANCE = 10
 NULL_BOMBS.NANCY_BOMBS_CHANCE = 5
 
--- BeckyMod.Item.NULL_BOMBS = NULL_BOMBS
+BeckyMod.Item.NULL_BOMBS = NULL_BOMBS
 
 local max = math.max
 local BombLibCallbacks = BombLib.Callbacks
 
 BombLib:RegisterBombModifier("Null Bomb",
     {
-		HasModifier = function(player) return player:HasCollectible(items.NULL_BOMBS) end,
+		HasModifier = function(player) return player:HasCollectible(NULL_BOMBS.ID) end,
 
 		FetusChance = BombLib.DefaultFetusChance, --Shared with epic fetus. you can input a function to scale with luck
 		NancyChance = -1, --Whacky.
@@ -34,7 +33,7 @@ BombLib:RegisterBombModifier("Null Bomb",
 
 		IgnoreHotPotato = false,
 
-		Variant = variants.NULL_BOMB,
+		Variant = NULL_BOMBS.BOMB_VARIANT,
 		Path = "gfx/items/pick ups/bombs/null",
 		AddPathSuffixOnGolden = true,
 

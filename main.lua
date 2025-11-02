@@ -1,12 +1,11 @@
 ---@class ModReference
 BeckyMod = RegisterMod("Becky", 1)
+BeckyMod.RECOMMENDED_SHIFT_IDX = 35
 
 --FLAGS!!!
 BeckyMod.FLAGS = {}
 BeckyMod.FLAGS.Debug = true
 --End of flags
-
-include("becky_scripts.Enums")
 
 BeckyMod.SaveManager = include("becky_scripts.utils.save_manager")
 BeckyMod.SaveManager.Init(BeckyMod)
@@ -19,10 +18,14 @@ include("becky_scripts.utils.bitmask_helper")
 include("becky_scripts.utils.hud_helper")
 include("becky_scripts.utils.BombLib")
 include("becky_scripts.utils.player_anim_lib")
--- include("becky_scripts.utils.deadseascrolls.dssmain")
+include("becky_scripts.utils.deadseascrolls.dssmain")
 
 Scheduler = include("becky_scripts.utils.schedule_data")
 
+
+
+BeckyMod.Game = Game()
+BeckyMod.Level = function() return BeckyMod.Game:GetLevel() end
 BeckyMod.itemconfig = Isaac.GetItemConfig()
 function BeckyMod:RefreshItemConfig()
 	BeckyMod.itemconfig = Isaac.GetItemConfig()
@@ -32,7 +35,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, BeckyMod.RefreshItemConf
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BeckyMod.RefreshItemConfig)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_MODS_LOADED, CallbackPriority.IMPORTANT, BeckyMod.RefreshItemConfig)
 
-BeckyMod.Trinket = {} -- Needed for Devilzon Prime and Holy Bookmark
+BeckyMod.Item = {}
+BeckyMod.Trinket = {}
+BeckyMod.Character = {}
 BeckyMod.Pickup = {}
 
 if not REPENTOGON then
@@ -83,8 +88,3 @@ include("becky_scripts.becky.pickups.dead_battery")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.CSection")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.DrFetus")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechZero")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.StatusEffects")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Brimstone")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.GodHead")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Haemolacria")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Ipecac")

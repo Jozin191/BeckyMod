@@ -1,14 +1,7 @@
----@diagnostic disable: undefined-doc-name, undefined-field
 --luacheck: no max line length
 -- Markdown guide https://github.com/wofsauge/External-Item-Descriptions/wiki
 
 if not EID then return end
-
-local mod = BeckyMod
-local enums = mod.Enums
-local player = enums.PlayerType
-local items = enums.CollectibleType
-local trinkets = enums.TrinketType
 
 local loader = BeckyMod.PatchesLoader
 
@@ -72,7 +65,7 @@ local function EIDPatch()
 	CharIcons:Load("gfx/ui/eid/becky_icons.anm2", true)
 	EID:addIcon("Becky", "Becky", 0, 16, 16, 6, 6, CharIcons)
 
-	EID.InlineIcons["Player" .. BeckyMod.Enums.PlayerType.BECKY] = EID.InlineIcons["Becky"]
+	EID.InlineIcons["Player" .. Character.BECKY.PLAYERTYPE] = EID.InlineIcons["Becky"]
 
 	-- Dynamic Callbacks
 
@@ -226,12 +219,12 @@ local function EIDPatch()
 	--Health related stuff on items
 
 	if EID.HealthUpData then
-		EID.HealthUpData["5.100." .. tostring(items.COXINHA)] = 1
+		EID.HealthUpData["5.100." .. tostring(Item.COXINHA.ID)] = 1
 	end
 	
 	if EID.HealingItemData then
-		EID.HealingItemData["5.100." .. tostring(items.COXINHA)] = true
-		EID.HealingItemData["5.100." .. tostring(items.DEFILED_CHALICE)] = true
+		EID.HealingItemData["5.100." .. tostring(Item.COXINHA.ID)] = true
+		EID.HealingItemData["5.100." .. tostring(Item.DEFILED_CHALICE.ID)] = true
 	end
 
 	--Actual Descriptions
@@ -252,7 +245,7 @@ local function EIDPatch()
 	-- Items
 
 	local EID_Collectibles = {
-		[items.HAND_MADE_BIBLE] = { -- EN: [X] | SPA: [X] 
+		[Item.HAND_MADE_BIBLE.ID] = { -- EN: [X] | SPA: [X] 
 			en_us = {
 				Name = "Hand Made Bible",
 				Description = {
@@ -261,7 +254,7 @@ local function EIDPatch()
 				},
 			},
 		},
-		[items.DREAM_BANISHER] = { -- EN: [OK] | SPA: [X] 
+		[Item.DREAM_BANISHER.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Dream Banisher",
 				Description = {
@@ -273,17 +266,17 @@ local function EIDPatch()
 				},
 			},
 		},
-		[items.COXINHA] = { -- EN: [OK] | SPA: [X] 
+		[Item.COXINHA.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Coxinha",
 				Description = {
 					"↑ {{Heart}} +1 Health",
-					"#↑ {{Speed}} +" .. 0.3 .. " Speed",
+					"#↑ {{Speed}} +" .. Item.COXINHA.SPEED_INCREASE .. " Speed",
 					"#{{HealingRed}} Heals 2 hearts",
 				},
 			},
 		},
-		[items.SCARECROW] = { -- EN: [OK] | SPA: [X] 
+		[Item.SCARECROW.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Scarecrow",
 				Description = {
@@ -292,7 +285,7 @@ local function EIDPatch()
 				},
 			},
 		},
-		[items.NIGHT_OF_THE_SLASHER] = { -- EN: [OK] | SPA: [X] 
+		[Item.NIGHT_OF_THE_SLASHER.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Night of the Slasher",
 				Description = {
@@ -301,7 +294,7 @@ local function EIDPatch()
 				},
 			},
 		},
-		[items.NULL_BOMBS] = { -- EN: [OK] | SPA: [X] 
+		[Item.NULL_BOMBS.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Null Bombs",
 				Description = {
@@ -310,7 +303,7 @@ local function EIDPatch()
 				},
 			},
 		},
-		[items.DEAD_SOCKET] = { -- EN: [OK] | SPA: [X] 
+		[Item.DEAD_SOCKET.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Dead Socket",
 				Description = {
@@ -319,7 +312,7 @@ local function EIDPatch()
 				},
 			},
 		},
-		[items.SINNER] = { -- EN: [OK] | SPA: [X] 
+		[Item.SINNER.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Sinner",
 				Description = {
@@ -328,7 +321,7 @@ local function EIDPatch()
 				},
 			},
 		},
-		[items.DEFILED_CHALICE] = { -- EN: [OK] | SPA: [X] 
+		[Item.DEFILED_CHALICE.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Defiled Chalice",
 				Description = {
@@ -386,7 +379,7 @@ local function EIDPatch()
 
 	local EID_Trinkets
 	EID_Trinkets = {
-		[trinkets.HOLY_BOOKMARK] = { -- EN: [OK] | SPA: [X] 
+		[Trinket.HOLY_BOOKMARK.ID] = { -- EN: [OK] | SPA: [X] 
 			_modifier = function(descObj, line) ---@param descObj EID_DescObj
 				local mult = getTrinketMult(descObj)
 				local luckTxt = tostring(Trinket.HOLY_BOOKMARK.LUCK_PER_ITEM * mult)
@@ -402,14 +395,14 @@ local function EIDPatch()
 				Name = "Holy Bookmark",
 				Description = {
 					function(descObj)
-						return EID_Trinkets[trinkets.HOLY_BOOKMARK]._modifier(descObj, "↑ {{Luck}} +{1} luck")
+						return EID_Trinkets[Trinket.HOLY_BOOKMARK.ID]._modifier(descObj, "↑ {{Luck}} +{1} luck")
 					end,
-					"#{{AngelChanceSmall}} Each unique angel-related item that the player owns grants an extra +" .. 0.5 .. " luck",
+					"#{{AngelChanceSmall}} Each unique angel-related item that the player owns grants an extra +" .. Trinket.HOLY_BOOKMARK.LUCK_PER_ITEM .. " luck",
 					"#Actives grant twice the luck",
 				}
 			},
 		},
-		[trinkets.DEVILZON_PRIME] = {
+		[Trinket.DEVILZON_PRIME.ID] = {
 			_modifier = function(descObj, line) ---@param descObj EID_DescObj
 				local mult = getTrinketMult(descObj)
 				local chanceTxt = tostring(Trinket.DEVILZON_PRIME.EXTRA_CHANCE_PER_DEAL * 2 * (1 - 0.5^mult))
@@ -432,7 +425,7 @@ local function EIDPatch()
 				}
 			}
 		},
-		[trinkets.CORPSE_TAG] = {
+		[Trinket.CORPSE_TAG.ID] = {
 			en_us = {
 				Name = "Corpse Tag",
 				Description = {
@@ -476,7 +469,7 @@ local function EIDPatch()
 
 	local EID_Characters
 	EID_Characters = {
-		[player.BECKY] = { -- EN: [OK] | SPA: [X] 
+		[Character.BECKY.PLAYERTYPE] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Becky",
 				Description = {
@@ -500,7 +493,7 @@ local function EIDPatch()
 		"Holy Bookmark Items",
 		-- condition
 		function(descObj)
-			if not BECKY_EID:ClosestPlayerTo(descObj.Entity):HasTrinket(trinkets.HOLY_BOOKMARK) then
+			if not BECKY_EID:ClosestPlayerTo(descObj.Entity):HasTrinket(Trinket.HOLY_BOOKMARK.ID) then
 				return false
 			end
 			local isActiveIn = table.indexOf(Trinket.HOLY_BOOKMARK.HolyList.Actives, descObj.ObjSubType) ~= -1
@@ -509,7 +502,7 @@ local function EIDPatch()
 		end,
 		-- modifier
 		function(descObj)
-			descObj.Description = descObj.Description .. '#{{Trinket' .. trinkets.HOLY_BOOKMARK .. '}} {{ColorSilver}}This item contributes to Holy Bookmark'
+			descObj.Description = descObj.Description .. '#{{Trinket' .. Trinket.HOLY_BOOKMARK.ID .. '}} {{ColorSilver}}This item contributes to Holy Bookmark'
 
 			return descObj
 		end
@@ -549,6 +542,7 @@ local function EIDPatch()
 	--EID._currentMod = "" --So items added after this with no set mod don't display as the becky mod
 end
 
-EID:addBirthright(player.BECKY, "The Ghost's range becomes unlimited.")
+local myPlayerID = Isaac.GetPlayerTypeByName("Becky")
+EID:addBirthright(myPlayerID, "The Ghost's range becomes unlimited.")
 
 loader:RegisterPatch("EID", EIDPatch)

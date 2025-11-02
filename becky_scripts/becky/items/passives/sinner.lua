@@ -1,13 +1,11 @@
 -- Damage = BASE_DAMAGE + speed * SPEED_PER_DAMAGE
 
-local mod = BeckyMod
-local enums = mod.Enums
-local items = enums.CollectibleType
-local variants = enums.Variants
-local utils = enums.Utils
-local game = utils.Game
-
 local SINNER = {}
+
+BeckyMod.Item.SINNER = SINNER
+
+SINNER.ID = Isaac.GetItemIdByName("Sinner")
+SINNER.FAMILIAR = Isaac.GetEntityVariantByName("Becky Sinner")
 
 ---@type table<integer, string>
 SINNER.SPEED_TO_SHEET = {
@@ -64,7 +62,7 @@ function SINNER:EvaluateOrbitOffsets()
     ---@type table<integer, EntityFamiliar[]>
     local hashToFamiliars = {}
 
-    for _, v in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, variants.SINNER)) do
+    for _, v in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, SINNER.FAMILIAR)) do
         ---@diagnostic disable-next-line: cast-local-type
         v = v:ToFamiliar() ---@cast v EntityFamiliar
         local hash = GetPtrHash(v.Player)
@@ -86,7 +84,7 @@ function SINNER:FamiliarInit(familiar)
     familiar:GetSprite():ReplaceSpritesheet(0, SINNER.SPEED_TO_SHEET[SINNER:GetPlayerData(familiar.Player).Speed], true)
     SINNER:EvaluateOrbitOffsets()
 end
-BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, SINNER.FamiliarInit, variants.SINNER)
+BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, SINNER.FamiliarInit, SINNER.FAMILIAR)
 
 ---@param familiar EntityFamiliar
 function SINNER:FamiliarUpdate(familiar)
@@ -114,7 +112,7 @@ function SINNER:FamiliarUpdate(familiar)
 
     familiar.Velocity = targPos - familiar.Position
 
-    if game:GetRoom():GetFrameCount() == 0 then
+    if BeckyMod.Game:GetRoom():GetFrameCount() == 0 then
         familiar.Velocity = Vector.Zero
         familiar.Position = targPos
     end
@@ -129,7 +127,7 @@ function SINNER:FamiliarUpdate(familiar)
 
             pdata.Speed = pdata.Speed + 1 > 2 and -2 or pdata.Speed + 1
 
-            for _, v in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, variants.SINNER)) do
+            for _, v in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, SINNER.FAMILIAR)) do
                 ---@diagnostic disable-next-line: cast-local-type
                 v = v:ToFamiliar() ---@cast v EntityFamiliar
 
@@ -142,22 +140,22 @@ function SINNER:FamiliarUpdate(familiar)
 
     fdata.PrevAngle = frame
 end
-BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, SINNER.FamiliarUpdate, variants.SINNER)
+BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, SINNER.FamiliarUpdate, SINNER.FAMILIAR)
 
 ---@param player EntityPlayer
 function SINNER:EvaluateCache(player)
     player:CheckFamiliar(
-        variants.SINNER,
-        player:GetCollectibleNum(items.SINNER) + player:GetEffects():GetCollectibleEffectNum(items.SINNER),
-        player:GetCollectibleRNG(items.SINNER),
-        Isaac.GetItemConfig():GetCollectible(items.SINNER)
+        SINNER.FAMILIAR,
+        player:GetCollectibleNum(SINNER.ID) + player:GetEffects():GetCollectibleEffectNum(SINNER.ID),
+        player:GetCollectibleRNG(SINNER.ID),
+        Isaac.GetItemConfig():GetCollectible(SINNER.ID)
     )
 end
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, SINNER.EvaluateCache, CacheFlag.CACHE_FAMILIARS)
 
 ---@param entity Entity
 function SINNER:PostEntityRemove(entity)
-    if entity.Type ~= EntityType.ENTITY_FAMILIAR or entity.Variant ~= variants.SINNER then return end
+    if entity.Type ~= EntityType.ENTITY_FAMILIAR or entity.Variant ~= SINNER.FAMILIAR then return end
     Isaac.CreateTimer(SINNER.EvaluateOrbitOffsets, 2, 1, true)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, SINNER.PostEntityRemove)

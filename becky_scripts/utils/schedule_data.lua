@@ -2,8 +2,6 @@
 
 local scheduler = {}
 local Mod = BeckyMod
-local enums = Mod.Enums
-local game = enums.Utils.Game
 scheduler.ScheduleData = {}
 ---
 ---@param delay integer
@@ -13,7 +11,7 @@ scheduler.ScheduleData = {}
 ---@scope Scheduler
 function scheduler.Schedule(delay, func, args)
 	table.insert(scheduler.ScheduleData, {
-		Time = game:GetFrameCount(),
+		Time = Mod.Game:GetFrameCount(),
 		Delay = delay,
 		Call = func,
 		Args = args or {},
@@ -21,7 +19,7 @@ function scheduler.Schedule(delay, func, args)
 end
 
 Mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
-	local time = game:GetFrameCount()
+	local time = Mod.Game:GetFrameCount()
 	for i = #scheduler.ScheduleData, 1, -1 do
 		local data = scheduler.ScheduleData[i]
 		if data.Time + data.Delay <= time then

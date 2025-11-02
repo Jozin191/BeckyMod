@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-global
 local loader = BeckyMod.PatchesLoader
 
 local function EpiphanyPatch()
@@ -52,7 +51,6 @@ local function EpiphanyPatch()
 
     local oldCallback = BeckyMod.areThereCurses
 
----@diagnostic disable-next-line: duplicate-set-field
     function BeckyMod:areThereCurses()
         local someoneHasMothersShadow = false
 

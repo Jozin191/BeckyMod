@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-global, undefined-field
 local loader = BeckyMod.PatchesLoader
 
 local function FiendFolioPatch()

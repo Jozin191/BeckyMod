@@ -1,8 +1,11 @@
-local mod = BeckyMod
-local enums = mod.Enums
-local costumes = enums.NullItemID
-local BeckyPlayer = enums.PlayerType.BECKY
 local BECKY = {}
+
+BECKY.PLAYERTYPE = Isaac.GetPlayerTypeByName("Becky", false)
+
+BECKY.HAIR_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_hair.anm2")
+BECKY.BODY_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_body.anm2")
+
+local ITEM_GHOST_AMULET = Isaac.GetItemIdByName("Ghost Amulet")
 
 BECKY.ExcludeSpikePickupVariants = {
     [PickupVariant.PICKUP_CHEST] = true,
@@ -17,7 +20,7 @@ BECKY.ExcludeSpikePickupVariants = {
     [PickupVariant.PICKUP_LOCKEDCHEST] = true,
 }
 
-local game = enums.Utils.Game
+local game = BeckyMod.Game
 
 --Deal modifiers (keeper's passive, blue baby's passive, or modded stuff)
 --Modded example: Tarnished Judas
@@ -56,7 +59,7 @@ BECKY.AddDealModifiers({
         identificator = "BECKY",
         priority = 500,
         condition = function(_)
-            return PlayerManager.AnyoneIsPlayerType(enums.PlayerType.PlayerType_BECKY)
+            return PlayerManager.AnyoneIsPlayerType(BECKY.PLAYERTYPE)
         end,
         ---@param pickup EntityPickup
         ---@param price number
@@ -68,22 +71,22 @@ BECKY.AddDealModifiers({
     },
 })
 
--- BeckyMod.Character.BECKY = BECKY
+BeckyMod.Character.BECKY = BECKY
 
 --End of deal modifiers
 
 ---@param player EntityPlayer
 function BECKY:OnInit(player)
-    if player:GetPlayerType() ~= BeckyPlayer then return end
+    if player:GetPlayerType() ~= BECKY.PLAYERTYPE then return end
     PlayerAnimLib:SetDefaultAnm2(player, "gfx/player_becky.anm2")
-    player:AddNullCostume(costumes.BECKY_HAIR)
-    player:AddNullCostume(costumes.BECKY_BODY)
-    player:AddCollectible(enums.CollectibleType.GHOST_AMULET)
+    player:AddNullCostume(BECKY.HAIR_COSTUME)
+    player:AddNullCostume(BECKY.BODY_COSTUME)
+    player:AddCollectible(ITEM_GHOST_AMULET)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit, 0)
 
 function BECKY:postNewRoom()
-    local player = PlayerManager.FirstPlayerByType(BeckyPlayer)
+    local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
 
     if not player then return end
     local room = game:GetRoom()
@@ -168,7 +171,7 @@ end
 
 ---@param pickup EntityPickup
 function BECKY:initAngelPickupPrices(pickup)
-    local becky = PlayerManager.FirstPlayerByType(BeckyPlayer)
+    local becky = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
     local room = game:GetRoom()
 
     if not becky then return end
@@ -202,11 +205,11 @@ function BECKY:checkAngelItem(pickup, player)
     local player = player:ToPlayer()
 
     if not player then return end
-    if player:GetPlayerType() ~= BeckyPlayer then return end
+    if player:GetPlayerType() ~= BECKY.PLAYERTYPE then return end
     if not game:GetRoom():GetType() == RoomType.ROOM_ANGEL then return end
     if not player:IsExtraAnimationFinished() then return end
 
-    local firstBecky = PlayerManager.FirstPlayerByType(BeckyPlayer) --Mod only checks the first becky for everything else
+    local firstBecky = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE) --Mod only checks the first becky for everything else
     BeckyMod:RunSave(firstBecky).GOT_ANGEL_ITEM = true
 
     BECKY:updateAngelDealPrice(pickup)
@@ -215,7 +218,7 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, CallbackPrior
 --Needs to run late in case a mod says "nuh uh" and stops you from colliding with it
 
 function BECKY:onBossDeath(entity)
-    local player = PlayerManager.FirstPlayerByType(BeckyPlayer)
+    local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
     if player and entity:IsBoss() then
         BeckyMod:FloorSave(player).bossIsDead = true
     end
@@ -223,7 +226,7 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, BECKY.onBossDeath)
 
 function BECKY:checkAngelRoomGen()
-    local player = PlayerManager.FirstPlayerByType(BeckyPlayer)
+    local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
     if not player then return end
 
     local runSave = BeckyMod:RunSave(player)
@@ -241,7 +244,12 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BECKY.checkAngelRoomGen)
 
 function BECKY:DamageMult(player)
-    if player:GetPlayerType() ~= enums.PlayerType.PlayerType_BECKY then return end
+    if player:GetPlayerType() ~= BECKY.PLAYERTYPE then return end
     player.Damage = player.Damage * 1.2
 end
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BECKY.DamageMult, CacheFlag.CACHE_DAMAGE)
+
+function BeckyMod:SetItemPrice(pickup)
+    
+end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, BeckyMod.SetItemPrice, PickupVariant.PICKUP_COLLECTIBLE)

@@ -1,15 +1,9 @@
-local mod = BeckyMod
-local enums = mod.Enums
-local items = enums.CollectibleType
-local costumes = enums.NullItemID
 local NOTS = {}
-
-
 
 NOTS.ID = Isaac.GetItemIdByName("Night of the Slasher")
 NOTS.Costume = Isaac.GetCostumeIdByPath("gfx/characters/night_of_the_slasher.anm2")
 
--- BeckyMod.Item.NIGHT_OF_THE_SLASHER = NOTS
+BeckyMod.Item.NIGHT_OF_THE_SLASHER = NOTS
 
 NOTS.SpecialFunctions = {
     [100] = {
@@ -63,7 +57,7 @@ function NOTS:UseItem(type, rng, player, useflags, activeslot)
             local specialFunct = NOTS.SpecialFunctions[pickup.Variant]
             if specialFunct ~= nil then
                 if specialFunct ~= false then
-                    local poop = specialFunct.DestroyFunction(pickup, player)
+                    local poop = specialFunct.DestroyFunction(pickup, player, rng)
                     if poop then
                         destroyLater = false
                     end
@@ -90,18 +84,18 @@ function NOTS:UseItem(type, rng, player, useflags, activeslot)
     }
 end
 
-BeckyMod:AddCallback(ModCallbacks.MC_USE_ITEM, NOTS.UseItem, items.NIGHT_OF_THE_SLASHER)
+BeckyMod:AddCallback(ModCallbacks.MC_USE_ITEM, NOTS.UseItem, NOTS.ID)
 
 function NOTS:HandleCostume(player)
     local save = BeckyMod:RunSave(player)
-    if player:HasCollectible(items.NIGHT_OF_THE_SLASHER) then
+    if player:HasCollectible(NOTS.ID) then
 		if not save.NOTSCostume then
-			player:AddNullCostume(costumes.NIGHT_OF_THE_SLASHER)
+			player:AddNullCostume(NOTS.Costume)
 			save.NOTSCostume = true
 		end
 	else
 		if save.NOTSCostume then
-			player:TryRemoveNullCostume(costumes.NIGHT_OF_THE_SLASHER)
+			player:TryRemoveNullCostume(NOTS.Costume)
 			save.NOTSCostume = nil
 		end
 	end

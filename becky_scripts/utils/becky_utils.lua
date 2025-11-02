@@ -1,17 +1,16 @@
 local mod = BeckyMod
-local game = mod.Enums.Utils.Game
 
 --- No idea how to explain this lol.
 --- I got the formula for this from the tboi modding discord resource page, from a guide by catinsurance.
-function BeckyMod:toTearsPerSecond(maxFireDelay)
+function mod:toTearsPerSecond(maxFireDelay)
     return 30 / (maxFireDelay + 1)
 end
   
-function BeckyMod:toMaxFireDelay(tearsPerSecond)
+function mod:toMaxFireDelay(tearsPerSecond)
     return (30 / tearsPerSecond) - 1
 end
 
-function BeckyMod:ForEachPlayer(func)
+function mod:ForEachPlayer(func)
 	for i, player in ipairs(PlayerManager.GetPlayers()) do
 		if func(player, i) then
 			return true
@@ -19,55 +18,10 @@ function BeckyMod:ForEachPlayer(func)
 	end
 end
 
----@param ent Entity
-function BeckyMod:IsEnemy(ent)
-	return (ent:IsActiveEnemy() and ent:IsVulnerableEnemy())
-end
-
-function BeckyMod:GetRoomEnemies()
-	local roomEnts = Isaac.GetRoomEntities()
-	local enemyTable = {}
-
-	for _, ent in ipairs(roomEnts) do
-		if not mod:IsEnemy(ent) then goto continue end
-
-		table.insert(enemyTable, ent)
-		::continue::
-	end
-
-	return enemyTable
-end
-
----@param rng RNG
----@param chance? number
----@return boolean
-function BeckyMod:RandomBoolean(rng, chance)
-	return (rng or RNG()):RandomFloat() <= (chance or 0.5)
-end
-
-
----Helper function for a better management of random floats, allowing to use min and max values, like `math.random()` and `RNG:RandomInt()`
----@param rng? RNG if `nil`, the function will use Mod's `RNG` object instead
----@param min number
----@param max? number if `nil`, returned number will be one between 0 and `min`
-function BeckyMod.RandomFloat(rng, min, max)
-	if not max then
-		max = min
-		min = 0
-	end
-
-	min = min * 1000
-	max = max * 1000
-
-	return (rng or RNG()):RandomInt(min, max) / 1000
-end
-
-
 --- Returns true if there is a curse present.
 --- Mods can modify this (Look at the Epiphany compatibility to see how it's done).
----@diagnostic disable-next-line: duplicate-set-field
-function BeckyMod:areThereCurses()
-    return game:GetLevel():GetCurses() > 0
+function mod:areThereCurses()
+    return BeckyMod.Game:GetLevel():GetCurses() > 0
 end
 
 -- Prints a group of given strings/numbers to both console and log.txt.
@@ -101,7 +55,7 @@ function BeckyMod:Log(...)
 end
 
 --Checks if something is in a table
----@param table table
+---@param table Table
 ---@param element any
 function BeckyMod:CheckTableContents(table, element)
 	for _, value in pairs(table) do
@@ -235,7 +189,6 @@ end
 
 function BeckyMod:IsAnyKeeper(player)
 	local type = player:GetPlayerType()
----@diagnostic disable-next-line: undefined-global
 	return type == PlayerType.PLAYER_KEEPER or type == PlayerType.PLAYER_KEEPER_B or (Epiphany and type == Epiphany.PlayerType.KEEPER)
 end
 

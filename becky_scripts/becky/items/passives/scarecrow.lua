@@ -5,13 +5,6 @@
         CODE: Tiburones202
 ]]
 
-local mod = BeckyMod
-local enums = mod.Enums
-local items = enums.CollectibleType
-local utils = enums.Utils
-local game = utils.Game
-local level = utils.Level
-
 local SCARECROW = {}
 
 SCARECROW.ID = Isaac.GetItemIdByName("Scarecrow")
@@ -20,6 +13,8 @@ SCARECROW.HITS_PER_SPAWNED_CROW = 5
 SCARECROW.MAX_CROWS_AT_A_TIME = 5
 local test = 0.5
 SCARECROW.MAX_COLOR = Color(0, 0, 0, 1.0, 244/255 * test, 241/255 * test, 134/255 * test)
+
+BeckyMod.Item.SCARECROW = SCARECROW
 
 local tearSaveThing = false
 
@@ -35,18 +30,18 @@ end
 function SCARECROW:collideWithEnemy(EntityTear, Collider)
     local enemy = Collider:ToNPC()
 
-    if not enemy then return end
-    if not mod:IsEnemy(enemy) or enemy:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) then return end
+    if not enemy then goto continue end
+    if (not enemy:IsVulnerableEnemy()) or (not enemy:IsActiveEnemy(false)) or enemy:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) then goto continue end
 
     local player = BeckyMod:TryGetPlayer(EntityTear)
 
-    if not player then return end
-    if not player:HasCollectible(items.SCARECROW) then return end
+    if not player then goto continue end
+    if not player:HasCollectible(SCARECROW.ID) then goto continue end
 
     local save = BeckyMod:TempSave(player)
     local saveAll = BeckyMod:TempSave()
     if not saveAll.ScareCrowCount then saveAll.ScareCrowCount = 0 end
-    if saveAll.ScareCrowCount >= SCARECROW.MAX_CROWS_AT_A_TIME then return end
+    if saveAll.ScareCrowCount >= SCARECROW.MAX_CROWS_AT_A_TIME then goto continue end
 
     if not saveAll.ScarecrowEnemyPtrSave then
         saveAll.ScarecrowEnemyPtrSave = GetPtrHash(enemy)
@@ -69,9 +64,11 @@ function SCARECROW:collideWithEnemy(EntityTear, Collider)
     local neededHits = (SCARECROW.HITS_NEEDED + SCARECROW.HITS_PER_SPAWNED_CROW * saveAll.ScareCrowCount)
 
     if save.ScareCrowHits >= neededHits then
-        local ent = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.DEAD_BIRD, 0, game:GetRoom():GetRandomPosition(400), Vector.Zero, player):ToEffect() ---@cast ent EntityEffect
+        local ent = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.DEAD_BIRD, 0, BeckyMod.Game:GetRoom():GetRandomPosition(400), Vector.Zero, player)
+        ent = ent:ToEffect()
         ent.Timeout = 1
-        ent.CollisionDamage = math.sqrt(level:GetAbsoluteStage())
+
+        ent.CollisionDamage = math.sqrt(BeckyMod.Level():GetAbsoluteStage())
 
         save.ScareCrowHits = 0
         saveAll.ScareCrowCount = saveAll.ScareCrowCount + 1
@@ -82,15 +79,19 @@ function SCARECROW:collideWithEnemy(EntityTear, Collider)
     enemy:SetColor(SCARECROW:GetCurrentColor(percent, enemy), -1, 1, false, false)
 
     tearSaveThing = true
+
+    ::continue::
 end
+
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_TEAR_COLLISION, SCARECROW.collideWithEnemy)
 
 function SCARECROW:postTearDeath(EntityTear)
     local player = BeckyMod:TryGetPlayer(EntityTear) --Has a player
-    if not (player and player:HasCollectible(items.SCARECROW)) then return end
-    if not tearSaveThing then
-        local save = BeckyMod:TempSave(player)
-        save.ScareCrowHits = 0
+    if player and player:HasCollectible(SCARECROW.ID) then
+        if not tearSaveThing then
+            local save = BeckyMod:TempSave(player)
+            save.ScareCrowHits = 0
+        end
     end
     tearSaveThing = false
 end

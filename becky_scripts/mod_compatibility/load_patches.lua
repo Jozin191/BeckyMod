@@ -5,7 +5,7 @@ local loader = {
 	Patches = {}
 }
 
-BeckyMod.PatchesLoader = loader
+Mod.PatchesLoader = loader
 
 function loader:RegisterPatch(mod, patchFunc)
 	table.insert(loader.Patches, { Mod = mod, PatchFunc = patchFunc, Loaded = false })
