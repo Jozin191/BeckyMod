@@ -3,11 +3,87 @@
 local mod = BeckyMod
 local game = Game()
 
+local Collectibles = {
+    Items = {},
+    PickupsEnt = {},
+    Pickups = {},
+    Trinkets = {},
+    Null = {}
+}
+
+
+for i = 1, XMLData.GetNumEntries(XMLNode.ENTITY) do
+    local entry = XMLData.GetEntryByOrder(XMLNode.ENTITY, i)
+    if entry.sourceid == "3167715373" then --anixbirth specific
+		local name = entry.name
+		local stats = {ID = tonumber(entry.type), Var = tonumber(entry.variant), Sub = tonumber(entry.subtype)}
+		for _ = 1, #entry.name do
+			name = mod:removeSubstring(tostring(name), " ")
+		end
+
+		if tonumber(entry.type) == 5 then
+            Collectibles.PickupsEnt[tostring(name)] = stats
+		end
+    end
+end
+
+for i = 1, XMLData.GetNumEntries(XMLNode.ITEM) do
+    local entry = XMLData.GetEntryByOrder(XMLNode.ITEM, i)
+    if entry.sourceid == "3597948673" then --becky specific
+		local name = entry.name
+		for _ = 1, #entry.name do
+			name = mod:gsubMany(name, " ", "'", "-", "=")
+		end
+        if entry.type == "passive" or entry.type == "active" then
+            Collectibles.Items[tostring(name)] = tonumber(entry.id)
+        elseif entry.type == "familiar" then
+            Collectibles.Items[tostring(name)] = tonumber(entry.id)
+        elseif entry.type == "null" then
+            Collectibles.Null[tostring(name)] = tonumber(entry.id)
+        end
+	end
+end
+
+for i = 1, XMLData.GetNumEntries(XMLNode.NULLITEM) do
+    local entry = XMLData.GetEntryByOrder(XMLNode.NULLITEM, i)
+    if entry.sourceid == "3597948673" then --becky specific
+		local name = entry.name
+		for _ = 1, #entry.name do
+			name = mod:gsubMany(name, " ", "'", "-", "=")
+		end
+        Collectibles.Null[tostring(name)] = tonumber(entry.id)
+	end
+end
+
+for i = 1, XMLData.GetNumEntries(XMLNode.TRINKET) do
+    local entry = XMLData.GetEntryByOrder(XMLNode.TRINKET, i)
+    if entry.sourceid == "3597948673" then --becky specific
+		local name = entry.name
+		for _ = 1, #entry.name do
+			name = mod:removeSubstring(tostring(name), " ")
+			name = mod:removeSubstring(tostring(name), "'")
+		end
+        Collectibles.Trinkets[tostring(name)] = tonumber(entry.id)
+	end
+end
+
+for i = 1, XMLData.GetNumEntries(XMLNode.CARD) do
+    local entry = XMLData.GetEntryByOrder(XMLNode.CARD, i)
+    if entry.sourceid == "3597948673" then --becky specific
+		local name = entry.name
+		for _ = 1, #entry.name do
+			name = mod:removeSubstring(tostring(name), " ")
+			name = mod:removeSubstring(tostring(name), "'")
+		end
+        Collectibles.Pickups[tostring(name)] = tonumber(entry.id)
+	end
+end
+
 BeckyMod.ACHIEVEMENT = {
     { 
 		ID = "DEVILZON_PRIME",
 		Note = {"devilzon", "prime"},
-		Trinket = Isaac.GetTrinketIdByName("Devilzon Prime"),
+		Trinket = Collectibles.Trinkets.DevilzonPrime,
 		Tooltip = {"beat", "moms heart", "on hard", "as becky"},
 		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Mom's Heart"},
 		Tags = {"Becky", "Mom's Heart"}
@@ -15,7 +91,7 @@ BeckyMod.ACHIEVEMENT = {
 	{ 
 		ID = "SINNER",
 		Note = {"sinner"},
-		Item = Isaac.GetItemIdByName("Sinner"),
+		Item = Collectibles.Items.Sinner,
 		Tooltip = {"beat", "satan", "on hard", "as becky"},
 		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Satan"},
 		Tags = {"Becky", "Satan"}
@@ -23,7 +99,7 @@ BeckyMod.ACHIEVEMENT = {
 	{ 
 		ID = "DREAM_BANISHER",
 		Note = {"dream", "banisher"},
-		Item = Isaac.GetItemIdByName("Dream Banisher"),
+		Item = Collectibles.Items.DreamBanisher,
 		Tooltip = {"beat", "isaac", "on hard", "as becky"},
 		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Isaac"},
 		Tags = {"Becky", "Isaac"}
@@ -63,11 +139,12 @@ BeckyMod.ACHIEVEMENT = {
 	{ 
 		ID = "DEAD_BATTERY",
 		Note = {"dead", "battery"},
-		Item = Isaac.GetPickupIdByName("Dead Battery"),
+		Item = Collectibles.PickupsEnt.DeadBattery,
 		Tooltip = {"beat", "mother", "on hard", "as becky"},
 		CompletionMark = {Isaac.GetPlayerTypeByName("Becky", false), "Mega Satan"},
 		Tags = {"Becky", "Mother"}
 	},
+	{
 		ID = "NIGHT_OF_THE_SLASHER",
 		Note = {"night", "of", "the", "slasher"},
 		Item = Isaac.GetItemIdByName("Night of the Slasher"),
@@ -454,9 +531,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 		{{406, 0}, "Becky", BeckyAchmnts.ITEM_COXINHA},
 		{{406, 1}, "Becky", BeckyAchmnts.TRINKET_CORPSE_TAG},
 		{{912, 10}, "Becky", BeckyAchmnts.ITEM_SCARECROW},
-		{{275, 0}, "Becky", BeckyAchmnts.PICKUP_DEAD_BATTERY},
+		--{{275, 0}, "Becky", BeckyAchmnts.PICKUP_DEAD_BATTERY},
 	--{{275, 0}, "Becky", BeckyAchmnts.ITEM_NIGHT_OF_THE_SLASHER},
-		{{273, 10}, "Becky", BeckyAchmnts.PICKUP_DEFILED_CHALICE},
+		--{{273, 10}, "Becky", BeckyAchmnts.PICKUP_DEFILED_CHALICE},
 		{{102, 1}, "Becky", BeckyAchmnts.TRINKET_HOLY_BOOKMARK},
 		{{412, 0}, "Becky", BeckyAchmnts.ITEM_BUTCHERS},
 		{{951, 0}, "Becky", BeckyAchmnts.ITEM_NULL_BOMBS},

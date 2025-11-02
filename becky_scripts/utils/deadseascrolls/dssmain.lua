@@ -299,6 +299,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                             SmallPanelFrame = panel.SmallPanelFrame
 
                                             panel.xPosPan = panel.xPosPan + 1
+                                            print(achList[i].extraSpriteID)
                                             if not BeckyAchievementSystem:IsUnlocked(achList[i].extraSpriteID) then 
                                                 achList[i].Sprite:ReplaceSpritesheet(2, "gfx/ui/achievement/achievement_locked.png")
                                             else

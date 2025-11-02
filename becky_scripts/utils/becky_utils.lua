@@ -66,6 +66,33 @@ function BeckyMod:CheckTableContents(table, element)
 	return false
 end
 
+function BeckyMod:removeSubstring(str, substr)
+	str = str or "Null Name"
+	substr = substr or "Null"
+   local startIndex, endIndex = string.find(str, substr)
+ 
+    if startIndex and endIndex then
+        local prefix = string.sub(str, 1, startIndex - 1)
+        local suffix = string.sub(str, endIndex + 1)
+        return prefix .. suffix
+    end
+    return str
+end
+
+function BeckyMod:gsubMany(string, ...)
+
+  local words = {...}
+
+  for i = 1, #words do
+    if type(words[i]) == "string" then
+      string = string:gsub(words[i], '')
+    end
+  end
+
+  return string 
+end
+
+
 -- thanks bobbymod (i cvs added this so this is self promo)
 
 function BeckyMod:NestVariable(tab, variable, ... )
