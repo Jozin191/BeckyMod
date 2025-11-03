@@ -1,10 +1,13 @@
+local Callbacks = BeckyMod.Enums.Callbacks
+local mod = BeckyMod
+
 local function HasBitFlags(flags, checkFlag)
 	return flags & checkFlag == checkFlag
 end
 
 ---@param familiar EntityFamiliar
 ---@param entity EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, familiar, entity)
+mod:AddCallback(Callbacks.ON_GHOST_HIT_ENEMY, function(_, familiar, entity)
     local player = familiar.Player
     local tearFlags = player.TearFlags
     local tearEffects = {

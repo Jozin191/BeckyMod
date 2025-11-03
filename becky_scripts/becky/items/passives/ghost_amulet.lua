@@ -1,13 +1,13 @@
-local ITEM_GHOST_AMULET = Isaac.GetItemIdByName("Ghost Amulet")
-local BeckyPlayerType = Isaac.GetPlayerTypeByName("Becky", false)
-local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
+local mod = BeckyMod
+local enums = mod.Enums
+local items = enums.CollectibleType
+local Callbacks = enums.Callbacks
+local variants = enums.Variants
+local players = enums.PlayerType
+local utils = enums.Utils
+local sfx = utils.SFX
+local game = utils.Game
 local GHOST_BALL_DMG = 1.25
-
-BeckyMod.Callbacks = {}
---- Called every time the ghost hits an enemy
---- * Familiar: The ghost entity
---- * Entity: The entity hit by the ghost
-BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY = "BeckyMod_ON_GHOST_HIT_ENEMY"
 
 ---@param npc EntityNPC
 ---@return boolean
@@ -18,12 +18,12 @@ end
 ---@param player EntityPlayer
 ---@return boolean
 local function HasGhostAmulet(player)
-    return player:HasCollectible(ITEM_GHOST_AMULET)
+    return player:HasCollectible(items.GHOST_AMULET)
 end
 
 ---@param player EntityPlayer
 local function BeckyHasBirthright(player)
-    return player:GetPlayerType() == BeckyPlayerType and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+    return player:GetPlayerType() == players.BECKY and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 end
 
 ---Triggers a push to `pushed` from `pusher`
@@ -132,7 +132,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player, cachef
     local seed = math.max(Random(), 1)
     rng:SetSeed(seed, 35)
 
-    player:CheckFamiliar(GHOST_BALL_VAR, 1, rng)
+    player:CheckFamiliar(variants.GHOST_BALL, 1, rng)
 end, CacheFlag.CACHE_FAMILIARS)
 
 ---@param familiar EntityFamiliar
@@ -141,7 +141,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
 	-- familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
     familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS 
-end, GHOST_BALL_VAR)
+end, variants.GHOST_BALL)
 
 ---Expontential function
 ---@param number number
@@ -173,7 +173,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local posDifLenght = posDif:Length()	
     local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
     local maxDistIdle = 40
-    local room = BeckyMod.Game:GetRoom()
+    local room = game:GetRoom()
     -- SpawnTrail(familiar)
 
     if isShooting then
@@ -220,7 +220,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
-    for _, ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOST_BALL_VAR)) do
+    for _, ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, variants.GHOST_BALL)) do
         local fam = ghost:ToFamiliar() ---@cast fam EntityFamiliar
         fam.Position = fam.Player.Position
     end
@@ -230,7 +230,7 @@ end)
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local GhostSprite = familiar:GetSprite()
     local player = familiar.Player
-    local room = BeckyMod.Game:GetRoom()
+    local room = game:GetRoom()
     local currentAnim = GhostSprite:GetAnimation()
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
     local GhostSize = Vector.One * exp((player.Damage / 4.2), 1, 1.2)
@@ -244,7 +244,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     playerData.GhostBall = familiar
 
     if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then
-        local rng = player:GetCollectibleRNG(ITEM_GHOST_AMULET)
+        local rng = player:GetCollectibleRNG(items.GHOST_AMULET)
         local randomNum = rng:RandomInt(1, 4)
 
         if randomNum ~= 4 then
@@ -265,7 +265,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 
         gridFromPos:Hurt(hurtVal)
     end
-end, GHOST_BALL_VAR)
+end, variants.GHOST_BALL)
 
 local DestroyableFireplaces = {
     [0] = true,
@@ -297,10 +297,13 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if not IsValidEnemy(npc) then return end
     familiar:GetSprite():Play("Hit")
     TriggerPush(npc, familiar, 20 * tearsMult)
-    TriggerPush(familiar, npc, 10)
-    SFXManager():Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
 
-    Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider)
+    if not familiar.Player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then    
+        TriggerPush(familiar, npc, 10)
+    end
+    sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
 
-    npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
-end, GHOST_BALL_VAR)
+    Isaac.RunCallback(Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider)
+
+    npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 20)
+end, variants.GHOST_BALL)

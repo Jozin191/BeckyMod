@@ -1,3 +1,9 @@
+local mod = BeckyMod
+local enums = mod.Enums
+local trinkets = enums.TrinketType
+local utils = enums.Utils
+local game = utils.Game
+
 local CORPSE_TAG = {}
 
 BeckyMod.Trinket.CORPSE_TAG = CORPSE_TAG
@@ -10,13 +16,13 @@ local sfx = SFXManager()
 
 ---@param player EntityPlayer
 function CORPSE_TAG:OnRoomClear(player)
-    local num = player:GetTrinketMultiplier(CORPSE_TAG.ID) if num == 0 then return end
-    local rng = player:GetTrinketRNG(CORPSE_TAG.ID)
+    local num = player:GetTrinketMultiplier(trinkets.CORPSE_TAG) if num == 0 then return end
+    local rng = player:GetTrinketRNG(trinkets.CORPSE_TAG)
     local spawned
 
     for _ = 1, num do
         for _ = 1, rng:RandomInt(CORPSE_TAG.MIN, CORPSE_TAG.MAX) do
-            BeckyMod.Game:Spawn(
+            game:Spawn(
                 EntityType.ENTITY_FAMILIAR,
                 FamiliarVariant.BONE_ORBITAL,
                 player.Position,
@@ -30,7 +36,7 @@ function CORPSE_TAG:OnRoomClear(player)
     end
 
     if spawned then
-        player:AnimateTrinket(CORPSE_TAG.ID, "UseItem")
+        player:AnimateTrinket(trinkets.CORPSE_TAG, "UseItem")
         sfx:Play(SoundEffect.SOUND_BONE_HEART)
     end
 end
