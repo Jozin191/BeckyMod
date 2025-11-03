@@ -244,6 +244,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                 end,
                                 UpdateAppear = function(panel) --universal
                                         panel.SmallPanelFrame = panel.SmallPanelFrame + 1
+                                        bannedPositions = {}
                                         if panel.SmallPanelFrame >= 10 then
                                             panel.Idle = true
                                             return true
@@ -251,6 +252,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                 end,
                                 StartDisappear = function(panel) --universal
                                     dssmod.playSound(dssmod.menusounds.Close)
+                                    bannedPositions = {}
                                     panel.SmallPanelFrame = 32
                                     forceUnpause = true
                                     paused = false
@@ -279,15 +281,15 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                     end
 
                                     if panel.MoveDown then
-                                        if panel.OuterOffset+3 < #achList then
-                                            panel.OuterOffset = panel.OuterOffset + 3
+                                        if panel.OuterOffset+9 < #achList then
+                                            panel.OuterOffset = panel.OuterOffset + 9
                                         end
                                         panel.MoveDown = false
                                     end
 
                                     if panel.MoveUp then
-                                        if panel.OuterOffset-3 >= 0 then
-                                            panel.OuterOffset = panel.OuterOffset - 3
+                                        if panel.OuterOffset-9 >= 0 then
+                                            panel.OuterOffset = panel.OuterOffset - 9
                                         end
                                         panel.MoveUp = false
                                     end
@@ -323,7 +325,6 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                         local placement = Vector(NEWxPosPan, (math.floor((i-1)/3)))
 
                                         if panel.MouseIconPos and not achList[realNum] then
-                                            print(placement, panel.MouseIconPos, #achList, realNum, achList[realNum])
                                             table.insert(bannedPositions, placement)
                                         end
                                     
@@ -404,12 +405,12 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                             panel.InputtedInput = nil
                                         end
                                         if rawinput.up > 0 and panel.InputtedInput~="up" then
-                                            if panel.MouseIconPos.Y < 1 then
+                                            if panel.MouseIconPos.Y < 1 and panel.OuterOffset ~= 0 then
                                                 panel.MoveUp = true
                                                 bannedPositions = {}
-                                                panel.MouseIconPos.Y = panel.MouseIconPos.Y + 1
-                                            elseif not CheckVectors(bannedPositions, Vector(panel.MouseIconPos.X,panel.MouseIconPos.Y-1)) then
-                                                panel.MouseIconPos.Y = panel.MouseIconPos.Y - 1
+                                                panel.MouseIconPos.Y = panel.MouseIconPos.Y + 2
+                                            elseif not CheckVectors(bannedPositions, Vector(panel.MouseIconPos.X,panel.MouseIconPos.Y-1)) and panel.MouseIconPos.Y > 0 then
+                                                panel.MouseIconPos.Y = panel.MouseIconPos.Y - 1                                                
                                             end
                                             panel.InputtedInput = "up"
                                         elseif rawinput.up == 0 and panel.InputtedInput=="up" then
@@ -419,7 +420,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                             if panel.MouseIconPos.Y > 1 then
                                                 panel.MoveDown = true
                                                 bannedPositions = {}
-                                                panel.MouseIconPos.Y = panel.MouseIconPos.Y - 1
+                                                panel.MouseIconPos.Y = panel.MouseIconPos.Y - 2
                                             elseif not CheckVectors(bannedPositions, Vector(panel.MouseIconPos.X,panel.MouseIconPos.Y+1)) then
                                                 panel.MouseIconPos.Y = panel.MouseIconPos.Y + 1
                                             end
