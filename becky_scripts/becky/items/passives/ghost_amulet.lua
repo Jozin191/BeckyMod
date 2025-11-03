@@ -297,7 +297,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if not IsValidEnemy(npc) then return end
     familiar:GetSprite():Play("Hit")
     TriggerPush(npc, familiar, 20 * tearsMult)
-    TriggerPush(familiar, npc, 10)
+    if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
+        TriggerPush(familiar, npc, 10)
+    end
     SFXManager():Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
 
     Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider)
