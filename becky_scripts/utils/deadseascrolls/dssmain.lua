@@ -107,6 +107,15 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
             dest = 'yesNo', tooltip = {strset = tooltip}}
         end
 
+        local function CheckVectors(table, element)
+            for k, v in ipairs(table) do
+                if v:Distance(element) == 0 then
+                    return true
+                end
+            end
+            return false
+        end
+
         local buttonAchievements = {}
         local panelFilterOptions = {
             nil,
@@ -172,6 +181,8 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
             ["Delirium"] = 9,
             ["Witness"] = 11
         }
+
+        local bannedPositions = {}
 
         BeckyMod.dmdirectory = {
             main = {
@@ -268,9 +279,17 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                     end
 
                                     if panel.MoveDown then
-                                        if panel.OuterOffset+9 < #achList then
+                                        if panel.OuterOffset+3 < #achList then
                                             panel.OuterOffset = panel.OuterOffset + 3
                                         end
+                                        panel.MoveDown = false
+                                    end
+
+                                    if panel.MoveUp then
+                                        if panel.OuterOffset-3 >= 0 then
+                                            panel.OuterOffset = panel.OuterOffset - 3
+                                        end
+                                        panel.MoveUp = false
                                     end
 
                                     local mousePlacement
@@ -289,21 +308,36 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                         end
                                     end
 
+                                    local NEWxPosPan = 0
                                     local mouseIconT = {}
                                     panel.xPosPan = 0
                                     for i = 1, 9 do -- i split these becauuuuseeee (uh) i hate myself probably
-                                        if (panel.OuterOffset + (i-1)) < #achList and panel.SmallPanelFrame ~= 40 then
+                                    
+                                        NEWxPosPan = NEWxPosPan + 1
+                                        if (i-1)%3 == 0 then
+                                            NEWxPosPan = 0                                        
+                                        end
+                                    
+                                        local realNum = i + panel.OuterOffset
+
+                                        local placement = Vector(NEWxPosPan, (math.floor((i-1)/3)))
+
+                                        if panel.MouseIconPos and not achList[realNum] then
+                                            print(placement, panel.MouseIconPos, #achList, realNum, achList[realNum])
+                                            table.insert(bannedPositions, placement)
+                                        end
+                                    
+                                        if achList[realNum] and (realNum-1) < 9 + panel.OuterOffset and panel.SmallPanelFrame ~= 40 then
 
                                             local butt = {}
 
                                             SmallPanelFrame = panel.SmallPanelFrame
 
                                             panel.xPosPan = panel.xPosPan + 1
-                                            print(achList[i].extraSpriteID)
-                                            if not BeckyAchievementSystem:IsUnlocked(achList[i].extraSpriteID) then 
+                                            if not BeckyAchievementSystem:IsUnlocked(achList[realNum].extraSpriteID) then 
                                                 achList[i].Sprite:ReplaceSpritesheet(2, "gfx/ui/achievement/achievement_locked.png")
                                             else
-                                                achList[i].Sprite:ReplaceSpritesheet(2, "gfx/ui/achievement/achievement_" .. string.lower(achList[i].ID) ..".png")
+                                                achList[i].Sprite:ReplaceSpritesheet(2, "gfx/ui/achievement/achievement_" .. string.lower(achList[realNum].ID) ..".png")
                                             end
                                             achList[i].Sprite:LoadGraphics()
                                             achList[i].Sprite:Play("Idle")
@@ -311,7 +345,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                             achList[i].Sprite.Scale = Vector(0.35, 0.35)
                                             if i == mousePlacement then
                                                 achList[i].Sprite.Color = DeadSeaScrollsMenu.GetPalette()[1]
-                                                selectedAch = achList[i]
+                                                selectedAch = achList[realNum]
                                                 if REPENTOGON then
                                                     achList[i].Sprite.Color:SetOffset(0.1, 0.1, 0.1, 1)  
                                                 else
@@ -330,9 +364,9 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                                 panel.xPosPan = 0                                        
                                             end
 
-                                            butt.tooltip = achList[i].Tooltip
+                                            butt.tooltip = achList[realNum].Tooltip
                                             butt.Position = panelPos + Vector((panel.xPosPan-1)*100, (math.floor((i-1)/3) * 80)) - Vector(190, 70)
-                                            table.insert(mouseIconT, achList[i].Sprite)
+                                            table.insert(mouseIconT, achList[realNum].Sprite)
                                             table.insert(buttonAchievements, butt)
                                         end
                                     end
@@ -354,7 +388,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                         panel.InputtedInput = panel.InputtedInput or nil
 
                                         if rawinput.right > 0 and panel.InputtedInput~="right" then --im sure theres a better way to dthis i js cant come up with oneeeee
-                                            if panel.MouseIconPos.X < 2 then
+                                            if panel.MouseIconPos.X < 2 and not CheckVectors(bannedPositions, Vector(panel.MouseIconPos.X+1,panel.MouseIconPos.Y )) then
                                                 panel.MouseIconPos.X = panel.MouseIconPos.X + 1
                                             end
                                             panel.InputtedInput = "right"
@@ -362,7 +396,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                             panel.InputtedInput = nil
                                         end
                                         if rawinput.left > 0 and panel.InputtedInput~="left" then
-                                            if panel.MouseIconPos.X > 0 then
+                                            if panel.MouseIconPos.X > 0  and not CheckVectors(bannedPositions, Vector(panel.MouseIconPos.X-1,panel.MouseIconPos.Y )) then
                                                 panel.MouseIconPos.X = panel.MouseIconPos.X - 1
                                             end
                                             panel.InputtedInput = "left"
@@ -372,7 +406,9 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                         if rawinput.up > 0 and panel.InputtedInput~="up" then
                                             if panel.MouseIconPos.Y < 1 then
                                                 panel.MoveUp = true
-                                            else
+                                                bannedPositions = {}
+                                                panel.MouseIconPos.Y = panel.MouseIconPos.Y + 1
+                                            elseif not CheckVectors(bannedPositions, Vector(panel.MouseIconPos.X,panel.MouseIconPos.Y-1)) then
                                                 panel.MouseIconPos.Y = panel.MouseIconPos.Y - 1
                                             end
                                             panel.InputtedInput = "up"
@@ -382,7 +418,9 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                                         if rawinput.down > 0 and panel.InputtedInput~="down" then
                                             if panel.MouseIconPos.Y > 1 then
                                                 panel.MoveDown = true
-                                            else
+                                                bannedPositions = {}
+                                                panel.MouseIconPos.Y = panel.MouseIconPos.Y - 1
+                                            elseif not CheckVectors(bannedPositions, Vector(panel.MouseIconPos.X,panel.MouseIconPos.Y+1)) then
                                                 panel.MouseIconPos.Y = panel.MouseIconPos.Y + 1
                                             end
                                             panel.InputtedInput = "down"
