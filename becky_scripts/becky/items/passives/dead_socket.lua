@@ -3,6 +3,7 @@ local enums = mod.Enums
 local items = enums.CollectibleType
 local utils = enums.Utils
 local game = utils.Game
+local sfx = utils.SFX
 
 local DEAD_SOCKET = {}
 local chargeAnimations = {
@@ -24,34 +25,38 @@ function DEAD_SOCKET:IsValidActiveItem(itemID)
 	and chargeAnimations[itemConfig.MaxCharges]
 end
 
----@param player EntityPlayer
----@param slot ActiveSlot
-function DEAD_SOCKET:ShouldRenderDeadSocket(player, slot)
-	local itemSlot = player:GetActiveItem(slot)
-
-	-- print(HudHelper.ShouldActiveBeDisplayed(player, itemSlot, slot) ~= nil)
-	-- print(player:HasCollectible(items.DEAD_SOCKET))
-	-- print(not player:NeedsCharge(ActiveSlot.SLOT_PRIMARY))
-	-- print(DEAD_SOCKET:IsValidActiveItem(itemSlot))
-
+function DEAD_SOCKET:ShouldAddToGhostCharge(player, slot)
 	return (
-		HudHelper.ShouldActiveBeDisplayed(player, itemSlot, slot) ~= nil and
-		player:HasCollectible(items.DEAD_SOCKET) and
-		not player:NeedsCharge(ActiveSlot.SLOT_PRIMARY) and
-		DEAD_SOCKET:IsValidActiveItem(itemSlot)
-	)	
-	-- local HasDeadSocket = player:HasCollectible(items.DEAD_SOCKET)
+		player:HasCollectible(items.DEAD_SOCKET) and 
+		DEAD_SOCKET:IsValidActiveItem(player:GetActiveItem(slot)) and
+		not player:NeedsCharge(slot)
+	)
 end
 
-local customChargebar = Sprite("gfx/ui/ui_chargebar.anm2", true)
+---@param player any
+---@param slot any
+---@return boolean
+function DEAD_SOCKET:ShouldRenderGhostCharge(player, slot)
+	return (
+		HudHelper.ShouldActiveBeDisplayed(player, player:GetActiveItem(slot), slot) and
+		player:GetEffects():GetCollectibleEffect(items.DEAD_SOCKET) and
+		not player:NeedsCharge(slot) and
+		DEAD_SOCKET:IsValidActiveItem(player:GetActiveItem(slot))
+	)
+end
+
+local customChargebar = Sprite("gfx/ui/ui_chargebar.anm2")
 customChargebar:ReplaceSpritesheet(0, "gfx/ui/ui_deadsocket_chargebar.png", true)
+
+-- customChargebar:Load("gfx/ui/ui_chargebar.anm2", false)
+-- customChargebar:LoadGraphics()
 
 HudHelper.RegisterHUDElement({
 	Name = "Dead Socket Chargebar",
 	Priority = HudHelper.Priority.HIGH,
 	Condition = function(player, playerHUDIndex, hudLayout, slot)
 		---@cast slot ActiveSlot
-		return DEAD_SOCKET:ShouldRenderDeadSocket(player, slot)
+		return DEAD_SOCKET:ShouldRenderGhostCharge(player, slot)
 	end,
 	OnRender = function(player, playerHUDIndex, hudLayout, position, alpha, scale, slot, chargebarOffset)
 		---@cast slot ActiveSlot
@@ -67,22 +72,19 @@ HudHelper.RegisterHUDElement({
 		customChargebar:SetFrame("BarOverlay" .. barAnim, 0)
 		customChargebar:Render(chargebarPos)
 
-		-- print("a[dka[pksdpakd[p]]]" )
+		print("ghost charges:", player:GetEffects():GetCollectibleEffectNum(items.DEAD_SOCKET))
 	end
 }, HudHelper.HUDType.ACTIVE)
 
 ---@param player EntityPlayer
 function DEAD_SOCKET:ChargeDeadSocket(player)
-	if not player:HasCollectible(items.DEAD_SOCKET) then return end
-	if not DEAD_SOCKET:IsValidActiveItem(player:GetActiveItem(ActiveSlot.SLOT_PRIMARY)) then return end
-	if not DEAD_SOCKET:IsValidActiveItem(player:GetActiveItem(ActiveSlot.SLOT_PRIMARY)) then return end 
-	if player:NeedsCharge(ActiveSlot.SLOT_PRIMARY) then return end
 	local effects = player:GetEffects()
-	-- if not effects:GetCollectibleEffectNum(items.DEAD_SOCKET) < player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY) then return end
-
 	local roomShape = game:GetRoom():GetRoomShape() >= RoomShape.ROOMSHAPE_2x2
-	game:GetHUD():FlashChargeBar(player, ActiveSlot.SLOT_PRIMARY)
-	utils.SFX:Play(SoundEffect.SOUND_BEEP, 1, 0, false, 0.8)
+	
+	if not DEAD_SOCKET:ShouldAddToGhostCharge(player, ActiveSlot.SLOT_PRIMARY) then return end
+	if effects:GetCollectibleEffectNum(items.DEAD_SOCKET) >= player:GetActiveCharge(ActiveSlot.SLOT_PRIMARY) then return end
+	
+	sfx:Play(SoundEffect.SOUND_BEEP, 1, 0, false, 0.75)
 	effects:AddCollectibleEffect(items.DEAD_SOCKET, false, roomShape and 2 or 1)
 end
 

@@ -8,7 +8,7 @@ BeckyMod.FLAGS.Debug = true
 
 include("becky_scripts.Enums")
 
-BeckyMod.SaveManager = include("becky_scripts.utils.save_manager")
+BeckyMod.SaveManager = require("becky_scripts.utils.save_manager")
 BeckyMod.SaveManager.Init(BeckyMod)
 
 include("becky_scripts.utils.lua_overrides")

@@ -97,7 +97,7 @@ end
 ---@param pickup EntityPickup
 ---@return table
 function BeckyMod:GetRerollPersistentData(pickup)
-	local data = Mod.SaveManager.GetRoomFloorSave(pickup)
+	local data = Mod.SaveManager.GetRoomSave(pickup)
 	return data.RerollSave
 end
 

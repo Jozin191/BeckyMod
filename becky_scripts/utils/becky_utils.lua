@@ -1,5 +1,7 @@
 local mod = BeckyMod
-local game = mod.Enums.Utils.Game
+local utils = mod.Enums.Utils
+local game = utils.Game
+local level = utils.Level
 
 --- No idea how to explain this lol.
 --- I got the formula for this from the tboi modding discord resource page, from a guide by catinsurance.
@@ -45,7 +47,6 @@ function BeckyMod:RandomBoolean(rng, chance)
 	return (rng or RNG()):RandomFloat() <= (chance or 0.5)
 end
 
-
 ---Helper function for a better management of random floats, allowing to use min and max values, like `math.random()` and `RNG:RandomInt()`
 ---@param rng? RNG if `nil`, the function will use Mod's `RNG` object instead
 ---@param min number
@@ -67,7 +68,7 @@ end
 --- Mods can modify this (Look at the Epiphany compatibility to see how it's done).
 ---@diagnostic disable-next-line: duplicate-set-field
 function BeckyMod:areThereCurses()
-    return game:GetLevel():GetCurses() > 0
+    return level:GetCurses() > 0
 end
 
 -- Prints a group of given strings/numbers to both console and log.txt.
@@ -220,8 +221,6 @@ function BeckyMod:addPercentToDealChance(chance, percent)
 end
 
 function BeckyMod:forceAngelDevil(angel, devil, force)
-	local level = game:GetLevel()
-
 	if force then
 		level:GetRoomByIdx(GridRooms.ROOM_DEVIL_IDX).Data = nil
 	end

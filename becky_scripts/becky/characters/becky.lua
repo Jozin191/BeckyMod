@@ -2,6 +2,7 @@ local mod = BeckyMod
 local enums = mod.Enums
 local costumes = enums.NullItemID
 local BeckyPlayer = enums.PlayerType.BECKY
+local game = enums.Utils.Game
 local BECKY = {}
 
 BECKY.ExcludeSpikePickupVariants = {
@@ -17,7 +18,7 @@ BECKY.ExcludeSpikePickupVariants = {
     [PickupVariant.PICKUP_LOCKEDCHEST] = true,
 }
 
-local game = enums.Utils.Game
+
 
 --Deal modifiers (keeper's passive, blue baby's passive, or modded stuff)
 --Modded example: Tarnished Judas
@@ -56,7 +57,7 @@ BECKY.AddDealModifiers({
         identificator = "BECKY",
         priority = 500,
         condition = function(_)
-            return PlayerManager.AnyoneIsPlayerType(enums.PlayerType.PlayerType_BECKY)
+            return PlayerManager.AnyoneIsPlayerType(enums.PlayerType.BECKY)
         end,
         ---@param pickup EntityPickup
         ---@param price number
