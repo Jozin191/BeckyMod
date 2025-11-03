@@ -1,18 +1,6 @@
 <items gfxroot="gfx/items/" version="1" deathanm2="gfx/death items.anm2">
         <!--ACTIVE ITEMS-->
 
-        <active id="1"
-        name="Hand Made Bible"
-        gfx="hand_made_bible.png"
-        description="There's a ghost!"
-        quality="4"
-        maxcharges="100"
-        chargetype="timed"
-        cache="familiars"
-        passivecache="true"
-        tags="book"
-        />
-
         <active id="2"
         name="Night of the Slasher"
         gfx="night_of_the_slasher.png"
@@ -112,14 +100,6 @@
         />
 
         <!--TRINKETS-->
-
-        <trinket id="1"
-        name="Burning Feather"
-        description="A broken dream"
-        gfx="burning_feather.png"
-        cache="flying"
-        passivecache="true"
-        />
 
         <trinket id="2"
         name="Holy Bookmark"

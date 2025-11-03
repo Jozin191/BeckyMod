@@ -11,7 +11,7 @@
         modcostume="1"
 		birthright="Freedom!!!"
     />
-    <player name="Becky" bSkinParent="Becky​"
+    <player name="Becky" bSkinParent="Becky"
         skin="character_becky.png"
         skinColor = "1"
         nameimage="playername_becky.png"

@@ -285,6 +285,14 @@ local function EIDPatch()
 				},
 			},
 		},
+		[Item.BUTCHERS_COOKBOOK.ID] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Butcher's Cookbook",
+				Description = {
+					"When used Spawns a Sawblade"
+				},
+			},
+		},
 		[Item.NIGHT_OF_THE_SLASHER.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Night of the Slasher",
