@@ -533,7 +533,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 		{{912, 10}, "Becky", BeckyAchmnts.ITEM_SCARECROW},
 		--{{275, 0}, "Becky", BeckyAchmnts.PICKUP_DEAD_BATTERY},
 	--{{275, 0}, "Becky", BeckyAchmnts.ITEM_NIGHT_OF_THE_SLASHER},
-		--{{273, 10}, "Becky", BeckyAchmnts.PICKUP_DEFILED_CHALICE},
+		{{273, 0}, "Becky", BeckyAchmnts.ITEM_DEFILED_CHALICE},
 		{{102, 1}, "Becky", BeckyAchmnts.TRINKET_HOLY_BOOKMARK},
 		{{412, 0}, "Becky", BeckyAchmnts.ITEM_BUTCHERS},
 		{{951, 0}, "Becky", BeckyAchmnts.ITEM_NULL_BOMBS},
