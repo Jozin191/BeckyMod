@@ -7,7 +7,8 @@ BeckyMod.Enums = {
         Level = game:GetLevel()
     },
     PlayerType = {
-        BECKY = Isaac.GetPlayerTypeByName("Becky")
+        BECKY = Isaac.GetPlayerTypeByName("Becky"),
+        BECKY_B = Isaac.GetPlayerTypeByName("Becky", true)
     },
     NullItemID = {
         BECKY_HAIR = Isaac.GetCostumeIdByPath("gfx/characters/becky_hair.anm2"),

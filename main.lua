@@ -72,6 +72,7 @@ include("becky_scripts.becky.items.trinkets.corpse_tag")
 
 --characters
 include("becky_scripts.becky.characters.becky")
+include("becky_scripts.becky.characters.becky_b")
 
 --Mod compatibility! (all patches are loaded in this file)
 include("becky_scripts.mod_compatibility.load_patches")
@@ -88,3 +89,7 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Brimstone")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.GodHead")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Haemolacria")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Ipecac")
+-- include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MomsKnife") -- On hold
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Explosivo")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TearSplit")
