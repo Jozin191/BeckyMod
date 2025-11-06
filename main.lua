@@ -84,6 +84,9 @@ include("becky_scripts.mod_compatibility.load_patches")
 --pickups
 include("becky_scripts.becky.pickups.dead_battery")
 
+--misc stuff
+include("becky_scripts.utils.achievements_revamp")
+
 --ghost synergies
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.CSection")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.DrFetus")
