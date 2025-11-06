@@ -11,4 +11,4 @@ local function FuturePatch()
     }
 end
 
-loader:RegisterPatch("TheFuture", futurePatch)
+loader:RegisterPatch("TheFuture", FuturePatch)
