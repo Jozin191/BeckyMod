@@ -123,7 +123,7 @@ function unlocks:CheckStartUnlocks()
                 pool:RemoveCollectible(tab.Item)
             end
             if tab.Trinket then
-                print(pool:RemoveTrinket(tab.Trinket))
+                pool:RemoveTrinket(tab.Trinket)
             end
             ::continue::
         end
