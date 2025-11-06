@@ -48,6 +48,9 @@ mod:AddCallback(Callbacks.ON_GHOST_HIT_ENEMY, function(_, familiar, entity)
         [TearFlags.TEAR_BACKSTAB] = function()
             entity:AddBleeding(EntityRef(player), 150)
         end,
+		[TearFlags.TEAR_BURN] = function()
+            entity:AddBurn(EntityRef(player), 90, player.Damage)
+        end,
     }
 
     for flag, func in pairs(tearEffects) do

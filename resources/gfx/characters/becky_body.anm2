@@ -1,11 +1,11 @@
 <AnimatedActor>
-	<Info CreatedBy="Jozin191" CreatedOn="10/12/2024 18:13:12" Version="20" Fps="30"/>
+	<Info CreatedBy="Jozin191" CreatedOn="03/11/2025 19:18:55" Version="21" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="costumes\becky_body.png" Id="0"/>
 		</Spritesheets>
 		<Layers>
-			<Layer Name="body0" Id="0" SpritesheetId="0"/>
+			<Layer Name="body" Id="0" SpritesheetId="0"/>
 		</Layers>
 		<Nulls/>
 		<Events/>
