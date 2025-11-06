@@ -93,3 +93,5 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Ipecac")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Explosivo")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TearSplit")
+
+include("becky_scripts.utils.achievements_revamp")

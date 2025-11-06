@@ -35,7 +35,6 @@ end
 function BECKY.AddDealModifiers(toAddDealModifiers)
     BECKY.OldDealModifiers = BECKY.DealModifiers
     for _, data in ipairs(toAddDealModifiers) do
-        --print("LINE 75: " .. data.identificator .. " POS:".. #BECKY.DealModifiers)
         table.insert(BECKY.OldDealModifiers, data)
     end
 
@@ -44,12 +43,6 @@ function BECKY.AddDealModifiers(toAddDealModifiers)
     table.sort(BECKY.DealModifiers, function (a,b)
         return a.priority < b.priority
     end)
-
-    --[[
-    for _, data in pairs(BECKY.DealModifiers) do
-        print("LINE 75: " .. data.identificator .. " PRIORITY:".. data.priority)
-    end
-    ]]
 end
 
 BECKY.AddDealModifiers({
