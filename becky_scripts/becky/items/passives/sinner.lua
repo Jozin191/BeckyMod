@@ -6,6 +6,7 @@ local items = enums.CollectibleType
 local variants = enums.Variants
 local utils = enums.Utils
 local game = utils.Game
+local tempData = mod.getData
 
 local SINNER = {}
 
@@ -38,7 +39,7 @@ end
 
 ---@param familiar Entity
 function SINNER:GetFamiliarData(familiar)
-    local data = familiar:GetData()
+    local data = tempData(familiar)
     data.__BECKY_SINNER = data.__BECKY_SINNER or {}
     ---@class SinnerFamiliarData
     ---@field Dist number
@@ -50,7 +51,7 @@ end
 
 ---@param player Entity
 function SINNER:GetPlayerData(player)
-    local data = player:GetData()
+    local data = tempData(player)
     data.__BECKY_SINNER = data.__BECKY_SINNER or {
         Speed = 0
     }

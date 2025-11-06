@@ -1,9 +1,11 @@
-local Callbacks = BeckyMod.Enums.Callbacks
 local mod = BeckyMod
+local Callbacks = mod.Enums.Callbacks
 
 local function HasBitFlags(flags, checkFlag)
 	return flags & checkFlag == checkFlag
 end
+
+local SlowColor = Color(0.5, 0.5, 0.5, 1)
 
 ---@param familiar EntityFamiliar
 ---@param entity EntityNPC
@@ -12,7 +14,6 @@ mod:AddCallback(Callbacks.ON_GHOST_HIT_ENEMY, function(_, familiar, entity)
     local tearFlags = player.TearFlags
     local tearEffects = {
         [TearFlags.TEAR_SLOW] = function()
-            local SlowColor = Color(0.5, 0.5, 0.5, 1)
             entity:AddSlowing(EntityRef(player), 90, 0.6, SlowColor)
         end,
         [TearFlags.TEAR_POISON] = function()

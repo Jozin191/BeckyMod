@@ -1,10 +1,11 @@
 local Callbacks = BeckyMod.Enums.Callbacks
+local tempData = BeckyMod.getData
 
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
 BeckyMod:AddCallback(Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
     local player = fam.Player
-    local ghostData = fam:GetData()
+    local ghostData = tempData(fam)
 
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
     if ghostData.Sword then return end
@@ -18,7 +19,7 @@ BeckyMod:AddCallback(Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
     )
 
     local knife = ghostData.Sword
-    local knifeData = knife:GetData()
+    local knifeData = tempData(knife)
     local knifeSprite = knife:GetSprite()
 
     knifeSprite:Play("SpinDown", true)
@@ -47,7 +48,7 @@ end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     local knifeSprite = knife:GetSprite()
-    local knifeData = knife:GetData()
+    local knifeData = tempData(knife)
 	
     if knife.Variant ~= KnifeVariant.SPIRIT_SWORD or not knifeData.GhostSword then return end
     if not (knifeSprite:GetAnimation() == "SpinDown" and knifeSprite:IsFinished()) then return end
@@ -55,7 +56,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     knife:Remove()
 
     for _, fam in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, BeckyMod.Enums.Variants.GHOST_BALL)) do
-        local ghostData = fam:GetData()
-        ghostData.Sword = nil
+        tempData(fam).Sword = nil
     end
 end)

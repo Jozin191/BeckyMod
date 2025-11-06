@@ -8,6 +8,7 @@ local utils = enums.Utils
 local sfx = utils.SFX
 local game = utils.Game
 local GHOST_BALL_DMG = 1.25
+local tempData = mod.getData
 
 ---@param npc EntityNPC
 ---@return boolean
@@ -83,7 +84,7 @@ end
 
 ---@param entity Entity
 local function SpawnTrail(entity)
-    local entData = entity:GetData()
+    local entData = tempData(entity)
 
     if entData.GhostTrail then return end
 
@@ -101,20 +102,11 @@ local function SpawnTrail(entity)
 end
 
 local function RemoveTrail(entity)
-    local entData = entity:GetData()
+    local entData = tempData(entity)
     if not entData.GhostTrail then return end
 
     entData.GhostTrail:Remove()
     entData.GhostTrail = nil
-end
-
----@param vectorA Vector
----@param vectorB Vector
----@param t number
----@return Vector
-local function interpolateVector2D(vectorA, vectorB, t)
-	local minT = (1 - t)
-    return Vector(minT * vectorA.X + t * vectorB.X, minT * vectorA.Y + t * vectorB.Y)
 end
 
 ---@param player EntityPlayer
@@ -160,7 +152,7 @@ local Anims = {
 
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-    local playerData = player:GetData()
+    local playerData = tempData(player)
     local ghost = playerData.GhostBall ---@cast ghost EntityFamiliar
 
     if not ghost then return end
@@ -239,7 +231,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     familiar.SizeMulti = GhostSize
     familiar.SpriteScale = GhostSize
 
-    local playerData = player:GetData()
+    local playerData = tempData(player)
 
     playerData.GhostBall = familiar
 
@@ -281,7 +273,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     local player = familiar.Player
     local tearsMult = Round(BeckyMod:toTearsPerSecond(player.MaxFireDelay), 2) / 2.73
     local baseDamage = (GHOST_BALL_DMG * player.Damage) * tearsMult
-    
 
     if collider.Type == EntityType.ENTITY_MOVABLE_TNT or (collider.Type == EntityType.ENTITY_FIREPLACE and DestroyableFireplaces[collider.Variant]) then
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)

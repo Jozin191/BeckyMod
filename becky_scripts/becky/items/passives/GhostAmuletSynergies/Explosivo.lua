@@ -14,6 +14,4 @@ BeckyMod:AddCallback(Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
 
     local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.EXPLOSIVO, 0, enemy.Position, Vector.Zero, player):ToTear() ---@cast tear EntityTear
     tear:AddTearFlags(TearFlags.TEAR_STICKY)
-
-    -- local bomb = player:FireBomb(fam.Position, Vector.Zero, player)
 end)

@@ -17,6 +17,9 @@ local chargeAnimations = {
 	[12] = true
 }
 
+local customChargebar = Sprite("gfx/ui/ui_chargebar.anm2")
+customChargebar:ReplaceSpritesheet(0, "gfx/ui/ui_deadsocket_chargebar.png", true)
+
 ---@param itemID CollectibleType
 function DEAD_SOCKET:IsValidActiveItem(itemID)
 	local itemConfig = mod.itemconfig:GetCollectible(itemID)
@@ -45,20 +48,14 @@ function DEAD_SOCKET:ShouldRenderGhostCharge(player, slot)
 	)
 end
 
-local customChargebar = Sprite("gfx/ui/ui_chargebar.anm2")
-customChargebar:ReplaceSpritesheet(0, "gfx/ui/ui_deadsocket_chargebar.png", true)
-
--- customChargebar:Load("gfx/ui/ui_chargebar.anm2", false)
--- customChargebar:LoadGraphics()
-
 HudHelper.RegisterHUDElement({
 	Name = "Dead Socket Chargebar",
 	Priority = HudHelper.Priority.HIGH,
-	Condition = function(player, playerHUDIndex, hudLayout, slot)
+	Condition = function(player, _, _, slot)
 		---@cast slot ActiveSlot
 		return DEAD_SOCKET:ShouldRenderGhostCharge(player, slot)
 	end,
-	OnRender = function(player, playerHUDIndex, hudLayout, position, alpha, scale, slot, chargebarOffset)
+	OnRender = function(player, _, _, _, alpha, scale, slot, chargebarOffset)
 		---@cast slot ActiveSlot
 		---@cast chargebarOffset Vector
 		local maxCharges = mod.itemconfig:GetCollectible(player:GetActiveItem(slot)).MaxCharges
@@ -71,8 +68,6 @@ HudHelper.RegisterHUDElement({
 		customChargebar:Render(chargebarPos, Vector(0, 3 + (23 - 23 * (numCharges / maxCharges))))
 		customChargebar:SetFrame("BarOverlay" .. barAnim, 0)
 		customChargebar:Render(chargebarPos)
-
-		print("ghost charges:", player:GetEffects():GetCollectibleEffectNum(items.DEAD_SOCKET))
 	end
 }, HudHelper.HUDType.ACTIVE)
 
@@ -93,7 +88,7 @@ mod:AddPriorityCallback(ModCallbacks.MC_PRE_PLAYER_TRIGGER_ROOM_CLEAR, CallbackP
 ---@param itemID CollectibleType
 ---@param rng RNG
 ---@param player EntityPlayer
-function DEAD_SOCKET:OnUseItem(itemID, rng, player, flags, slot)
+function DEAD_SOCKET:OnUseItem(itemID, rng, player, _, slot)
 	if not (DEAD_SOCKET:IsValidActiveItem(itemID) and not player:NeedsCharge(slot)) then return end
 	local effects = player:GetEffects()
 	if not effects:HasCollectibleEffect(items.DEAD_SOCKET) then return end
