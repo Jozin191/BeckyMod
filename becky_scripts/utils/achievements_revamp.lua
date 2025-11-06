@@ -64,12 +64,12 @@ local UnlockTable = {
             Item = items.DREAM_BANISHER,
         },
         [CompletionType.BOSS_RUSH] = {
-            Unlock = achievements.NIGHT_OF_THE_SLASHER,
+            Unlock = achievements.ACHIEVEMENT_NIGHT_OF_THE_SLASHER,
             Difficulty = Difficulty.DIFFICULTY_HARD,
             Trinket = trinkets.NIGHT_OF_THE_SLASHER
         },
         [CompletionType.BLUE_BABY] = {
-            Unlock = achievements.HOLY_BOOKMARK,
+            Unlock = achievements.ACHIEVEMENT_HOLY_BOOKMARK,
             Difficulty = Difficulty.DIFFICULTY_HARD,
             Trinket = trinkets.HOLY_BOOKMARK
         },
@@ -81,7 +81,6 @@ local UnlockTable = {
         [CompletionType.MEGA_SATAN] = {
             Unlock = achievements.ACHIEVEMENT_DEAD_BATTERY,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = pickup.DEAD_BATTERY
         },
         [CompletionType.ULTRA_GREED] = {
             Unlock = achievements.ACHIEVEMENT_COXINHA,
@@ -124,13 +123,47 @@ function unlocks:CheckStartUnlocks()
                 pool:RemoveCollectible(tab.Item)
             end
             if tab.Trinket then
-                pool:RemoveTrinket(tab.Trinket)
+                print(pool:RemoveTrinket(tab.Trinket))
             end
             ::continue::
         end
     end
 end
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, unlocks.CheckStartUnlocks)
+
+---@return table<TrinketType, Achievement>
+local function GetModdedTrinketsUnlocks()
+    local tab = {}
+
+    for _, stuff in pairs(UnlockTable.Becky) do
+        if stuff.Trinket then
+            tab[stuff.Trinket] = stuff.Unlock
+        end
+    end
+
+    return tab
+end
+
+---@param pickup EntityPickup
+function unlocks:OnPickupInit(pickup)
+    local pgd = Isaac.GetPersistentGameData()
+
+    if pickup.Variant == PickupVariant.PICKUP_TRINKET then
+        local unlocks = GetModdedTrinketsUnlocks()[pickup.SubType]
+        if unlocks then
+            if not pgd:Unlocked(unlocks) then
+                pickup:Morph(pickup.Type, pickup.Variant, 0)
+            end
+        end
+    end
+
+    if pickup.Variant == PickupVariant.PICKUP_LIL_BATTERY then
+        if not pgd:Unlocked(achievements.ACHIEVEMENT_DEAD_BATTERY) then
+            pickup:Morph(pickup.Type, pickup.Variant, 1)
+        end
+    end
+end
+mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, unlocks.OnPickupInit)
 
 ---@param mark CompletionType
 ---@param player PlayerType
