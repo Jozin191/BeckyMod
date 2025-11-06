@@ -24,7 +24,6 @@ local achievements = {
 local items = {
     --- Actives ---
     BUTCHERS_COOKBOOK = Isaac.GetItemIdByName("Butcher's Cookbook"),
-    HAND_MADE_BIBLE = Isaac.GetItemIdByName("Hand Made Bible"),
     NIGHT_OF_THE_SLASHER = Isaac.GetItemIdByName("Night of the Slasher"),
 
     --- Passives --- 
@@ -38,7 +37,6 @@ local items = {
     SINNER = Isaac.GetItemIdByName("Sinner"),
 }
 local trinkets = {
-    BURNING_FEATHER = Isaac.GetTrinketIdByName("Burning Feather"),
     CORPSE_TAG = Isaac.GetTrinketIdByName("Corpse Tag"),
     DEVILZON_PRIME = Isaac.GetTrinketIdByName("Devilzon Prime"),
     HOLY_BOOKMARK = Isaac.GetTrinketIdByName("Holy Bookmark"),
@@ -151,7 +149,7 @@ function unlocks:OnTriggerCompletion(mark, player)
     pgd:TryUnlock(unlock.Unlock)
 
     if Isaac.AllMarksFilled(BeckyID) == 2 then 
-        pgd:TryUnlock(achievements.ACHIEVEMENT_SALT_HEART)
+        pgd:TryUnlock(achievements.ACHIEVEMENT_GHOST_AMULET)
     end
 end
 mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion)
