@@ -41,6 +41,9 @@ local trinkets = {
     DEVILZON_PRIME = Isaac.GetTrinketIdByName("Devilzon Prime"),
     HOLY_BOOKMARK = Isaac.GetTrinketIdByName("Holy Bookmark"),
 }
+local pickup = {
+	DEAD_BATTERY = Isaac.GetEntityVariantByName("Dead Battery")
+}
 
 local unlocks = {}
 local UnlockTable = {
@@ -78,7 +81,7 @@ local UnlockTable = {
         [CompletionType.MEGA_SATAN] = {
             Unlock = achievements.ACHIEVEMENT_DEAD_BATTERY,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            -- Pickup = , -- Temporarily on hold
+            Item = pickup.DEAD_BATTERY
         },
         [CompletionType.ULTRA_GREED] = {
             Unlock = achievements.ACHIEVEMENT_COXINHA,
