@@ -12,7 +12,5 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_IPECAC) then return end
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_IPECAC)
 
-    if rng:RandomFloat() > 0.2 then return end
-
     BeckyMod.Game:BombExplosionEffects(fam.Position, player.Damage * 10, TearFlags.TEAR_POISON)
 end)
