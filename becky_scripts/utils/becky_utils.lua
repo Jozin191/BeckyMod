@@ -101,6 +101,20 @@ function BeckyMod:Log(...)
 	Isaac.DebugString(str)
 end
 
+function BeckyMod:Lerp(first, second, percent, smoothIn, smoothOut) --woah siiickkkk
+    if smoothIn then
+        percent = percent ^ smoothIn
+    end
+
+    if smoothOut then
+        percent = 1 - percent
+        percent = percent ^ smoothOut
+        percent = 1 - percent
+    end
+
+	return (first + (second - first)*percent)
+end
+
 --Checks if something is in a table
 ---@param table table
 ---@param element any

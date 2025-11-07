@@ -1,14 +1,13 @@
-local mod = BeckyMod
-local enums = mod.Enums
-local items = enums.CollectibleType
-local Callbacks = enums.Callbacks
-local variants = enums.Variants
-local players = enums.PlayerType
-local utils = enums.Utils
-local sfx = utils.SFX
-local game = utils.Game
+local ITEM_GHOST_AMULET = Isaac.GetItemIdByName("Ghost Amulet")
+local BeckyPlayerType = Isaac.GetPlayerTypeByName("Becky", false)
+local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
 local GHOST_BALL_DMG = 1.25
-local tempData = mod.getData
+
+BeckyMod.Callbacks = {}
+--- Called every time the ghost hits an enemy
+--- * Familiar: The ghost entity
+--- * Entity: The entity hit by the ghost
+BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY = "BeckyMod_ON_GHOST_HIT_ENEMY"
 
 ---@param npc EntityNPC
 ---@return boolean
@@ -19,12 +18,12 @@ end
 ---@param player EntityPlayer
 ---@return boolean
 local function HasGhostAmulet(player)
-    return player:HasCollectible(items.GHOST_AMULET)
+    return player:HasCollectible(ITEM_GHOST_AMULET)
 end
 
 ---@param player EntityPlayer
 local function BeckyHasBirthright(player)
-    return player:GetPlayerType() == players.BECKY and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+    return player:GetPlayerType() == BeckyPlayerType and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 end
 
 ---Triggers a push to `pushed` from `pusher`
@@ -84,7 +83,7 @@ end
 
 ---@param entity Entity
 local function SpawnTrail(entity)
-    local entData = tempData(entity)
+    local entData = entity:GetData()
 
     if entData.GhostTrail then return end
 
@@ -102,11 +101,20 @@ local function SpawnTrail(entity)
 end
 
 local function RemoveTrail(entity)
-    local entData = tempData(entity)
+    local entData = entity:GetData()
     if not entData.GhostTrail then return end
 
     entData.GhostTrail:Remove()
     entData.GhostTrail = nil
+end
+
+---@param vectorA Vector
+---@param vectorB Vector
+---@param t number
+---@return Vector
+local function interpolateVector2D(vectorA, vectorB, t)
+	local minT = (1 - t)
+    return Vector(minT * vectorA.X + t * vectorB.X, minT * vectorA.Y + t * vectorB.Y)
 end
 
 ---@param player EntityPlayer
@@ -124,7 +132,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player, cachef
     local seed = math.max(Random(), 1)
     rng:SetSeed(seed, 35)
 
-    player:CheckFamiliar(variants.GHOST_BALL, 1, rng)
+    player:CheckFamiliar(GHOST_BALL_VAR, 1, rng)
 end, CacheFlag.CACHE_FAMILIARS)
 
 ---@param familiar EntityFamiliar
@@ -133,7 +141,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
 	-- familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
     familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS 
-end, variants.GHOST_BALL)
+end, GHOST_BALL_VAR)
 
 ---Expontential function
 ---@param number number
@@ -152,67 +160,73 @@ local Anims = {
 
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-    local playerData = tempData(player)
-    local ghost = playerData.GhostBall ---@cast ghost EntityFamiliar
+    local playerData = player:GetData()
+    local ghosts = playerData.GhostBalls
 
-    if not ghost then return end
-    
-    local isShooting = IsPlayerShooting(player)
-    local famPos = ghost.Position
-    local playerPos = player.Position
-    local shotSpeed = player.ShotSpeed
-    local posDif = famPos - playerPos
-    local posDifLenght = posDif:Length()	
-    local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
-    local maxDistIdle = 40
-    local room = game:GetRoom()
-    -- SpawnTrail(familiar)
+    local num = 0
 
-    if isShooting then
-        SpawnTrail(ghost)
-        if not player:AreOpposingShootDirectionsPressed() then
-            ghost.State = 1
-        local input = {
-			up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
-			down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
-			left = Input.GetActionValue(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex),
-			right = Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex),
-		}
+    for _, ghost in pairs(ghosts) do ---@cast ghost EntityFamiliar
+        if not ghost then return end
 
-        local MirrorInversor = room:IsMirrorWorld() and -1 or 1
+        num = num + 1
+        
+        local isShooting = IsPlayerShooting(player)
+        local famPos = ghost.Position
+        local playerPos = player.Position
+        local shotSpeed = player.ShotSpeed
+        local posDif = famPos - playerPos
+        local posDifLenght = posDif:Length()	
+        local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
+        local maxDistIdle = 40
+        local room = BeckyMod.Game:GetRoom()
+        -- SpawnTrail(familiar)
 
-        local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * MirrorInversor
-		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
-        local resizer = 1.5 * shotSpeed
+        if isShooting then
+            SpawnTrail(ghost)
+            if not player:AreOpposingShootDirectionsPressed() then
+                ghost.State = 1
+                local input = {
+                    up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
+                    down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
+                    left = Input.GetActionValue(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex),
+                    right = Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex),
+                }
 
-        ghost.Velocity = ghost.Velocity + (Vector(VectorX, VectorY):Normalized():Resized(resizer))
+                local MirrorInversor = room:IsMirrorWorld() and -1 or 1
+
+                local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * MirrorInversor
+                local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
+                local resizer = 1.5 * shotSpeed
+
+                ghost.Velocity = ghost.Velocity + (Vector(VectorX, VectorY):Normalized():Resized(resizer))
 
 
-        if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
-			ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
-		end
+                if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
+                    ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
+                end
 
-        local dir = (famPos - playerPos):Normalized()
-        player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
-        end
-    else
-        ghost.State = 0    
-        if posDifLenght > maxDistIdle then
-            ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
+                local dir = (famPos - playerPos):Normalized()
+                player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
+            end
         else
-            RemoveTrail(ghost)
+            ghost.State = 0    
+            if posDifLenght > maxDistIdle then
+                ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
+            else
+                RemoveTrail(ghost)
+            end
         end
-    end
 
-    local sprite = player:GetSprite()
+        local sprite = player:GetSprite()
 
-    if sprite:GetAnimation() == "Appear" then
-        ghost.Velocity = Vector.Zero
+        if sprite:GetAnimation() == "Appear" then
+            ghost.Velocity = Vector.Zero
+        end
     end
 end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
-    for _, ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, variants.GHOST_BALL)) do
+    for _, ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOST_BALL_VAR)) do
         local fam = ghost:ToFamiliar() ---@cast fam EntityFamiliar
         fam.Position = fam.Player.Position
     end
@@ -222,7 +236,7 @@ end)
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local GhostSprite = familiar:GetSprite()
     local player = familiar.Player
-    local room = game:GetRoom()
+    local room = BeckyMod.Game:GetRoom()
     local currentAnim = GhostSprite:GetAnimation()
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
     local GhostSize = Vector.One * exp((player.Damage / 4.2), 1, 1.2)
@@ -231,12 +245,13 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     familiar.SizeMulti = GhostSize
     familiar.SpriteScale = GhostSize
 
-    local playerData = tempData(player)
+    local playerData = player:GetData()
 
-    playerData.GhostBall = familiar
+    playerData.GhostBalls = playerData.GhostBalls or {}
+    playerData.GhostBalls[tostring(familiar.InitSeed)] = playerData.GhostBalls[tostring(familiar.InitSeed)] or familiar
 
     if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then
-        local rng = player:GetCollectibleRNG(items.GHOST_AMULET)
+        local rng = player:GetCollectibleRNG(ITEM_GHOST_AMULET)
         local randomNum = rng:RandomInt(1, 4)
 
         if randomNum ~= 4 then
@@ -257,7 +272,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 
         gridFromPos:Hurt(hurtVal)
     end
-end, variants.GHOST_BALL)
+end, GHOST_BALL_VAR)
 
 local DestroyableFireplaces = {
     [0] = true,
@@ -273,6 +288,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     local player = familiar.Player
     local tearsMult = Round(BeckyMod:toTearsPerSecond(player.MaxFireDelay), 2) / 2.73
     local baseDamage = (GHOST_BALL_DMG * player.Damage) * tearsMult
+    
 
     if collider.Type == EntityType.ENTITY_MOVABLE_TNT or (collider.Type == EntityType.ENTITY_FIREPLACE and DestroyableFireplaces[collider.Variant]) then
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
@@ -288,13 +304,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if not IsValidEnemy(npc) then return end
     familiar:GetSprite():Play("Hit")
     TriggerPush(npc, familiar, 20 * tearsMult)
-
-    if not familiar.Player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then    
+    if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
         TriggerPush(familiar, npc, 10)
     end
-    sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
+    SFXManager():Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
 
-    Isaac.RunCallback(Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider)
+    Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider)
 
-    npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 20)
-end, variants.GHOST_BALL)
+    npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
+end, GHOST_BALL_VAR)

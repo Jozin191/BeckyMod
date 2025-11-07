@@ -1,12 +1,49 @@
 local mod = BeckyMod
-local enums = mod.Enums
-local utils = enums.Utils
-local game = utils.Game
-local achievements = enums.Achievements
-local players = enums.PlayerType
-local items = enums.CollectibleType
-local trinkets = enums.TrinketType
+local game = mod.Game
 local pool = game:GetItemPool()
+local BeckyID = Isaac.GetPlayerTypeByName("Becky")
+
+local achievements = {
+    ACHIEVEMENT_DEVILZONE_PRIME = Isaac.GetAchievementIdByName("Devilzon Prime"),
+    ACHIEVEMENT_NIGHT_OF_THE_SLASHER = Isaac.GetAchievementIdByName("Night of the Slasher"),
+    ACHIEVEMENT_DREAM_BANISHER = Isaac.GetAchievementIdByName("Dream Banisher"),
+    ACHIEVEMENT_SINNER = Isaac.GetAchievementIdByName("Sinner"),
+    ACHIEVEMENT_HOLY_BOOKMARK = Isaac.GetAchievementIdByName("Holy Bookmark"),
+    ACHIEVEMENT_CHALICE = Isaac.GetAchievementIdByName("Chalice"),
+    ACHIEVEMENT_COXINHA = Isaac.GetAchievementIdByName("Coxinha"),
+    ACHIEVEMENT_CORPSE_TAG = Isaac.GetAchievementIdByName("Corpse Tag"),
+    ACHIEVEMENT_SCARECROW = Isaac.GetAchievementIdByName("Scarecrow"),
+    ACHIEVEMENT_NULL_BOMBS = Isaac.GetAchievementIdByName("Null Bombs"),
+    ACHIEVEMENT_GHOST_AMULET = Isaac.GetAchievementIdByName("Ghost Amulet"),
+    ACHIEVEMENT_DEAD_SOCKET = Isaac.GetAchievementIdByName("Dead Socket"),
+    ACHIEVEMENT_DEAD_BATTERY = Isaac.GetAchievementIdByName("Dead Battery"),
+    ACHIEVEMENT_BUTCHERS_COOKBOOK = Isaac.GetAchievementIdByName("Butchers Cookbook"),
+    ACHIEVEMENT_TAINTED_BECKY = Isaac.GetAchievementIdByName("Tainted Becky"), -- Currently unused
+}
+
+local items = {
+    --- Actives ---
+    BUTCHERS_COOKBOOK = Isaac.GetItemIdByName("Butcher's Cookbook"),
+    NIGHT_OF_THE_SLASHER = Isaac.GetItemIdByName("Night of the Slasher"),
+
+    --- Passives --- 
+    COXINHA = Isaac.GetItemIdByName("Coxinha"),
+    DEAD_SOCKET = Isaac.GetItemIdByName("Dead Socket"),
+    DEFILED_CHALICE = Isaac.GetItemIdByName("Defiled Chalice"),
+    DREAM_BANISHER = Isaac.GetItemIdByName("Dream Banisher"),
+    GHOST_AMULET = Isaac.GetItemIdByName("Ghost Amulet"),
+    NULL_BOMBS = Isaac.GetItemIdByName("Null Bombs"),
+    SCARECROW = Isaac.GetItemIdByName("Scarecrow"),
+    SINNER = Isaac.GetItemIdByName("Sinner"),
+}
+local trinkets = {
+    CORPSE_TAG = Isaac.GetTrinketIdByName("Corpse Tag"),
+    DEVILZON_PRIME = Isaac.GetTrinketIdByName("Devilzon Prime"),
+    HOLY_BOOKMARK = Isaac.GetTrinketIdByName("Holy Bookmark"),
+}
+local pickup = {
+	DEAD_BATTERY = Isaac.GetEntityVariantByName("Dead Battery")
+}
 
 local unlocks = {}
 local UnlockTable = {
@@ -27,12 +64,12 @@ local UnlockTable = {
             Item = items.DREAM_BANISHER,
         },
         [CompletionType.BOSS_RUSH] = {
-            Unlock = achievements.NIGHT_OF_THE_SLASHER,
+            Unlock = achievements.ACHIEVEMENT_NIGHT_OF_THE_SLASHER,
             Difficulty = Difficulty.DIFFICULTY_HARD,
             Trinket = trinkets.NIGHT_OF_THE_SLASHER
         },
         [CompletionType.BLUE_BABY] = {
-            Unlock = achievements.HOLY_BOOKMARK,
+            Unlock = achievements.ACHIEVEMENT_HOLY_BOOKMARK,
             Difficulty = Difficulty.DIFFICULTY_HARD,
             Trinket = trinkets.HOLY_BOOKMARK
         },
@@ -44,7 +81,6 @@ local UnlockTable = {
         [CompletionType.MEGA_SATAN] = {
             Unlock = achievements.ACHIEVEMENT_DEAD_BATTERY,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            -- Pickup = , -- Temporarily on hold
         },
         [CompletionType.ULTRA_GREED] = {
             Unlock = achievements.ACHIEVEMENT_COXINHA,
@@ -95,10 +131,44 @@ function unlocks:CheckStartUnlocks()
 end
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, unlocks.CheckStartUnlocks)
 
+---@return table<TrinketType, Achievement>
+local function GetModdedTrinketsUnlocks()
+    local tab = {}
+
+    for _, stuff in pairs(UnlockTable.Becky) do
+        if stuff.Trinket then
+            tab[stuff.Trinket] = stuff.Unlock
+        end
+    end
+
+    return tab
+end
+
+---@param pickup EntityPickup
+function unlocks:OnPickupInit(pickup)
+    local pgd = Isaac.GetPersistentGameData()
+
+    if pickup.Variant == PickupVariant.PICKUP_TRINKET then
+        local unlocks = GetModdedTrinketsUnlocks()[pickup.SubType]
+        if unlocks then
+            if not pgd:Unlocked(unlocks) then
+                pickup:Morph(pickup.Type, pickup.Variant, 0)
+            end
+        end
+    end
+
+    if pickup.Variant == PickupVariant.PICKUP_LIL_BATTERY then
+        if not pgd:Unlocked(achievements.ACHIEVEMENT_DEAD_BATTERY) then
+            pickup:Morph(pickup.Type, pickup.Variant, 1)
+        end
+    end
+end
+mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, unlocks.OnPickupInit)
+
 ---@param mark CompletionType
 ---@param player PlayerType
 function unlocks:OnTriggerCompletion(mark, player)
-    if player ~= players.BECKY then return end
+    if player ~= BeckyID then return end
 
     local pgd = Isaac.GetPersistentGameData()
     local difficulty = game.Difficulty
@@ -114,11 +184,12 @@ function unlocks:OnTriggerCompletion(mark, player)
     if difficulty ~= unlock.Difficulty then return end
     pgd:TryUnlock(unlock.Unlock)
 
-    if Isaac.AllMarksFilled(players.BECKY) == 2 then 
-        pgd:TryUnlock(achievements.ACHIEVEMENT_SALT_HEART)
+    if Isaac.AllMarksFilled(BeckyID) == 2 then 
+        pgd:TryUnlock(achievements.ACHIEVEMENT_GHOST_AMULET)
     end
 end
 mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion)
+
 
 -- Tainted Becky isn't here so we comment this for a while
 
