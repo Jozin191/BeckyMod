@@ -1,3 +1,4 @@
+local Mod = BeckyMod
 local loader = BeckyMod.PatchesLoader
 
     if TheFuture then

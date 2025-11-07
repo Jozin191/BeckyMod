@@ -253,3 +253,14 @@ function BeckyMod:SetItemPrice(pickup)
     
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, BeckyMod.SetItemPrice, PickupVariant.PICKUP_COLLECTIBLE)
+
+
+--Auri Compat
+function BECKY:Onupdate(player)
+	if (player:GetName() == "Becky") then
+	
+	uniqueprogressbar = true
+	end
+end
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.Onupdate)

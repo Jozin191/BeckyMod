@@ -84,6 +84,9 @@ include("becky_scripts.mod_compatibility.load_patches")
 --pickups
 include("becky_scripts.becky.pickups.dead_battery")
 
+--misc stuff
+include("becky_scripts.utils.achievements_revamp")
+
 --ghost synergies
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.CSection")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.DrFetus")
@@ -93,3 +96,8 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.StatusEffects")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.GodHead")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Haemolacria")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Ipecac")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Explosivo")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Booger")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Spore")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TearSplit")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
