@@ -1,6 +1,5 @@
 local loader = BeckyMod.PatchesLoader
 
-local function FuturePatch()
     if TheFuture then
         TheFuture.ModdedCharacterDialogue["Becky"] = {
             "Huh... i don't remember seeing you in the bible...",
@@ -10,6 +9,4 @@ local function FuturePatch()
             "...what? i do have an uvula"
         }
     end
-end
 
-loader:RegisterPatch("Future", FuturePatch)
