@@ -83,7 +83,6 @@ function MenuProvider.SaveMenusPoppedUp(var)
 end
 local dssmenucore = include("becky_scripts.utils.deadseascrolls.dssmenucore")
 BeckyMod.dssmod = dssmenucore.init(DSSModName, MenuProvider)
-local dssmod = BeckyMod.dssmod
 
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
     if not mod.HasLoadedDSSReal and mod.SaveManager.IsLoaded() then
@@ -124,16 +123,16 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
             "Item",
         }
 
-        for i, item in ipairs(BeckyMod.ACHIEVEMENT) do
-            if not item.Sprite then
-                item.Sprite = Sprite()
-                item.Sprite:Load("gfx/ui/achievement/_becky_achievement.anm2", false)
-                item.Sprite:ReplaceSpritesheet(2, "gfx/ui/achievement/achievement_" .. string.lower(item.ID) ..".png")
-                item.Sprite:ReplaceSpritesheet(0, "gfx/nothing.png")
-                item.extraSpriteID = i
-                item.Sprite:LoadGraphics()
-            end
-        end
+        -- for i, item in ipairs(BeckyMod.ACHIEVEMENT) do
+        --     if not item.Sprite then
+        --         item.Sprite = Sprite()
+        --         item.Sprite:Load("gfx/ui/achievement/_becky_achievement.anm2", false)
+        --         item.Sprite:ReplaceSpritesheet(2, "gfx/ui/achievement/achievement_" .. string.lower(item.ID) ..".png")
+        --         item.Sprite:ReplaceSpritesheet(0, "gfx/nothing.png")
+        --         item.extraSpriteID = i
+        --         item.Sprite:LoadGraphics()
+        --     end
+        -- end
 
         local selectedAch
         local drawings = {}
@@ -200,161 +199,35 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                 tooltip = BeckyMod.dssmod.menuOpenToolTip,
             },
 
-            Beckyoptions =  {
-                    title = 'options',
-                        buttons = {
-                            {str = '', fsize=2, nosel = true},
-                            {str = '-----other-----', fsize=2, nosel = true},
+            -- Beckyoptions =  {
+            --     title = 'options',
+            --         buttons = {
+            --             {str = '', fsize=2, nosel = true},
+            --             {str = '-----other-----', fsize=2, nosel = true},
 
-                            {str = '', fsize=2, nosel = true},
-                            {str = 'achievements',   
-                            dest = 'achievementsoptions',
-                            tooltip = {strset = {'control', 'locked content', 'and related', 'achievements'}}
-                            },                   
-                            {str = '', fsize=2, nosel = true},
+            --             {str = '', fsize=2, nosel = true},
+            --             {str = 'achievements',   
+            --             dest = 'achievementsoptions',
+            --             tooltip = {strset = {'control', 'locked content', 'and related', 'achievements'}}
+            --             },                   
+            --             {str = '', fsize=2, nosel = true},
 
-                            {str = '--------------', fsize=2, nosel = true},
-                            {str = '', fsize=2, nosel = true},
-                            {
-                                str = "reset savedata",
-                                fsize = 3,
-                                action = "resume",
+            --             {str = '--------------', fsize=2, nosel = true},
+            --             {str = '', fsize=2, nosel = true},
+            --             {
+            --                 str = "reset savedata",
+            --                 fsize = 3,
+            --                 action = "resume",
 
-                                func = function()
-                                    DeadSeaScrollsMenu.QueueMenuOpen("becky mod", "resetSavedata", 1, true)
-                                end,
+            --                 func = function()
+            --                     DeadSeaScrollsMenu.QueueMenuOpen("becky mod", "resetSavedata", 1, true)
+            --                 end,
 
-                                tooltip = {strset = {'control', 'locked content', 'and related', 'achievements'}}
-                            },
-                            {str = '', fsize=2, nosel = true},
-                        }
-            },
-
-            achievementsoptions = {
-                title = "achievements",
-                buttons = {
-                    SureFunc("unlock all", "lockall", 2, {'unlocks all','if desired', '', 'dependant', 'by default', '', 'to update', 'restart run'}),
-                    SureFunc("depend all", "lockall", 1, {'sets unlocks','back to','player','dependant', '', 'to update', 'restart run'}),
-                    {
-                        str = "unlock tooltip",
-                        choices = {'on', 'off'},
-                        variable = "lockAchTooltip",
-                        setting = 1,
-                        load = function()
-                            return mod.SaveManager.GetSettingsSave().lockAchTooltip or 2
-                        end,
-                        store = function(var)
-                            mod.SaveManager.GetSettingsSave().lockAchTooltip = var
-                        end,
-                        tooltip = {strset = {'shows tooltip', 'to a unlock', 'while locked', '', 'default', 'is off', '', 'updates on', 'dss close'}}
-                    },
-                }
-            },
-
-            unlockspopup = {
-                title = "achievements ?",
-                fsize = 1,
-                buttons = {
-                    {str = "a majority of the becky mod's", nosel = true},
-                    {str = "non-character related content", nosel = true},
-                    {str = "is locked behind achievements", nosel = true},
-                    {str = "", nosel = true},
-                    {str = "this is an optional feature", nosel = true},
-                    {str = "", nosel = true},
-                    {str = "continue with", fsize = 2, nosel = true},
-                    {str = "said changes?", fsize = 2, nosel = true},
-                    {str = "", nosel = true},
-                    {
-                        str = "yes",
-                        action = "resume",
-                        fsize = 3,
-                        glowcolor = 3,
-
-                        func = function()
-                            mod.SaveManager.GetSettingsSave().lockall = 1
-                            mod.SaveManager.GetPersistentSave().shownUnlocksChoicePopup = true
-                            BeckyAchievementSystem:Setup()
-                        end,
-                    },
-                    {
-                        str = "no",
-                        action = "resume",
-                        fsize = 3,
-
-                        func = function()
-                            mod.SaveManager.GetSettingsSave().lockall = 2
-                            mod.SaveManager.GetPersistentSave().shownUnlocksChoicePopup = true
-                            BeckyAchievementSystem:Setup()
-                        end
-                    },
-
-                    {str = "", nosel = true},
-                },
-                tooltip = {strset = {'you may', 'change options', 'later'}}
-            },
-
-            resetSavedata = {
-                title = "reset savedata?",
-                fsize = 1,
-                buttons = {
-                    {str = "you cannot undo this", nosel = true},
-                    {str = "", nosel = true},
-                    {str = "continue with", fsize = 2, nosel = true},
-                    {str = "said changes?", fsize = 2, nosel = true},
-                    {str = "", nosel = true},
-                    {
-                        str = "yes",
-                        action = "resume",
-                        fsize = 3,
-                        glowcolor = 3,
-
-                        func = function()
-                            --thanks epiph
-                            local modSave = mod.SaveManager.GetEntireSave()
-                            modSave.file.other = nil
-                            modSave = mod.SaveManager.Utility.PatchSaveFile(modSave, mod.SaveManager.DEFAULT_SAVE)
-                            mod.SaveManager.GetPersistentSave().SAVE_VERSION = 4
-                            mod.SaveManager.Save()
-                        end,
-                    },
-                    {
-                        str = "no",
-                        action = "resume",
-                        fsize = 3,
-                    },
-
-                    {str = "", nosel = true},
-                },
-                tooltip = {strset = {'you cannot', 'undo this'}}
-            },
-            yesNo = {
-                title = mod:GetNestedVariable(mod.SaveManager.GetSettingsSave(), "DSSSavedata", "YesNo", "Name" ),
-                fsize = 1,
-                buttons = {
-                    {str = "would you wish", nosel = true},
-                    {str = "to proceed with", nosel = true},
-                    {str = "your choice?", fsize = 2, nosel = true},
-                    {str = "", nosel = true},
-                    {
-                        str = "yes",
-                        action = "back",
-                        fsize = 3,
-                        glowcolor = 3,
-
-                        func = function()
-                            mod.SaveManager.GetSettingsSave()[mod:GetNestedVariable(mod.SaveManager.GetSettingsSave(), "DSSSavedata", "YesNo", "Variable" )] = mod:GetNestedVariable(mod.SaveManager.GetSettingsSave(), "DSSSavedata", "YesNo", "Outcome" )
-                        end,
-                    },
-                    {
-                        str = "no",
-                        action = "back",
-                        fsize = 3,
-                    },
-
-                    {str = "", nosel = true},
-                },
-                tooltip = {strset = mod:GetNestedVariable(mod.SaveManager.GetSettingsSave(), "DSSSavedata", "YesNo", "Tooltip" )}
-            }
+            --                 tooltip = {strset = {'control', 'locked content', 'and related', 'achievements'}}
+            --             },
+            --             {str = '', fsize=2, nosel = true},
+            --     }
+            -- },
         }
 
         local dmdirectorykey = {
