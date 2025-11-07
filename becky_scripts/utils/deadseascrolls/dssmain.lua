@@ -191,7 +191,6 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                 buttons = {
                     {str = 'resume game', action = 'resume'},
                     {str = 'options', dest = 'Beckyoptions',tooltip = {strset = {'---','play around', 'with what', 'you like and', 'do not like', '---'}}},
-                    {str = 'achievements', dest = 'achievements',tooltip = {strset = {'---','force lock or', 'unlock things ','', 'recommended', 'to keep',  'stuff locked', '---'}}},
                     {str = 'credits', dest = 'Beckycredits',tooltip = {strset = {'---','giving thanks', 'to everyone', 'who helped', '---'}}},         
                     BeckyMod.dssmod.changelogsButton,
                     {str = '', fsize=2, nosel = true},
