@@ -161,61 +161,67 @@ local Anims = {
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local playerData = player:GetData()
-    local ghost = playerData.GhostBall ---@cast ghost EntityFamiliar
+    local ghosts = playerData.GhostBalls
 
-    if not ghost then return end
-    
-    local isShooting = IsPlayerShooting(player)
-    local famPos = ghost.Position
-    local playerPos = player.Position
-    local shotSpeed = player.ShotSpeed
-    local posDif = famPos - playerPos
-    local posDifLenght = posDif:Length()	
-    local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
-    local maxDistIdle = 40
-    local room = BeckyMod.Game:GetRoom()
-    -- SpawnTrail(familiar)
+    local num = 0
 
-    if isShooting then
-        SpawnTrail(ghost)
-        if not player:AreOpposingShootDirectionsPressed() then
-            ghost.State = 1
-        local input = {
-			up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
-			down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
-			left = Input.GetActionValue(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex),
-			right = Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex),
-		}
+    for _, ghost in pairs(ghosts) do ---@cast ghost EntityFamiliar
+        if not ghost then return end
 
-        local MirrorInversor = room:IsMirrorWorld() and -1 or 1
+        num = num + 1
+        
+        local isShooting = IsPlayerShooting(player)
+        local famPos = ghost.Position
+        local playerPos = player.Position
+        local shotSpeed = player.ShotSpeed
+        local posDif = famPos - playerPos
+        local posDifLenght = posDif:Length()	
+        local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
+        local maxDistIdle = 40
+        local room = BeckyMod.Game:GetRoom()
+        -- SpawnTrail(familiar)
 
-        local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * MirrorInversor
-		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
-        local resizer = 1.5 * shotSpeed
+        if isShooting then
+            SpawnTrail(ghost)
+            if not player:AreOpposingShootDirectionsPressed() then
+                ghost.State = 1
+                local input = {
+                    up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
+                    down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
+                    left = Input.GetActionValue(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex),
+                    right = Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex),
+                }
 
-        ghost.Velocity = ghost.Velocity + (Vector(VectorX, VectorY):Normalized():Resized(resizer))
+                local MirrorInversor = room:IsMirrorWorld() and -1 or 1
+
+                local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * MirrorInversor
+                local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
+                local resizer = 1.5 * shotSpeed
+
+                ghost.Velocity = ghost.Velocity + (Vector(VectorX, VectorY):Normalized():Resized(resizer))
 
 
-        if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
-			ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
-		end
+                if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
+                    ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
+                end
 
-        local dir = (famPos - playerPos):Normalized()
-        player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
-        end
-    else
-        ghost.State = 0    
-        if posDifLenght > maxDistIdle then
-            ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
+                local dir = (famPos - playerPos):Normalized()
+                player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
+            end
         else
-            RemoveTrail(ghost)
+            ghost.State = 0    
+            if posDifLenght > maxDistIdle then
+                ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
+            else
+                RemoveTrail(ghost)
+            end
         end
-    end
 
-    local sprite = player:GetSprite()
+        local sprite = player:GetSprite()
 
-    if sprite:GetAnimation() == "Appear" then
-        ghost.Velocity = Vector.Zero
+        if sprite:GetAnimation() == "Appear" then
+            ghost.Velocity = Vector.Zero
+        end
     end
 end)
 
@@ -241,7 +247,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 
     local playerData = player:GetData()
 
-    playerData.GhostBall = familiar
+    playerData.GhostBalls = playerData.GhostBalls or {}
+    playerData.GhostBalls[tostring(familiar.InitSeed)] = playerData.GhostBalls[tostring(familiar.InitSeed)] or familiar
 
     if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then
         local rng = player:GetCollectibleRNG(ITEM_GHOST_AMULET)
