@@ -240,7 +240,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                     {str = 'no-name', fsize=2, tooltip = GenerateTooltip('artist')},
                     {str = 'muffintae', fsize=2, tooltip = GenerateTooltip('designer')},
                     {str = 'blender', fsize=2, tooltip = GenerateTooltip('designer')},
-                    -- {str = '', fsize=1, nosel = true},    
+                    -- {str = '', fsize=1, nosel = true},
 
                     BREAK_LINE,
                     {str = 'contributors', fsize = 3, nosel = true},
