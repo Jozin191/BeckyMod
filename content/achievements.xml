@@ -17,6 +17,6 @@
 	<achievement name="Ghost Amulet" text='Becky All' gfx="achievement_ghost_amulet.png" />
 	
 	<!-- Tainted shit so it's locked -->
-	<achievement name="Tainted Becky" text='' gfx="achievement_placeholder.png" />
+	<achievement name="Tainted Becky" text='' gfx="achievement_placeholder.png" hidden="true"/>
 	
 </achievements>
