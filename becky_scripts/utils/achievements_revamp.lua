@@ -9,7 +9,7 @@ local achievements = {
     ACHIEVEMENT_DREAM_BANISHER = Isaac.GetAchievementIdByName("Dream Banisher"),
     ACHIEVEMENT_SINNER = Isaac.GetAchievementIdByName("Sinner"),
     ACHIEVEMENT_HOLY_BOOKMARK = Isaac.GetAchievementIdByName("Holy Bookmark"),
-    ACHIEVEMENT_CHALICE = Isaac.GetAchievementIdByName("Chalice"),
+    ACHIEVEMENT_CHALICE = Isaac.GetAchievementIdByName("Defiled Chalice"),
     ACHIEVEMENT_COXINHA = Isaac.GetAchievementIdByName("Coxinha"),
     ACHIEVEMENT_CORPSE_TAG = Isaac.GetAchievementIdByName("Corpse Tag"),
     ACHIEVEMENT_SCARECROW = Isaac.GetAchievementIdByName("Scarecrow"),
@@ -17,7 +17,7 @@ local achievements = {
     ACHIEVEMENT_GHOST_AMULET = Isaac.GetAchievementIdByName("Ghost Amulet"),
     ACHIEVEMENT_DEAD_SOCKET = Isaac.GetAchievementIdByName("Dead Socket"),
     ACHIEVEMENT_DEAD_BATTERY = Isaac.GetAchievementIdByName("Dead Battery"),
-    ACHIEVEMENT_BUTCHERS_COOKBOOK = Isaac.GetAchievementIdByName("Butchers Cookbook"),
+    ACHIEVEMENT_BUTCHERS_COOKBOOK = Isaac.GetAchievementIdByName("Butcher's Cookbook"),
     ACHIEVEMENT_TAINTED_BECKY = Isaac.GetAchievementIdByName("Tainted Becky"), -- Currently unused
 }
 
