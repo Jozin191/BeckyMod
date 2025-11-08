@@ -4,9 +4,28 @@ BeckyMod.HasLoadedDSS = true
 
 local DSSModName = "becky Mod DSS Menu"
 
+local BREAK_LINE = {str = "", fsize = 1, nosel = true}
+
 local DSSCoreVersion = 7
 
 local MenuProvider = {}
+
+local function GenerateTooltip(str)
+    local endTable = {}
+    local currentString = ""
+    for w in str:gmatch("%S+") do
+        local newString = currentString .. w .. " "
+        if newString:len() >= 15 then
+            table.insert(endTable, currentString)
+            currentString = ""
+        end
+
+        currentString = currentString .. w .. " "
+    end
+
+    table.insert(endTable, currentString)
+    return {strset = endTable}
+end
 
 function MenuProvider.SaveSaveData()
     mod.SaveManager.Save()
@@ -199,35 +218,48 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                 tooltip = BeckyMod.dssmod.menuOpenToolTip,
             },
 
-            -- Beckyoptions =  {
-            --     title = 'options',
-            --         buttons = {
-            --             {str = '', fsize=2, nosel = true},
-            --             {str = '-----other-----', fsize=2, nosel = true},
+            Beckycredits = {
+                title = 'credits',
 
-            --             {str = '', fsize=2, nosel = true},
-            --             {str = 'achievements',   
-            --             dest = 'achievementsoptions',
-            --             tooltip = {strset = {'control', 'locked content', 'and related', 'achievements'}}
-            --             },                   
-            --             {str = '', fsize=2, nosel = true},
+                buttons = {
+                    {str = 'directors', fsize = 3, nosel = true},
+                    BREAK_LINE,
+                    {str = 'jozin', fsize=2, tooltip = GenerateTooltip('director, art, design and animation')},
+                    {str = 'interstellarnuggo ', fsize=2, tooltip = GenerateTooltip('trailer music and co-director')},
 
-            --             {str = '--------------', fsize=2, nosel = true},
-            --             {str = '', fsize=2, nosel = true},
-            --             {
-            --                 str = "reset savedata",
-            --                 fsize = 3,
-            --                 action = "resume",
+                    BREAK_LINE,
+                    {str = 'members', fsize = 3, nosel = true},
+                    BREAK_LINE,
 
-            --                 func = function()
-            --                     DeadSeaScrollsMenu.QueueMenuOpen("becky mod", "resetSavedata", 1, true)
-            --                 end,
+                    {str = 'kotry', fsize=2, tooltip = GenerateTooltip('main coder')},
+                    {str = 'tiburones', fsize=2, tooltip = GenerateTooltip('coder')},
+                    {str = 'ignatz', fsize=2, tooltip = GenerateTooltip('coder')},
+                    {str = 'cvs', fsize=2, tooltip = GenerateTooltip('coder')},
+                    {str = 'nerfexus', fsize=2, tooltip = GenerateTooltip('artist')},
+                    {str = 'darigoat', fsize=2, tooltip = GenerateTooltip('artist')},
+                    {str = 'no-name', fsize=2, tooltip = GenerateTooltip('artist')},
+                    {str = 'muffintae', fsize=2, tooltip = GenerateTooltip('designer')},
+                    {str = 'blender', fsize=2, tooltip = GenerateTooltip('designer')},
+                    -- {str = '', fsize=1, nosel = true},    
 
-            --                 tooltip = {strset = {'control', 'locked content', 'and related', 'achievements'}}
-            --             },
-            --             {str = '', fsize=2, nosel = true},
-            --     }
-            -- },
+                    BREAK_LINE,
+                    {str = 'contributors', fsize = 3, nosel = true},
+                    BREAK_LINE,
+                    {str = 'kerkel', fsize=2, tooltip = GenerateTooltip('"sinner" code')},
+                    {str = 'benny', fsize=2, tooltip = GenerateTooltip('"dead socket" code')},
+                    {str = 'sorrow', fsize=2, tooltip = GenerateTooltip('"corpse tag" code')},
+                    {str = 'lunastella', fsize=2, tooltip = GenerateTooltip('part of the ghost code')},
+                    {str = 'hellio', fsize=2, tooltip = GenerateTooltip('part of the ghost code')},
+
+                    BREAK_LINE,
+                    {str = 'playtesters', fsize = 3, nosel = true},
+                    BREAK_LINE,
+                    {str = 'burrowingbug', fsize=2},
+                    {str = '4head', fsize=2},
+                    {str = 'alperenalc', fsize=2},
+                    {str = 'kattack', fsize=2},
+                }
+            },
         }
 
         local dmdirectorykey = {
