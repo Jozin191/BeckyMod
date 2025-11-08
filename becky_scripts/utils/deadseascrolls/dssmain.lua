@@ -250,12 +250,12 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                     {str = 'sorrow', fsize=2, tooltip = GenerateTooltip('"corpse tag" code')},
                     {str = 'lunastella', fsize=2, tooltip = GenerateTooltip('part of the ghost code')},
                     {str = 'hellio', fsize=2, tooltip = GenerateTooltip('part of the ghost code')},
+					{str = '4head', fsize=2, tooltip = GenerateTooltip('bug fixing')},
 
                     BREAK_LINE,
                     {str = 'playtesters', fsize = 3, nosel = true},
                     BREAK_LINE,
                     {str = 'burrowingbug', fsize=2},
-                    {str = '4head', fsize=2},
                     {str = 'alperenalc', fsize=2},
                     {str = 'kattack', fsize=2},
                 }
