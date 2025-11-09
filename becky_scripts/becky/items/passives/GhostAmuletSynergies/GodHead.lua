@@ -8,7 +8,7 @@ mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
     if not fam.Player:HasCollectible(CollectibleType.COLLECTIBLE_GODHEAD) then return end
     if ghostData.GodHeadAura then return end
 
-    ghostData.GodHeadAura = BeckyMod.Game:Spawn(EntityType.ENTITY_TEAR, 0, fam.Position, Vector.Zero, fam, 0, math.max(Random(), 1)):ToTear() 
+    ghostData.GodHeadAura = BeckyMod.Game:Spawn(EntityType.ENTITY_TEAR, 0, fam.Position, Vector.Zero, fam, 0, math.max(Random(), 1)):ToTear()
     
     local tear = ghostData.GodHeadAura ---@cast tear EntityTear
 
@@ -21,7 +21,7 @@ end, GHOST_BALL)
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function (_, tear)
     if not tear:GetData().GhostBallTear then return end
 
-    tear.Position = tear.SpawnerEntity.Position 
+    tear.Position = tear.SpawnerEntity.Position
     tear.Height = -5
 end)
 
