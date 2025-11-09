@@ -240,7 +240,7 @@ end)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
     for _, ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOST_BALL_VAR)) do
         local fam = ghost:ToFamiliar() ---@cast fam EntityFamiliar
-        fam.Position = fam.Player.Position
+        fam.Position = fam.Player.Position + Vector(3, 0):Rotated(math.random(360))
     end
 end)
 
@@ -270,7 +270,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 
     playerData.GhostBalls = playerData.GhostBalls or {}
     if not CheckTableForGhost(playerData.GhostBalls, familiar) then
-        print("add")
         table.insert(playerData.GhostBalls, familiar)
     end
 
