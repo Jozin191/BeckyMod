@@ -10,4 +10,11 @@
     <sound name="deadseascrolls_whoosh">
         <sample weight="1" path="deadseascrolls/whoosh.wav" />
     </sound>
+
+    <sound name="saw_start">
+        <sample weight="1" path="items/butcher/saw_start.wav" />
+    </sound>
+    <sound name="saw_loop">
+        <sample weight="1" path="items/butcher/saw_loop.wav" />
+    </sound>
 </sounds>

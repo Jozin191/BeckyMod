@@ -17,7 +17,7 @@
         gfx="butchers_cookbook.png"
         description="I'm the butcher and this is my cookbook!"
         quality="2"
-        maxcharges="4"
+        maxcharges="1"
         chargetype="normal"
         />
 

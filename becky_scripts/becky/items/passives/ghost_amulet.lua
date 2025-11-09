@@ -132,7 +132,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player, cachef
     local seed = math.max(Random(), 1)
     rng:SetSeed(seed, 35)
 
-    player:CheckFamiliar(GHOST_BALL_VAR, 1, rng)
+    local num = player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears() + (player:GetCollectibleNum(ITEM_GHOST_AMULET)-1)
+
+    player:CheckFamiliar(GHOST_BALL_VAR, num, rng)
 end, CacheFlag.CACHE_FAMILIARS)
 
 ---@param familiar EntityFamiliar
@@ -163,9 +165,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local playerData = player:GetData()
     local ghosts = playerData.GhostBalls
 
+    if not ghosts then return end
+
     local num = 0
 
-    for _, ghost in pairs(ghosts) do ---@cast ghost EntityFamiliar
+    for _, ghost in ipairs(ghosts) do ---@cast ghost EntityFamiliar
         if not ghost then return end
 
         num = num + 1
@@ -222,15 +226,32 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         if sprite:GetAnimation() == "Appear" then
             ghost.Velocity = Vector.Zero
         end
+
+        for _, gh in ipairs(Isaac.FindInCapsule(ghost:GetCollisionCapsule())) do
+            if gh.Type == ghost.Type then
+                local vel = (ghost.Position - gh.Position):Resized(1)
+                ghost.Velocity = ghost.Velocity + vel
+                gh.Velocity = gh.Velocity - vel
+            end
+        end
     end
 end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
     for _, ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOST_BALL_VAR)) do
         local fam = ghost:ToFamiliar() ---@cast fam EntityFamiliar
-        fam.Position = fam.Player.Position
+        fam.Position = fam.Player.Position + Vector(3, 0):Rotated(math.random(360))
     end
 end)
+
+local function CheckTableForGhost(tab, ghost)
+    for i, gh in ipairs(tab) do
+        if gh.InitSeed == ghost.InitSeed then
+            return true
+        end
+    end
+    return false
+end
 
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
@@ -239,7 +260,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local room = BeckyMod.Game:GetRoom()
     local currentAnim = GhostSprite:GetAnimation()
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
-    local GhostSize = Vector.One * exp((player.Damage / 4.2), 1, 1.2)
+    local GhostSize = Vector.One * exp((player.Damage / 5), 1, 1.2)
     local gridFromPos = room:GetGridEntityFromPos(familiar.Position)
     
     familiar.SizeMulti = GhostSize
@@ -248,7 +269,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local playerData = player:GetData()
 
     playerData.GhostBalls = playerData.GhostBalls or {}
-    playerData.GhostBalls[tostring(familiar.InitSeed)] = playerData.GhostBalls[tostring(familiar.InitSeed)] or familiar
+    if not CheckTableForGhost(playerData.GhostBalls, familiar) then
+        table.insert(playerData.GhostBalls, familiar)
+    end
 
     if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then
         local rng = player:GetCollectibleRNG(ITEM_GHOST_AMULET)
