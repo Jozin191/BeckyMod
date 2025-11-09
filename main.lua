@@ -25,6 +25,7 @@ Scheduler = include("becky_scripts.utils.schedule_data")
 
 
 BeckyMod.Game = Game()
+BeckyMod.SFX = SFXManager()
 BeckyMod.Level = function() return BeckyMod.Game:GetLevel() end
 BeckyMod.itemconfig = Isaac.GetItemConfig()
 function BeckyMod:RefreshItemConfig()
