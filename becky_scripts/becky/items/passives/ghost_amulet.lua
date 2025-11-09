@@ -163,6 +163,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local playerData = player:GetData()
     local ghosts = playerData.GhostBalls
 
+    if not ghosts then return end
+
     local num = 0
 
     for _, ghost in pairs(ghosts) do ---@cast ghost EntityFamiliar
