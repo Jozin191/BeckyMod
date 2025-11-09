@@ -284,27 +284,6 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
             end
         end
 
-        for hook = InputHook.IS_ACTION_PRESSED, InputHook.IS_ACTION_TRIGGERED do
-            mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function(_, entity, hook, action)
-                if paused and action ~= ButtonAction.ACTION_CONSOLE then
-                    return false
-                end
-            end, hook)
-        end
-
-        mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function(_, entity, hook, action)
-            if forceUnpause and action == ButtonAction.ACTION_SHOOTDOWN then
-                forceUnpause = false
-                return 0.75
-            end
-        end, InputHook.GET_ACTION_VALUE)
-
-        BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
-            if not mod.SaveManager.GetPersistentSave().shownUnlocksChoicePopup then
-                DeadSeaScrollsMenu.QueueMenuOpen("becky mod", "unlockspopup", 1, true) 
-            end
-        end)
-
         mod.HasLoadedDSSReal = true
     end
 end)

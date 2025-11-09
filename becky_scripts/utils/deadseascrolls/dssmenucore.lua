@@ -1786,6 +1786,7 @@ function dssmenucore.init(DSSModName, MenuProvider)
         local directorykey = tbl.DirectoryKey
         local scenter = getScreenCenterPosition()
         local item = directorykey.Item
+        print(item)
         if item.menuname and item.item then
             if type(item.item) == "string" then
                 directorykey.Item = directory[item.item]
