@@ -78,6 +78,7 @@ include("becky_scripts.becky.items.trinkets.corpse_tag")
 
 --characters
 include("becky_scripts.becky.characters.becky")
+include("becky_scripts.becky.characters.sofia")
 
 --Mod compatibility! (all patches are loaded in this file)
 include("becky_scripts.mod_compatibility.load_patches")
