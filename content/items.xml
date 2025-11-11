@@ -123,11 +123,12 @@
         cache=""
         />
 
-        <trinket id="5"
+        <trinket id="12"
         name="Sanguine Feather"
         description="Find solace in pain"
         gfx="sanguine_feather.png"
         cache="flying"
+        achievement="Sanguine Feather"
         />
 
         <!-- Null Items -->
