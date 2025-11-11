@@ -148,6 +148,8 @@ end
 function unlocks:OnPickupInit(pickup)
     local pgd = Isaac.GetPersistentGameData()
 
+    if not pickup then return end
+
     if pickup.Variant == PickupVariant.PICKUP_TRINKET then
         local unlocks = GetModdedTrinketsUnlocks()[pickup.SubType]
         if unlocks then
@@ -157,9 +159,9 @@ function unlocks:OnPickupInit(pickup)
         end
     end
 
-    if pickup.Variant == PickupVariant.PICKUP_LIL_BATTERY then
+    if pickup.Variant == PickupVariant.PICKUP_LIL_BATTERY and pickup.SubType == Isaac.GetEntitySubTypeByName("Dead Battery") then
         if not pgd:Unlocked(achievements.ACHIEVEMENT_DEAD_BATTERY) then
-            pickup:Morph(pickup.Type, pickup.Variant, 1)
+            pickup:Morph(pickup.Type, 50, 1, true)
         end
     end
 end
