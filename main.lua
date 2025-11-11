@@ -71,7 +71,7 @@ include("becky_scripts.becky.items.actives.night_of_the_slasher")
 include("becky_scripts.becky.items.actives.butcher's_cookbook")
 
 --trinkets
-include("becky_scripts.becky.items.trinkets.burning_feather")
+include("becky_scripts.becky.items.trinkets.sanguine_feather")
 include("becky_scripts.becky.items.trinkets.holy_bookmark")
 include("becky_scripts.becky.items.trinkets.devilzon_prime")
 include("becky_scripts.becky.items.trinkets.corpse_tag")
@@ -105,3 +105,6 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TearSplit")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechX")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.BothPeppers")
+
+--challenges
+include("becky_scripts.becky.challenges.path_of_pain")
