@@ -15,5 +15,6 @@
     <costume anm2path="costume_chalice.anm2" type="passive" id="4" hasOverlay="true" hasSkinAlt="true" />
 
     <costume anm2path="costumes/pog/becky_pog.anm2" isFlying="true" priority="969" type="none"/>
+    <costume anm2path="costumes/pog/sofia_pog.anm2" isFlying="true" priority="969" type="none"/>
 
 </costumes>
