@@ -8,19 +8,12 @@ BeckyMod.Trinket.SANGUINE_FEATHER = SANGUINE_FEATHER
 function SANGUINE_FEATHER:postDamage(player)
     if not player:HasTrinket(SANGUINE_FEATHER.ID) then return end
     local rng = player:GetTrinketRNG(SANGUINE_FEATHER.ID)
-    local roll = rng:RandomInt(2)
-
-    -- print(rng:RandomInt(2))
-
-    -- print(player:GetDamageCooldown())
 
     if player:GetDamageCooldown() ~= 0 then return end
-    if roll ~= 0 then return end
+    if rng:RandomInt(2) ~= 0 then return end
     player:GetData().rngFlight = true
     player:AddCacheFlags(CacheFlag.CACHE_FLYING, true)
     player:GetEffects():AddCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)
-
-    print("Added item effect")
 end
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, SANGUINE_FEATHER.postDamage)
 
