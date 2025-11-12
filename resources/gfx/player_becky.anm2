@@ -6,7 +6,6 @@
             <Spritesheet Path="characters\costumes_becky\becky_ghost.png" Id="1"/>
         </Spritesheets>
         <Layers>
-            <Layer Name="New Layer" Id="-1" SpritesheetId="-1"/>
             <Layer Name="glow" Id="0" SpritesheetId="0"/>
             <Layer Name="body" Id="1" SpritesheetId="0"/>
             <Layer Name="body0" Id="2" SpritesheetId="0"/>
