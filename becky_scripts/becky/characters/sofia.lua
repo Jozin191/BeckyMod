@@ -15,3 +15,16 @@ function SOFIA:OnInit(player)
     end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, SOFIA.OnInit, 0)
+
+---@param pickup EntityPickup
+---@param collider Entity
+function SOFIA:postPickup(pickup, collider, low)
+    if collider.Type ~= EntityType.ENTITY_PLAYER or pickup.Variant == PickupVariant.PICKUP_HEART then return end
+    local player = collider:ToPlayer()
+
+    if player and player:GetPlayerType() == SOFIA.PLAYERTYPE then 
+        player:TakeDamage(1, DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(pickup), 1)
+    end
+
+end
+BeckyMod:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, SOFIA.postPickup)
