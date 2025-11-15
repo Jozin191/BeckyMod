@@ -1,16 +1,14 @@
-BeckyMod = RegisterMod("Becky", 1) --[[@as ModReference|table]]
+---@class ModReference
+BeckyMod = RegisterMod("Becky", 1)
+BeckyMod.RECOMMENDED_SHIFT_IDX = 35
 
 --FLAGS!!!
 BeckyMod.FLAGS = {}
 BeckyMod.FLAGS.Debug = true
 --End of flags
 
-include("becky_scripts.Enums")
-
-BeckyMod.SaveManager = require("becky_scripts.utils.save_manager")
+BeckyMod.SaveManager = include("becky_scripts.utils.save_manager")
 BeckyMod.SaveManager.Init(BeckyMod)
-
-BeckyMod.Game = Game()
 
 include("becky_scripts.utils.lua_overrides")
 include("becky_scripts.utils.becky_utils")
@@ -20,10 +18,13 @@ include("becky_scripts.utils.bitmask_helper")
 include("becky_scripts.utils.hud_helper")
 include("becky_scripts.utils.BombLib")
 include("becky_scripts.utils.player_anim_lib")
--- include("becky_scripts.utils.deadseascrolls.dssmain")
+include("becky_scripts.utils.deadseascrolls.dssmain")
 
 Scheduler = include("becky_scripts.utils.schedule_data")
 
+BeckyMod.Game = Game()
+BeckyMod.SFX = SFXManager()
+BeckyMod.Level = function() return BeckyMod.Game:GetLevel() end
 BeckyMod.itemconfig = Isaac.GetItemConfig()
 function BeckyMod:RefreshItemConfig()
 	BeckyMod.itemconfig = Isaac.GetItemConfig()
@@ -33,7 +34,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, BeckyMod.RefreshItemConf
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BeckyMod.RefreshItemConfig)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_MODS_LOADED, CallbackPriority.IMPORTANT, BeckyMod.RefreshItemConfig)
 
-BeckyMod.Trinket = {} -- Needed for Devilzon Prime and Holy Bookmark
+BeckyMod.Item = {}
+BeckyMod.Trinket = {}
+BeckyMod.Character = {}
 BeckyMod.Pickup = {}
 
 if not REPENTOGON then
@@ -66,14 +69,14 @@ include("becky_scripts.becky.items.actives.night_of_the_slasher")
 include("becky_scripts.becky.items.actives.butcher's_cookbook")
 
 --trinkets
-include("becky_scripts.becky.items.trinkets.burning_feather")
+include("becky_scripts.becky.items.trinkets.sanguine_feather")
 include("becky_scripts.becky.items.trinkets.holy_bookmark")
 include("becky_scripts.becky.items.trinkets.devilzon_prime")
 include("becky_scripts.becky.items.trinkets.corpse_tag")
 
 --characters
 include("becky_scripts.becky.characters.becky")
-include("becky_scripts.becky.characters.becky_b")
+include("becky_scripts.becky.characters.sofia")
 
 --Mod compatibility! (all patches are loaded in this file)
 include("becky_scripts.mod_compatibility.load_patches")
@@ -81,18 +84,25 @@ include("becky_scripts.mod_compatibility.load_patches")
 --pickups
 include("becky_scripts.becky.pickups.dead_battery")
 
+--misc stuff
+include("becky_scripts.utils.achievements_revamp")
+
 --ghost synergies
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.CSection")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.DrFetus")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechZero")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.StatusEffects")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Brimstone")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.StatusEffects")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.GodHead")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Haemolacria")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Ipecac")
--- include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MomsKnife") -- On hold
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Explosivo")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Booger")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Spore")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TearSplit")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechX")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.BothPeppers")
 
-include("becky_scripts.utils.achievements_revamp")
+--challenges
+include("becky_scripts.becky.challenges.path_of_pain")
