@@ -174,7 +174,7 @@ function PlayerAnimLib:Reload(player)
     local path = PlayerAnimLib:GetSkinPath(player)
 
     for layer = PlayerSpriteLayer.SPRITE_GLOW, PlayerSpriteLayer.SPRITE_BACK do
-        if layer ~= PlayerSpriteLayer.SPRITE_GHOST then
+        if layer ~= 14 and layer ~= 13 then
             sprite:ReplaceSpritesheet(layer, path)
         end
     end
