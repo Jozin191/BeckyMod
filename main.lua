@@ -103,6 +103,7 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TearSplit")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechX")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.BothPeppers")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Techs")
 
 --challenges
 include("becky_scripts.becky.challenges.path_of_pain")
