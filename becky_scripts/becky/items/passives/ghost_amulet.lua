@@ -3,6 +3,7 @@ local BeckyPlayerType = Isaac.GetPlayerTypeByName("Becky", false)
 local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
 local GHOST_BALL_DMG = 1.25
 
+
 BeckyMod.Callbacks = {}
 --- Called every time the ghost hits an enemy
 --- * Familiar: The ghost entity
@@ -98,6 +99,8 @@ local function SpawnTrail(entity)
     local sprite = trail:GetSprite()
     local blendMode = sprite:GetLayer(0):GetBlendMode()
     blendMode:SetMode(BlendType.NORMAL)
+
+    return trail 
 end
 
 local function RemoveTrail(entity)
@@ -169,11 +172,19 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
     local num = 0
 
+
     for _, ghost in ipairs(ghosts) do ---@cast ghost EntityFamiliar
         if not ghost then return end
 
         num = num + 1
         
+        local ghostData = ghost:GetData()
+        local ghostTrail = ghostData.GhostTrail 
+
+        if not ghostTrail then
+            ghostTrail = SpawnTrail(ghost)
+        end
+
         local isShooting = IsPlayerShooting(player)
         local famPos = ghost.Position
         local playerPos = player.Position
@@ -184,9 +195,18 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         local maxDistIdle = 40
         local room = BeckyMod.Game:GetRoom()
         -- SpawnTrail(familiar)
+        
+        local color = ghostTrail.Color
+
+        if ghost.State == 1 then
+           color.A = math.min(color.A + .05, 1)
+        else
+           color.A = math.max(color.A - .05, 0)
+        end
+
+        ghostTrail.Color = Color(color.R, color.G, color.B, color.A, color.RO, color.GO, color.BO)
 
         if isShooting then
-            SpawnTrail(ghost)
             if not player:AreOpposingShootDirectionsPressed() then
                 ghost.State = 1
                 local input = {
@@ -216,8 +236,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             ghost.State = 0    
             if posDifLenght > maxDistIdle then
                 ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
-            else
-                RemoveTrail(ghost)
             end
         end
 
