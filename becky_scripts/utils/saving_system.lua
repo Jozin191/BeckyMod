@@ -1,7 +1,5 @@
 ---@diagnostic disable: undefined-field, cast-local-type
 
---lowkey also stole this from Epiphany
-
 local Mod = BeckyMod
 
 -- ==========================================
