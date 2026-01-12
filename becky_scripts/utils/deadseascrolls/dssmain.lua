@@ -10,20 +10,23 @@ local DSSCoreVersion = 7
 
 local MenuProvider = {}
 
-local function GenerateTooltip(str)
+local function GenerateTooltip( ... )
     local endTable = {}
-    local currentString = ""
-    for w in str:gmatch("%S+") do
-        local newString = currentString .. w .. " "
-        if newString:len() >= 15 then
-            table.insert(endTable, currentString)
-            currentString = ""
+
+    for _, str in ipairs({...}) do
+        local currentString = ""
+        for w in str:gmatch("%S+") do
+            local newString = currentString .. w .. " "
+            if newString:len() >= 15 then
+                table.insert(endTable, currentString)
+                currentString = ""
+            end
+
+            currentString = currentString .. w .. " "
         end
 
-        currentString = currentString .. w .. " "
+        table.insert(endTable, currentString) 
     end
-
-    table.insert(endTable, currentString)
     return {strset = endTable}
 end
 
@@ -103,104 +106,14 @@ end
 local dssmenucore = include("becky_scripts.utils.deadseascrolls.dssmenucore")
 BeckyMod.dssmod = dssmenucore.init(DSSModName, MenuProvider)
 
+local cvsSprite = Sprite()
+cvsSprite:Load("gfx/ui/deadseascrolls/newslettersprites.anm2", true)
+cvsSprite:ReplaceSpritesheet(0, "gfx/ui/deadseascrolls/cvs.png")
+cvsSprite:LoadGraphics()
+cvsSprite:Play("Idle")
+
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
     if not mod.HasLoadedDSSReal and mod.SaveManager.IsLoaded() then
-
-        -- for achievements
-
-        local function SureFunc(str, var, outcome, tooltip)
-
-            return {str = str, 
-            func = function()     
-                mod:NestVariable(mod.SaveManager.GetSettingsSave(), str, "DSSSavedata", "YesNo", "Name" )
-                mod:NestVariable(mod.SaveManager.GetSettingsSave(), var, "DSSSavedata", "YesNo", "Variable" )
-                mod:NestVariable(mod.SaveManager.GetSettingsSave(), outcome, "DSSSavedata", "YesNo", "Outcome" )
-                mod:NestVariable(mod.SaveManager.GetSettingsSave(), tooltip, "DSSSavedata", "YesNo", "Tooltip" )
-
-                if BeckyMod.dmdirectory.yesNo then
-                    BeckyMod.dmdirectory.yesNo.title = mod:GetNestedVariable(mod.SaveManager.GetSettingsSave(), "DSSSavedata", "YesNo", "Name" )
-                    BeckyMod.dmdirectory.yesNo.tooltip = {strset = mod:GetNestedVariable(mod.SaveManager.GetSettingsSave(), "DSSSavedata", "YesNo", "Tooltip" )}
-                end
-            end, 
-            dest = 'yesNo', tooltip = {strset = tooltip}}
-        end
-
-        local function CheckVectors(table, element)
-            for k, v in ipairs(table) do
-                if v:Distance(element) == 0 then
-                    return true
-                end
-            end
-            return false
-        end
-
-        local buttonAchievements = {}
-        local panelFilterOptions = {
-            nil,
-            "Becky",
-            "Character",
-            "Item",
-        }
-
-        -- for i, item in ipairs(BeckyMod.ACHIEVEMENT) do
-        --     if not item.Sprite then
-        --         item.Sprite = Sprite()
-        --         item.Sprite:Load("gfx/ui/achievement/_becky_achievement.anm2", false)
-        --         item.Sprite:ReplaceSpritesheet(2, "gfx/ui/achievement/achievement_" .. string.lower(item.ID) ..".png")
-        --         item.Sprite:ReplaceSpritesheet(0, "gfx/nothing.png")
-        --         item.extraSpriteID = i
-        --         item.Sprite:LoadGraphics()
-        --     end
-        -- end
-
-        local selectedAch
-        local drawings = {}
-        local forceUnpause
-        local paused
-        local sidePaper = Sprite()
-        sidePaper:Load("gfx/ui/achievement/sidenote/_becky_achievement_sidepaper.anm2", true)
-
-        local achievementTooltipSprites = {
-            Shadow = "gfx/ui/achievement/sidenote/sidepaper_shadow.png",
-            Back = "gfx/ui/achievement/sidenote/sidepaper_back.png",
-            Face = "gfx/ui/achievement/sidenote/sidepaper_face.png",
-            Border = "gfx/ui/achievement/sidenote/sidepaper_border.png",
-            Mask = "gfx/ui/achievement/sidenote/sidepaper_mask.png",
-        }
-
-        for k, v in pairs(achievementTooltipSprites) do
-            local sprite = Sprite()
-            sprite:Load("gfx/ui/achievement/sidenote/_becky_achievement_sidepaper.anm2", false)
-            sprite:ReplaceSpritesheet(0, "gfx/nothing.png")
-            sprite:LoadGraphics()
-            achievementTooltipSprites[k] = sprite
-        end
-
-        local coOpSprite = Sprite()
-        coOpSprite:Load("gfx/ui/eid_becky_players_icon.anm2", true)
-        -- ok done with setting up achievements
-
-        local coOpSpriteList = {
-            "Becky"
-        }
-
-        local bossSprite = Sprite()
-        bossSprite:Load("gfx/ui/hudpickups.anm2", true)
-
-        local coOpBossList = {
-            ["Mom"] = 0,
-            ["Mom's Heart"] = 1,
-            ["Satan"] = 2,
-            ["Isaac"] = 3,
-            ["Lamb"] = 4,
-            ["???"] = 5,
-            ["Mega Satan"] = 6,
-            ["Hush"] = 8,
-            ["Delirium"] = 9,
-            ["Witness"] = 11
-        }
-
-        local bannedPositions = {}
 
         BeckyMod.dmdirectory = {
             main = {
@@ -208,7 +121,6 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 
                 buttons = {
                     {str = 'resume game', action = 'resume'},
-                    {str = 'options', dest = 'Beckyoptions',tooltip = {strset = {'---','play around', 'with what', 'you like and', 'do not like', '---'}}},
                     {str = 'credits', dest = 'Beckycredits',tooltip = {strset = {'---','giving thanks', 'to everyone', 'who helped', '---'}}},         
                     BeckyMod.dssmod.changelogsButton,
                     {str = '', fsize=2, nosel = true},
@@ -220,7 +132,6 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 
             Beckycredits = {
                 title = 'credits',
-
                 buttons = {
                     {str = 'directors', fsize = 3, nosel = true},
                     BREAK_LINE,
@@ -230,11 +141,11 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                     BREAK_LINE,
                     {str = 'members', fsize = 3, nosel = true},
                     BREAK_LINE,
-
+                    {spr = {sprite = cvsSprite, anim= "Idle", width = 0, height = 1, center = false, color = Color(1, 1, 1, 1)}, nosel = true, color = 2, pos = Vector(40, 40)},
                     {str = 'kotry', fsize=2, tooltip = GenerateTooltip('main coder')},
                     {str = 'tiburones', fsize=2, tooltip = GenerateTooltip('coder')},
                     {str = 'ignatz', fsize=2, tooltip = GenerateTooltip('coder')},
-                    {str = 'cvs', fsize=2, tooltip = GenerateTooltip('coder')},
+                    {str = 'cvs', fsize=2, tooltip = GenerateTooltip('coder', '', 'cvs waz here')},
                     {str = 'nerfexus', fsize=2, tooltip = GenerateTooltip('artist')},
                     {str = 'darigoat', fsize=2, tooltip = GenerateTooltip('artist')},
                     {str = 'no-name', fsize=2, tooltip = GenerateTooltip('artist')},
@@ -250,7 +161,6 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                     {str = 'sorrow', fsize=2, tooltip = GenerateTooltip('"corpse tag" code')},
                     {str = 'lunastella', fsize=2, tooltip = GenerateTooltip('part of the ghost code')},
                     {str = 'hellio', fsize=2, tooltip = GenerateTooltip('part of the ghost code')},
-					{str = '4head', fsize=2, tooltip = GenerateTooltip('bug fixing')},
 
                     BREAK_LINE,
                     {str = 'playtesters', fsize = 3, nosel = true},
@@ -258,6 +168,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                     {str = 'burrowingbug', fsize=2},
                     {str = 'alperenalc', fsize=2},
                     {str = 'kattack', fsize=2},
+                    {str = '4head', fsize=2},
                 }
             },
         }

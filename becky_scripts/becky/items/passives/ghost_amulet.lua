@@ -3,6 +3,7 @@ local BeckyPlayerType = Isaac.GetPlayerTypeByName("Becky", false)
 local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
 local GHOST_BALL_DMG = 1.25
 
+
 BeckyMod.Callbacks = {}
 --- Called every time the ghost hits an enemy
 --- * Familiar: The ghost entity
@@ -98,6 +99,8 @@ local function SpawnTrail(entity)
     local sprite = trail:GetSprite()
     local blendMode = sprite:GetLayer(0):GetBlendMode()
     blendMode:SetMode(BlendType.NORMAL)
+
+    return trail 
 end
 
 local function RemoveTrail(entity)
@@ -122,6 +125,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function (_, player)
     if not HasGhostAmulet(player) then return end
     player:SetCanShoot(false)
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
+
+    if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
+        BeckyMod.SaveManager.GetRunSave(player).amuletCopies = (BeckyMod.SaveManager.GetRunSave(player).amuletCopies and BeckyMod.SaveManager.GetRunSave(player).amuletCopies + 1) or 1
+        player:ToPlayer():GetEffects():RemoveNullEffect(NullItemID.ID_BOOKWORM)
+    end
 end)
 
 ---@param player EntityPlayer
@@ -144,6 +152,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
 	-- familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
     familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS 
 end, GHOST_BALL_VAR)
+
+BeckyMod:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, function(_, pickup, coll, bool)
+    local sadOnionConfig = Isaac.GetItemConfig():GetCollectible(pickup.SubType)
+    if sadOnionConfig and sadOnionConfig.Tags & ItemConfig.TAG_BOOK == ItemConfig.TAG_BOOK and coll.Type == 1 then
+        local player = coll:ToPlayer()
+        if BeckyMod.SaveManager.GetRunSave(player).LastBookTaken and pickup~=BeckyMod.SaveManager.GetRunSave(player).LastBookTaken and not player:HasCollectible(BeckyMod.SaveManager.GetRunSave(player).LastBookTaken, true) then
+            player:RemoveCollectible(BeckyMod.SaveManager.GetRunSave(player).LastBookTaken, true, ActiveSlot.SLOT_PRIMARY, true)
+        end
+        BeckyMod.SaveManager.GetRunSave(player).LastBookTaken = pickup.SubType
+    end
+end)
 
 ---Expontential function
 ---@param number number
@@ -169,11 +188,19 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
     local num = 0
 
+
     for _, ghost in ipairs(ghosts) do ---@cast ghost EntityFamiliar
         if not ghost then return end
 
         num = num + 1
         
+        local ghostData = ghost:GetData()
+        local ghostTrail = ghostData.GhostTrail 
+
+        if not ghostTrail then
+            ghostTrail = SpawnTrail(ghost)
+        end
+
         local isShooting = IsPlayerShooting(player)
         local famPos = ghost.Position
         local playerPos = player.Position
@@ -184,9 +211,18 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         local maxDistIdle = 40
         local room = BeckyMod.Game:GetRoom()
         -- SpawnTrail(familiar)
+        
+        local color = ghostTrail.Color
+
+        if ghost.State == 1 then
+           color.A = math.min(color.A + .05, 1)
+        else
+           color.A = math.max(color.A - .05, 0)
+        end
+
+        ghostTrail.Color = Color(color.R, color.G, color.B, color.A, color.RO, color.GO, color.BO)
 
         if isShooting then
-            SpawnTrail(ghost)
             if not player:AreOpposingShootDirectionsPressed() then
                 ghost.State = 1
                 local input = {
@@ -216,8 +252,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             ghost.State = 0    
             if posDifLenght > maxDistIdle then
                 ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
-            else
-                RemoveTrail(ghost)
             end
         end
 
@@ -271,6 +305,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     playerData.GhostBalls = playerData.GhostBalls or {}
     if not CheckTableForGhost(playerData.GhostBalls, familiar) then
         table.insert(playerData.GhostBalls, familiar)
+    end
+
+    for k, v in ipairs(playerData.GhostBalls) do
+        if not v:Exists() or v:IsDead() then
+            table.remove(playerData.GhostBalls, k)
+        end
     end
 
     if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then

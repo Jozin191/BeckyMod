@@ -439,6 +439,14 @@ local function EIDPatch()
 					"Chance to get some bone spurs when clearing a room"
 				}
 			}
+		},
+		[Trinket.SANGUINE_FEATHER.ID] = {
+			en_us = {
+				Name = "Sanguine Feather",
+				Description = {
+					"Has a 1/3 chance of giving flight after receiving damage for the room"
+				}
+			}
 		}
 	}
 

@@ -15,6 +15,9 @@
 	<achievement name="Scarecrow" text='Becky Mother' gfx="achievement_scarecrow.png" />
 	<achievement name="Null Bombs" text='Becky The Beast' gfx="achievement_null_bombs.png" />
 	<achievement name="Ghost Amulet" text='Becky All' gfx="achievement_ghost_amulet.png" />
+
+	<!-- Sofia Challenge -->
+	<achievement name="Sanguine Feather" text='Sofia Challenge' gfx="achievement_sanguine_feather.png" />
 	
 	<!-- Tainted shit so it's locked -->
 	<achievement name="Tainted Becky" text='' gfx="achievement_placeholder.png" hidden="true"/>

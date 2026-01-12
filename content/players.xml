@@ -24,4 +24,16 @@
 		birthright="None"
 		achievement="Tainted Becky"
     />
+        <player name="Sofia"
+        skin="character_sofia.png"
+        skinColor = "0"
+        nameimage="playername_sofia.png"
+        portrait="playerportrait_sofia.png"
+        hp="8"
+        canShoot="true"
+        costumeSuffix="sofia"
+        modcostume="1"
+		birthright="None"
+        hidden="true"
+    />
 </players>

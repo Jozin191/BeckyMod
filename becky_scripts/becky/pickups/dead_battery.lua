@@ -45,6 +45,7 @@ end, PickupVariant.PICKUP_LIL_BATTERY)
 ---@param variant PickupVariant
 ---@param subtype BatterySubType
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_SELECTION, function (_, _, variant, subtype)
+    if not Isaac.GetPersistentGameData():Unlocked(Isaac.GetAchievementIdByName("Dead Battery")) then return end
     if variant ~= PickupVariant.PICKUP_LIL_BATTERY or subtype == t.SUBTYPE then return end
     local room = game:GetRoom() if not (room:IsFirstVisit() and room:GetFrameCount() == -1)
     or Isaac.GetPlayer():GetCollectibleRNG(items.DEAD_SOCKET):RandomFloat() > t.REPLACE_CHANCE then return end

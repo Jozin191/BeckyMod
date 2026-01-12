@@ -103,7 +103,7 @@
 
         <trinket id="2"
         name="Holy Bookmark"
-        description="With lightness come luck"
+        description="With lightness comes luck"
         gfx="holy_bookmark.png"
         cache="luck"
         passivecache="true"
@@ -121,6 +121,14 @@
         description="A bone to pick"
         gfx="corpse_tag.png"
         cache=""
+        />
+
+        <trinket id="12"
+        name="Sanguine Feather"
+        description="Find solace in pain"
+        gfx="sanguine_feather.png"
+        cache="flying"
+        achievement="Sanguine Feather"
         />
 
         <!-- Null Items -->
