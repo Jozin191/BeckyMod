@@ -10,20 +10,23 @@ local DSSCoreVersion = 7
 
 local MenuProvider = {}
 
-local function GenerateTooltip(str)
+local function GenerateTooltip( ... )
     local endTable = {}
-    local currentString = ""
-    for w in str:gmatch("%S+") do
-        local newString = currentString .. w .. " "
-        if newString:len() >= 15 then
-            table.insert(endTable, currentString)
-            currentString = ""
+
+    for _, str in ipairs({...}) do
+        local currentString = ""
+        for w in str:gmatch("%S+") do
+            local newString = currentString .. w .. " "
+            if newString:len() >= 15 then
+                table.insert(endTable, currentString)
+                currentString = ""
+            end
+
+            currentString = currentString .. w .. " "
         end
 
-        currentString = currentString .. w .. " "
+        table.insert(endTable, currentString) 
     end
-
-    table.insert(endTable, currentString)
     return {strset = endTable}
 end
 
@@ -103,6 +106,12 @@ end
 local dssmenucore = include("becky_scripts.utils.deadseascrolls.dssmenucore")
 BeckyMod.dssmod = dssmenucore.init(DSSModName, MenuProvider)
 
+local cvsSprite = Sprite()
+cvsSprite:Load("gfx/ui/deadseascrolls/newslettersprites.anm2", true)
+cvsSprite:ReplaceSpritesheet(0, "gfx/ui/deadseascrolls/cvs.png")
+cvsSprite:LoadGraphics()
+cvsSprite:Play("Idle")
+
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
     if not mod.HasLoadedDSSReal and mod.SaveManager.IsLoaded() then
 
@@ -123,7 +132,6 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 
             Beckycredits = {
                 title = 'credits',
-
                 buttons = {
                     {str = 'directors', fsize = 3, nosel = true},
                     BREAK_LINE,
@@ -133,11 +141,11 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                     BREAK_LINE,
                     {str = 'members', fsize = 3, nosel = true},
                     BREAK_LINE,
-
+                    {spr = {sprite = cvsSprite, anim= "Idle", width = 0, height = 1, center = false, color = Color(1, 1, 1, 1)}, nosel = true, color = 2, pos = Vector(40, 40)},
                     {str = 'kotry', fsize=2, tooltip = GenerateTooltip('main coder')},
                     {str = 'tiburones', fsize=2, tooltip = GenerateTooltip('coder')},
                     {str = 'ignatz', fsize=2, tooltip = GenerateTooltip('coder')},
-                    {str = 'cvs', fsize=2, tooltip = GenerateTooltip('coder')},
+                    {str = 'cvs', fsize=2, tooltip = GenerateTooltip('coder', '', 'cvs waz here')},
                     {str = 'nerfexus', fsize=2, tooltip = GenerateTooltip('artist')},
                     {str = 'darigoat', fsize=2, tooltip = GenerateTooltip('artist')},
                     {str = 'no-name', fsize=2, tooltip = GenerateTooltip('artist')},
