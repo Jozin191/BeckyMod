@@ -238,7 +238,7 @@ local function InitFunctions()
 			return registeredBomb.HasModifier(player)
 		elseif Mod:CheckExplosionType(extraData, registeredBomb, "EpicFetus") then
 			local checkFrom = spawner == nil and spawnerThing.SpawnerEntity or spawner
-			print('checking...', checkFrom)
+			--print('checking...', checkFrom)
 			return checkFrom:GetData()[identificator]
 		else
 			local bomb

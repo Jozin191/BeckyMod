@@ -37,7 +37,7 @@ function DEVILZON_PRIME:checkDealPickup(item, player)
             end
 
             runSave.extraDealchanceByDevilzonPrimeForNextFloor = runSave.extraDealchanceByDevilzonPrimeForNextFloor + DEVILZON_PRIME.EXTRA_CHANCE_PER_DEAL
-            print(runSave.extraDealchanceByDevilzonPrimeForNextFloor)
+            --print(runSave.extraDealchanceByDevilzonPrimeForNextFloor)
         end
     end
 end
