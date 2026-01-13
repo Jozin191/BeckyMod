@@ -111,36 +111,62 @@ local function RemoveTrail(entity)
     entData.GhostTrail = nil
 end
 
----@param vectorA Vector
----@param vectorB Vector
----@param t number
----@return Vector
-local function interpolateVector2D(vectorA, vectorB, t)
-	local minT = (1 - t)
-    return Vector(minT * vectorA.X + t * vectorB.X, minT * vectorA.Y + t * vectorB.Y)
-end
+---@param player EntityPlayer
+BeckyMod:AddCallback(ModCallbacks.MC_PLAYER_INIT_POST_LEVEL_INIT_STATS, function(_, player)
+    player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
+end)
+
+---@param ID CollectibleType
+---@param player EntityPlayer
+local function StopShooting(ID, player)
+    if ID ~= ITEM_GHOST_AMULET then return end
+    player:SetCanShoot(false)
+end 
+
+local MultiShotItems = {
+    [CollectibleType.COLLECTIBLE_20_20] = true,
+    [CollectibleType.COLLECTIBLE_INNER_EYE] = true,
+    [CollectibleType.COLLECTIBLE_MUTANT_SPIDER] = true,
+    [CollectibleType.COLLECTIBLE_THE_WIZ] = true,
+}
 
 ---@param player EntityPlayer
-BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function (_, player)
-    if not HasGhostAmulet(player) then return end
-    player:SetCanShoot(false)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
+    local data = player:GetData()
+
+    data.BookWormFlag = data.BookWormFlag or false 
+
+    if data.BookWormFlag == true then return end
+    if not player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then return end
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 
-    if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
-        BeckyMod.SaveManager.GetRunSave(player).amuletCopies = (BeckyMod.SaveManager.GetRunSave(player).amuletCopies and BeckyMod.SaveManager.GetRunSave(player).amuletCopies + 1) or 1
-        player:ToPlayer():GetEffects():RemoveNullEffect(NullItemID.ID_BOOKWORM)
-    end
+    data.BookWormFlag = true
+end)
+
+---@param id CollectibleType
+---@param player EntityPlayer
+BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, id, _, _, _, _, player)
+    StopShooting(id, player)
+    if not HasGhostAmulet(player) then return end
+    if not MultiShotItems[id] then return end
+    player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
+end)
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(player, ID)
+    if ID ~= ITEM_GHOST_AMULET then return end
+    player:SetCanShoot(true)
+    player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
 
 ---@param player EntityPlayer
----@param cacheflag CacheFlag
-BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player, cacheflag)
+BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     if not HasGhostAmulet(player) then return end
     local rng = RNG()
     local seed = math.max(Random(), 1)
     rng:SetSeed(seed, 35)
 
-    local num = player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears() + (player:GetCollectibleNum(ITEM_GHOST_AMULET)-1)
+    local BookWormExtra = player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) and 1 or 0
+    local num = player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears() + (player:GetCollectibleNum(ITEM_GHOST_AMULET)-1) + BookWormExtra
 
     player:CheckFamiliar(GHOST_BALL_VAR, num, rng)
 end, CacheFlag.CACHE_FAMILIARS)
@@ -149,20 +175,8 @@ end, CacheFlag.CACHE_FAMILIARS)
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
     familiar:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
-	-- familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
     familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS 
 end, GHOST_BALL_VAR)
-
-BeckyMod:AddCallback(ModCallbacks.MC_PRE_PICKUP_COLLISION, function(_, pickup, coll, bool)
-    local sadOnionConfig = Isaac.GetItemConfig():GetCollectible(pickup.SubType)
-    if sadOnionConfig and sadOnionConfig.Tags & ItemConfig.TAG_BOOK == ItemConfig.TAG_BOOK and coll.Type == 1 then
-        local player = coll:ToPlayer()
-        if BeckyMod.SaveManager.GetRunSave(player).LastBookTaken and pickup~=BeckyMod.SaveManager.GetRunSave(player).LastBookTaken and not player:HasCollectible(BeckyMod.SaveManager.GetRunSave(player).LastBookTaken, true) then
-            player:RemoveCollectible(BeckyMod.SaveManager.GetRunSave(player).LastBookTaken, true, ActiveSlot.SLOT_PRIMARY, true)
-        end
-        BeckyMod.SaveManager.GetRunSave(player).LastBookTaken = pickup.SubType
-    end
-end)
 
 ---Expontential function
 ---@param number number
@@ -186,14 +200,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
     if not ghosts then return end
 
-    local num = 0
-
-
     for _, ghost in ipairs(ghosts) do ---@cast ghost EntityFamiliar
-        if not ghost then return end
+        if not ghost then goto continue end
 
-        num = num + 1
-        
         local ghostData = ghost:GetData()
         local ghostTrail = ghostData.GhostTrail 
 
@@ -268,6 +277,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 gh.Velocity = gh.Velocity - vel
             end
         end
+        ::continue::
     end
 end)
 
@@ -351,7 +361,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     local player = familiar.Player
     local tearsMult = Round(BeckyMod:toTearsPerSecond(player.MaxFireDelay), 2) / 2.73
     local baseDamage = (GHOST_BALL_DMG * player.Damage) * tearsMult
-    
 
     if collider.Type == EntityType.ENTITY_MOVABLE_TNT or (collider.Type == EntityType.ENTITY_FIREPLACE and DestroyableFireplaces[collider.Variant]) then
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
