@@ -14,4 +14,32 @@
 
     <!--Effect entities-->
     <entity name="Butcher's Cookbook Sawblade" id="1000" anm2path="familiar/sawblade.anm2"/>
+
+    <!-- Magic Staff weapon stuff -->
+    <entity name="Magic Staff (Dummy)" id="1000" anm2path="becky_magic_staff.anm2" collisionDamage="0" collisionMass="0" collisionRadius="1" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />
+    <entity name="Magic Staff (Weapon)" id="8" anm2path="becky_magic_staff.anm2" collisionDamage="0" collisionMass="3" collisionRadius="16" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />
+
+    <!-- Spells stuff -->
+    <entity name="Mana Tear"
+        anm2path="beckyMagic/mana_tear 1.anm2"
+        id ="2" friction="1"
+        numGridCollisionPoints="8" shadowSize="8" collisionDamage="0" collisionMass="8" collisionRadius="7"
+        baseHP="0" boss="0" champion="0"
+    />
+    <entity name="Big Mana Tear"
+        anm2path="beckyMagic/mana_tear 2.anm2"
+        id ="2" friction="1"
+        numGridCollisionPoints="8" shadowSize="12" collisionDamage="0" collisionMass="8" collisionRadius="7"
+        baseHP="0" boss="0" champion="0"
+    />
+    <entity name="Polty Familiar"
+        anm2path="beckyMagic/polty_familiar.anm2"
+        id="3" friction="1"
+        numGridCollisionPoints="8" shadowSize="12" collisionDamage="0" collisionMass="8" collisionRadius="7"
+        baseHP="0" boss="0" champion="0"
+    />
+    <entity name="Mana Shield"
+        anm2path="beckyMagic/spell_shield.anm2"
+        id="1000" friction="1"
+        numGridCollisionPoints="8" shadowSize="14" collisionDamage="0" collisionMass="0" collisionRadius="10" baseHP="0"/>
 </entities>

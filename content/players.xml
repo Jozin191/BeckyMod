@@ -12,18 +12,22 @@
 		birthright="Freedom!!!"
     />
     <player name="Becky" bSkinParent="Becky"
-        skin="character_becky.png"
+		damagemodifier="1.5"
+        skin="character_beckyb.png"
         skinColor = "1"
         nameimage="playername_becky.png"
         portrait="playerportrait_becky.png"
         black="4"
         hp="2"
-        canShoot="false"
         costumeSuffix="becky"
-        modcostume="1"
-		birthright="None"
-		achievement="Tainted Becky"
+        modcostume="7"
+		birthright="!!!TO BE ADDED!!!"
+        pocketActive="Magic Staff"
     />
+		<!--
+        achievement="Tainted Becky"
+        canShoot="false"
+        -->
         <player name="Sofia"
         skin="character_sofia.png"
         skinColor = "0"

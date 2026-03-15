@@ -68,6 +68,8 @@ include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
 include("becky_scripts.becky.items.actives.butcher's_cookbook")
 
+include("becky_scripts.becky.items.magic_staff")
+
 --trinkets
 include("becky_scripts.becky.items.trinkets.sanguine_feather")
 include("becky_scripts.becky.items.trinkets.holy_bookmark")
@@ -77,6 +79,8 @@ include("becky_scripts.becky.items.trinkets.corpse_tag")
 --characters
 include("becky_scripts.becky.characters.becky")
 include("becky_scripts.becky.characters.sofia")
+
+include("becky_scripts.becky.characters.becky_b")
 
 --Mod compatibility! (all patches are loaded in this file)
 include("becky_scripts.mod_compatibility.load_patches")
@@ -107,3 +111,6 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Techs")
 
 --challenges
 include("becky_scripts.becky.challenges.path_of_pain")
+
+--spells
+include("becky_scripts.becky.spells.spells")

@@ -5,6 +5,8 @@
     <costume id="2" anm2path="ghostheadstuff.anm2" type="none" priority="100"/>
     <costume anm2path="sofia_hair.anm2" type="none" priority="99" />
     <costume anm2path="sofia_belt.anm2" type="none" priority="0" />
+    <costume id="7" anm2path="becky_b_hair.anm2" type="none" priority="99" />
+    <costume id="8" anm2path="becky_b_scarf.anm2" type="none" priority="0" />
 
     <costume anm2path="night_of_the_slasher.anm2" type="none" priority="100" />
     <costume anm2path="scarecrow.anm2" type="passive" id="5" />
