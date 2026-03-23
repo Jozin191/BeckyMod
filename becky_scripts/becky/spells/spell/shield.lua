@@ -81,7 +81,7 @@ local function fun(player)
 end
 
 local function canSelectFun(player, manaLeft)
-    return true
+    return manaLeft > 15
 end
 
 return {

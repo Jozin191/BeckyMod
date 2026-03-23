@@ -103,18 +103,17 @@ local game = BeckyMod.Game
 function SPELLS:GetSpells(player)
     local save = BeckyMod:RunSave(player)
     save.RunSpells = save.RunSpells or {
-        SPELLS.SpellType.SUMMON,
         SPELLS.SpellType.SPREAD,
-        SPELLS.SpellType.BIG,
+        SPELLS.SpellType.NULL,
         SPELLS.SpellType.SHIELD,
+        SPELLS.SpellType.NULL,
     }
     return save.RunSpells
 end
 
 function SPELLS:SetSpellType(player, slot, spellType)
     if slot <1 or slot > 4 then return end
-    local save = BeckyMod:RunSave(player)
-    save.RunSpells[slot] = spellType
+    SPELLS:GetSpells(player)[slot] = spellType
 end
 
 function SPELLS:UseSpellType(player, spellType)
@@ -164,6 +163,8 @@ local function renderPlayerSpellSelection(player)
 
         for i=1, 4 do
             local spell = playerSpells[i]
+            if spell == nil or spell == SPELLS.SpellType.NULL then goto continue end
+            
             if SPELLS_FRAME[spell] == nil then spell = 0 end
             if SPELLS.SPELL_FUNC_CAN_SELECT[spell](player, manaLeft) then
                 SPELLS_SPRITE:SetFrame("Spells", SPELLS_FRAME[spell])
@@ -171,6 +172,7 @@ local function renderPlayerSpellSelection(player)
                 SPELLS_SPRITE:SetFrame("SpellsNoMana", SPELLS_FRAME[spell])
             end
             SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos + SELECTION_POS.OFFSETS[i]))
+            ::continue::
         end
     else
         local spell = data.MagicStaff_SelectSpellDir.Type
@@ -257,6 +259,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     else
         spell = SPELLS:GetSpells(player)[dir +1]
     end
+    if spell == nil or spell == 0 then return end
 
     local manaLeft = BeckyMod:RunSave(player).ManaCharge or 0
     if SPELLS.SPELL_FUNC_CAN_SELECT[spell](player, manaLeft) then
@@ -291,7 +294,24 @@ local function resetPlayerSelection(player)
     data.MaxManaOffset = 0
     data.ManaDischarge = 0
     data.NoChargeMana = false
+
+    if data.MagicStaff_SelectingSpell then
+        data.MagicStaff_SelectingSpell = false
+        data.MagicStaff_SelectSpellDir = nil
+        data.SpellNoSelect = false
+    end
 end
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_ROOM_EXIT, function()
     BeckyMod:ForEachPlayer(resetPlayerSelection)
+end)
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, function(_, ent, dmg, dmgFlags, src, cooldown)
+    if ent.Type == 1 then
+        local data = ent:GetData()
+        if data.MagicStaff_SelectingSpell then
+            data.MagicStaff_SelectingSpell = false
+            data.MagicStaff_SelectSpellDir = nil
+            data.SpellNoSelect = false
+        end
+    end
 end)

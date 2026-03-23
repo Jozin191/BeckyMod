@@ -27,6 +27,41 @@ local VALID_GRID_TYPES = {
     [GridEntityType.GRID_POOP] = true,
 }
 
+local function GetSpriteSheet(t, v)
+    if t == GridEntityType.GRID_POOP then
+        if v == GridPoopVariant.RED then
+            return "gfx/grid/grid_poop_red_1.png"
+        elseif v == GridPoopVariant.CORN then
+            return "gfx/grid/grid_poop_corn.png"
+        elseif v == GridPoopVariant.GOLDEN then
+            return "gfx/grid/grid_poop_gold.png"
+        elseif v == GridPoopVariant.RAINBOW then
+            return "gfx/grid/grid_poop_rainbow.png"
+        elseif v == GridPoopVariant.BLACK then
+            return "gfx/grid/grid_poop_black.png"
+        elseif v == GridPoopVariant.HOLY then
+            return "gfx/grid/grid_poop_white_1.png"
+        elseif v == GridPoopVariant.GIANT_TL or v == GridPoopVariant.GIANT_TR or v == GridPoopVariant.GIANT_BL or v == GridPoopVariant.GIANT_BR then
+            return "gfx/grid/grid_poop_giant.png"
+        elseif v == GridPoopVariant.CHARMING then
+            return "gfx/grid/grid_poop_charming.png"
+        else
+            return "gfx/grid/grid_poop_1.png"
+        end
+    elseif t == GridEntityType.GRID_TNT then
+        return "gfx/grid/grid_tnt.png"
+    else
+        local xmldata = XMLData.GetEntryByOrder(XMLNode.BACKDROP, game:GetRoom():GetBackdropType())
+        if xmldata.rocks == nil or xmldata.rocks == "" then
+            return "gfx/grid/rocks_basement.png"
+        elseif xmldata.gridgfxroot and xmldata.gridgfxroot ~= "" then
+            return xmldata.gridgfxroot..xmldata.rocks
+        else
+            return xmldata.rocks
+        end
+    end
+    return ""
+end
 
 local function SetGridSprite(target, grid, t, v)
     local sp = target:GetSprite()
@@ -34,51 +69,19 @@ local function SetGridSprite(target, grid, t, v)
     
     sp:Load(gridSp:GetFilename(), true)
     local anim = gridSp:GetAnimation()
-    local frame = 0
-    local spritesheet = ""
-    if t == GridEntityType.GRID_POOP then
-        if v == GridPoopVariant.RED then
-            spritesheet = "gfx/grid/grid_poop_red_1.png"
-        elseif v == GridPoopVariant.CORN then
-            spritesheet = "gfx/grid/grid_poop_corn.png"
-        elseif v == GridPoopVariant.GOLDEN then
-            spritesheet = "gfx/grid/grid_poop_gold.png"
-        elseif v == GridPoopVariant.RAINBOW then
-            spritesheet = "gfx/grid/grid_poop_rainbow.png"
-        elseif v == GridPoopVariant.BLACK then
-            spritesheet = "gfx/grid/grid_poop_black.png"
-        elseif v == GridPoopVariant.HOLY then
-            spritesheet = "gfx/grid/grid_poop_white_1.png"
-        elseif v == GridPoopVariant.GIANT_TL or v == GridPoopVariant.GIANT_TR or v == GridPoopVariant.GIANT_BL or v == GridPoopVariant.GIANT_BR then
-            spritesheet = "gfx/grid/grid_poop_giant.png"
-        elseif v == GridPoopVariant.CHARMING then
-            spritesheet = "gfx/grid/grid_poop_charming.png"
-        else
-            spritesheet = "gfx/grid/grid_poop_1.png"
-        end
-        frame = gridSp:GetFrame()
-    elseif t == GridEntityType.GRID_TNT then
-        spritesheet = "gfx/grid/grid_tnt.png"
-        frame = gridSp:GetFrame()
-    else
-        if anim == "big" then
-            anim = "normal"
-            v = Random() % 3
-        end
+    local frame = gridSp:GetFrame()
+    local spritesheet = GetSpriteSheet(t, v)
+    
+    if t == GridEntityType.GRID_ROCK and anim == "big" then
+        anim = "normal"
+        v = Random() % 3
         frame = v
-        local xmldata = XMLData.GetEntryByOrder(XMLNode.BACKDROP, game:GetRoom():GetBackdropType())
-        if xmldata.rocks == nil or xmldata.rocks == "" then
-            spritesheet ="gfx/grid/rocks_basement.png"
-        elseif xmldata.gridgfxroot and xmldata.gridgfxroot ~= "" then
-            spritesheet = xmldata.gridgfxroot..xmldata.rocks
-        else
-            spritesheet = xmldata.rocks
-        end
     end
+
     sp:SetFrame(anim, frame)
     sp:ReplaceSpritesheet(0, spritesheet, true)
 
-    print(anim, frame, spritesheet, t, v)
+    --print(anim, frame, spritesheet, t, v)
 end
 
 
@@ -147,16 +150,36 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
             if room:CanPickupGridEntity(gridIdx) then
                 local grid = room:GetGridEntity(gridIdx)
 
-                local eff = Isaac.Spawn(1000, EffectVariant.GRID_ENTITY_PROJECTILE_HELPER, 0, fam.Position, Vector.Zero, fam)
+                local t = grid:GetType()
+                local v = grid:GetVariant()
+                local subType = (t << 16) | v
+
+                local spriteSheet = GetSpriteSheet(t, v)
+                local gridSp = grid:GetSprite()
+                local anim = gridSp:GetAnimation()
+                local anm2 = gridSp:GetFilename()
+                local frame = gridSp:GetFrame()
+                if t == GridEntityType.GRID_ROCK and anim == "big" then
+                    anim = "normal"
+                    v = Random() % 3
+                    frame = v
+                end
+
+                --Isaac.Spawn(1000, EffectVariant.GRID_ENTITY_PROJECTILE_HELPER, 0, fam.Position, Vector.Zero, fam)
+                local eff = room:PickupGridEntity(gridIdx)
                 fam.Child = eff
                 eff.Parent = fam
+                local sp = eff:GetSprite()
 
-                SetGridSprite(eff, grid, grid:GetType(), grid:GetVariant())
-                eff:GetData().GridTypeVar = (grid:GetType() << 16) | (grid:GetVariant() << 0)
+                --sp:Load(anm2, true)
+                --sp:SetFrame(anim, frame)
+                --sp:ReplaceSpritesheet(0, spritesheet, true)
+
+                eff:GetData().GridTypeVar = subType
                 eff:ToEffect():FollowParent(fam)
                 eff.DepthOffset = 1
                 
-                room:PickupGridEntity(gridIdx):Remove() -- using this to update grids around it without doing to much work
+                 -- using this to update grids around it without doing to much work
             end
             fam.Coins = -1
         end
@@ -223,13 +246,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
             local t = gridTypeVar >> 16
             local v = gridTypeVar & ~((~0) <<16)
             SetGridSprite(tear, grid, t, v)
-            --[[
-            local gridSp = grid:GetSprite()
-                
-            local tearSp = tear:GetSprite()
-            tearSp:Load(gridSp:GetFilename(), true)
-            tearSp:SetFrame(gridSp:GetAnimation(), gridSp:GetFrame())
-]]
+            tear.CollisionDamage = 10
             grid:Remove()
         end
     elseif fam.FireCooldown > 0 then
@@ -246,30 +263,18 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
     
 end, BeckyMod.Spells.ENTITIES.POLTY_FAM.Variant)
 
-BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_RENDER, function(_, eff)
-    eff:Render(game:GetRoom():WorldToScreenPosition( Vector(100, 100) ))
-    if 1 > 0 then return end
-    --print(eff.SpriteOffset, eff.State)
-
-    local fam = eff.Parent and eff.Parent:ToFamiliar()
-    
-    if not fam or not (fam.Type == 3 and fam.Variant == BeckyMod.Spells.ENTITIES.POLTY_FAM.Variant) then return end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, fam)
+    local eff = fam.Child and fam.Child:ToEffect()
+    if not eff then return end
     local sp = fam:GetSprite()
     local nullFrame = sp:GetNullFrame("Item")
     
     if not (nullFrame and nullFrame:IsVisible()) then return end
-    
-    sp:Render(game:GetRoom():WorldToScreenPosition( eff.Position + fam:GetNullOffset("Item") ))
+    eff.Visible = true
+    eff:GetSprite():Render(game:GetRoom():WorldToScreenPosition( fam.Position + fam:GetNullOffset("Item") ))
+    eff.Visible = false
 
-end, EffectVariant.GRID_ENTITY_PROJECTILE_HELPER)
-
---[[
-BeckyMod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
-    if tear.FrameCount > 0 then return end
-    local sp = tear:GetSprite()
-    print( tear.SubType, sp:GetAnimation(), sp:GetFrame(), sp:GetFilename() )
-end, TearVariant.GRIDENT)
-]]
+end, BeckyMod.Spells.ENTITIES.POLTY_FAM.Variant)
 
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_NEW_ROOM, function()
     CanPickupGridList = {}
@@ -279,7 +284,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_GRID_ENTITY_SPAWN, function(_, gridEnt
         table.insert(CanPickupGridList, gridEnt:GetGridIndex())
     end
 end)
-BeckyMod:AddCallback(ModCallbacks.MC_PRE_NEW_ROOM, function()
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
     local room = game:GetRoom()
     if room:IsFirstVisit() then return end
 
@@ -341,51 +346,6 @@ return {
 
 
 --[[
-sub: 131072 | anim: normal | frame: 0 | type: rock
-sub: 131073 | anim: normal | frame: 1 | type: rock
-sub: 131074 | anim: normal | frame: 2 | type: rock
-
-sub: 393216 | anim: alt | frame: 0 | type: rock
-sub: 393217 | anim: alt | frame: 1 | type: rock
-sub: 393218 | anim: alt | frame: 2 | type: rock
-
-sub: 327680 | anim: bombrock | frame: 0 | type: rock
-       v  it repeat until reaching frame 14
-sub: 327695 | anim: bombrock | frame: 14 | type: rock
-
-sub: 262144 | anim: tinted | frame: 0 | type: rock
-       v  it repeat until reaching frame 14
-sub: 262158 | anim: tinted | frame: 14 | type: rock
-
-sub: 1703936 | anim: alt2 | frame: 0 | type: rock
-
-sub: 1769472 | anim: foolsgold | frame: 0 | type: rock
-sub: 1769473 | anim: foolsgold | frame: 1 | type: rock
-sub: 1769474 | anim: foolsgold | frame: 2 | type: rock
-
-sub: 1441792 | anim: supersecret | frame: 0 | type: rock
-       v  it repeat until reaching frame 14
-sub: 1441806 | anim: supersecret | frame: 14 | type: rock
-sub: 1441792 | anim: ss_broken | frame: 0 | type: rock
-       v  it repeat until reaching frame 14
-sub: 1441806 | anim: ss_broken | frame: 14 | type: rock
-
-sub: 786432 | anim: Idle | frame: 0 | type: tnt
-
-
-sub: 915704 | anim: State1 | frame: 4 | type: poop (normal poop)
-sub: 915704 | anim: State2 | frame: 4 | type: poop (normal poop)
-sub: 915704 | anim: State3 | frame: 4 | type: poop (normal poop)
-sub: 915705 | anim: State1 | frame: 4 | type: poop (red poop)
-sub: 915706 | anim: State1 | frame: 4 | type: poop (corny poop)
-sub: 915707 | anim: State1 | frame: 4 | type: poop (golden poop)
-sub: 915708 | anim: State1 | frame: 4 | type: poop (rainbow poop)
-sub: 915709 | anim: State1 | frame: 4 | type: poop (black poop)
-sub: 915710 | anim: State1 | frame: 4 | type: poop (holy poop)
-sub: 915711 | anim: State1 | frame: 6 | type: poop (giant poop)
-sub: 915715 | anim: State1 | frame: 4 | type: poop (charming poop)
-
-
 tint : 1 | 1 | 1 | 1
 colorize : 1.8 | 0.9 | 0.3 | 1
 offset : 0.3 | 0 | 0

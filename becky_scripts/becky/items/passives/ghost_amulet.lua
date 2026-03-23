@@ -84,17 +84,12 @@ end
 
 ---@param entity Entity
 local function SpawnTrail(entity)
-    local entData = entity:GetData()
-
-    if entData.GhostTrail then return end
-
     local entityParent = entity -- Set this to the parent of the trail
     local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, entityParent.Position, Vector.Zero, entityParent):ToEffect() ---@cast trail EntityEffect
     trail:FollowParent(entityParent)
     trail.Color = Color(1, 1, 1, 1)
     trail.MinRadius = 0.1
     trail.SpriteScale = Vector.One * 2
-    entData.GhostTrail = trail
 
     local sprite = trail:GetSprite()
     local blendMode = sprite:GetLayer(0):GetBlendMode()
@@ -206,8 +201,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         local ghostData = ghost:GetData()
         local ghostTrail = ghostData.GhostTrail 
 
-        if not ghostTrail then
+        if not (ghostTrail and ghostTrail:Exists()) then
             ghostTrail = SpawnTrail(ghost)
+            ghostData.GhostTrail = ghostTrail
         end
 
         local isShooting = IsPlayerShooting(player)
@@ -229,6 +225,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
            color.A = math.max(color.A - .05, 0)
         end
 
+        ghostTrail.SpriteScale = Vector(5, 2) * ghost.SpriteScale
         ghostTrail.Color = Color(color.R, color.G, color.B, color.A, color.RO, color.GO, color.BO)
 
         if isShooting then
