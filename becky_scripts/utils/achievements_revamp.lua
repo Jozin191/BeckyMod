@@ -193,29 +193,45 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion)
 
 
+-- Tainted Becky isn't here so we comment this for a while
 
-function mod:SlotUpdate(slot)
-    if Isaac.GetPlayer(0):GetPlayerType() ~= mod.Character.BECKY.PLAYERTYPE or Isaac.GetPersistentGameData():Unlocked(achievements.ACHIEVEMENT_TAINTED_BECKY) then return end
-    if not slot:GetSprite():IsFinished("PayPrize") then return end
-    Isaac.GetPersistentGameData():TryUnlock(achievements.ACHIEVEMENT_TAINTED_BECKY)
-end
-mod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, mod.SlotUpdate, SlotVariant.HOME_CLOSET_PLAYER)
+-- local taintedAchievement = {
+--     [players.PLAYER_EDITH] = {unlock = achievements.ACHIEVEMENT_TAINTED_EDITH, gfx = "gfx/characters/costumes/characterTaintedEdith.png"}
+-- }
+-- function mod:SlotUpdate(slot)
+--     if not slot:GetSprite():IsFinished("PayPrize") then return end
+--     local d = slot:GetData().Tainted
+--     if not d then return end
+--     Isaac.GetPersistentGameData():TryUnlock(d.unlock)
+-- end
+-- mod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, mod.SlotUpdate, 14)
 
-function mod:SpawnClosetSlot(_, t, v, s)
-    if game:AchievementUnlocksDisallowed() then return end
-    if t ~= 6 or v ~= SlotVariant.HOME_CLOSET_PLAYER then return end
-    local level = mod.Level()
-    if level:GetStage() == LevelStage.STAGE8 and level:GetCurrentRoomIndex() == 94 then
-        if Isaac.GetPlayer(0):GetPlayerType() ~= mod.Character.BECKY.PLAYERTYPE or Isaac.GetPersistentGameData():Unlocked(achievements.ACHIEVEMENT_TAINTED_BECKY) then return end
-        return {t, v, s}
-    end
-end
-mod:AddCallback(ModCallbacks.MC_PRE_ROOM_ENTITY_SPAWN, mod.SpawnClosetSlot)
+-- function mod:HiddenCloset()
+--     if level:GetStage() ~= LevelStage.STAGE8 then return end
+--     if level:GetCurrentRoomDesc().SafeGridIndex ~= 94 then return end
+--     if game:AchievementUnlocksDisallowed() then return end
 
-function mod:OnClosetIsaacInit(slot)
-    if game:AchievementUnlocksDisallowed() then return end
-    if Isaac.GetPlayer(0):GetPlayerType() ~= mod.Character.BECKY.PLAYERTYPE or Isaac.GetPersistentGameData():Unlocked(achievements.ACHIEVEMENT_TAINTED_BECKY) then return end
-    local sp = slot:GetSprite()
-    sp:ReplaceSpritesheet(0, "gfx/characters/costumes/character_beckyb.png", true)
-end
-mod:AddCallback(ModCallbacks.MC_POST_SLOT_INIT, mod.OnClosetIsaacInit, SlotVariant.HOME_CLOSET_PLAYER)
+--     local p = Isaac.GetPlayer():GetPlayerType()
+--     local d = taintedAchievement[p]
+    
+--     if not d then return end
+--     if Isaac.GetPersistentGameData():Unlocked(d.unlock) then return end
+
+--     if game:GetRoom():IsFirstVisit() then
+--         for _, k in ipairs(Isaac.FindByType(17)) do
+--             k:Remove()
+--         end
+--         for _, i in ipairs(Isaac.FindByType(5)) do
+--             i:Remove()
+--         end
+--         local s = Isaac.Spawn(6, 14, 0, game:GetRoom():GetCenterPos(), Vector.Zero, nil)
+--         s:GetSprite():ReplaceSpritesheet(0, d.gfx, true)
+--         s:GetData().Tainted = d
+--     else
+--         for _, s in ipairs(Isaac.FindByType(6, 14)) do
+--             s:GetSprite():ReplaceSpritesheet(0, d.gfx, true)
+--             s:GetData().Tainted = d
+--         end
+--     end
+-- end
+-- mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.HiddenCloset)

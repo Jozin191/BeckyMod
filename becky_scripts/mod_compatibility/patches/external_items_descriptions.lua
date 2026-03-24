@@ -244,7 +244,7 @@ local function EIDPatch()
 
 	-- Items
 
-	local EID_Collectibles = {--[[
+	local EID_Collectibles = {
 		[Item.HAND_MADE_BIBLE.ID] = { -- EN: [X] | SPA: [X] 
 			en_us = {
 				Name = "Hand Made Bible",
@@ -253,7 +253,7 @@ local function EIDPatch()
 					"#add later"
 				},
 			},
-		},]]
+		},
 		[Item.DREAM_BANISHER.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Dream Banisher",

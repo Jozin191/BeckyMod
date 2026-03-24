@@ -1,16 +1,14 @@
 
-local SPELL_COST = 15
-local TEAR_VEL = Vector(2.5 *10, 0)
+local SPELL_COST = 30
+local TEAR_VEL = Vector(1, 0)
 
 local function fun(player)
+    local vel = TEAR_VEL:Resized(2.5 *10)
     local pos = player.Position
 
-    for angle=0, 270, 90 do
-        for _, weap in ipairs(BeckyMod.Character.BECKY_B:FireWeapon(player, player, Vector(1,0):Rotated(angle), 1, false)) do
-            if weap.Velocity:Length() >0 then
-                weap.Velocity = TEAR_VEL:Rotated( weap.Velocity:GetAngleDegrees() )
-            end
-        end
+    for i=0, 270, 90 do
+        local tear = player:FireTear(pos, vel:Rotated(i), false, false, false, player, 1)
+        tear:ChangeVariant(BeckyMod.Spells.ENTITIES.MANA_TEAR.Variant)
     end
 end
 

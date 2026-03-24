@@ -16,7 +16,7 @@
     <entity name="Butcher's Cookbook Sawblade" id="1000" anm2path="familiar/sawblade.anm2"/>
 
     <!-- Magic Staff weapon stuff -->
-    <entity name="Magic Staff (Dummy)" id="1000" anm2path="becky_magic_staff.anm2" collisionDamage="0" collisionMass="0" collisionRadius="0" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />
+    <entity name="Magic Staff (Dummy)" id="1000" anm2path="becky_magic_staff.anm2" collisionDamage="0" collisionMass="0" collisionRadius="1" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />
     <entity name="Magic Staff (Weapon)" id="8" anm2path="becky_magic_staff.anm2" collisionDamage="0" collisionMass="3" collisionRadius="16" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />
 
     <!-- Spells stuff -->

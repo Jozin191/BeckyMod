@@ -1,5 +1,5 @@
 local Mod = BeckyMod
-local emptyShaderName = ""
+local emptyShaderName = "TestHUDEmptyShader"
 
 local VERSION = 1.16 -- (v1.1.6) do not modify
 local game = Game()
