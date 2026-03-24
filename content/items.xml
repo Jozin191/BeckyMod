@@ -21,17 +21,6 @@
         chargetype="normal"
         />
 
-        <active id="14"
-        name="Magic Staff"
-        gfx="magic staff.png"
-        description=""
-        quality="2"
-        maxcharges="0"
-        chargetype="normal"
-
-        tags="nocantrip"
-        />
-
         <!--PASSIVE ITEMS-->
 
         <passive id="3"
