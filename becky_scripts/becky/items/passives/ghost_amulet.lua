@@ -307,11 +307,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
     local GhostSize = Vector.One * exp((player.Damage / 5), 1, 1.2)
     local gridFromPos = room:GetGridEntityFromPos(familiar.Position)
-    
+
     familiar.SizeMulti = GhostSize
     familiar.SpriteScale = GhostSize
 
     local playerData = player:GetData()
+
+    if player:HasCollectible(CollectibleType.COLLECTIBLE_LOST_CONTACT) then
+        for _, proj in ipairs(Isaac.FindInCapsule(familiar:GetCollisionCapsule(), EntityPartition.BULLET)) do
+            proj:Kill()
+        end
+    end
 
     playerData.GhostBalls = playerData.GhostBalls or {}
     if not CheckTableForGhost(playerData.GhostBalls, familiar) then
