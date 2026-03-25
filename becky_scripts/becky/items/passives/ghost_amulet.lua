@@ -381,6 +381,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
 
     if not npc then return end
     if not IsValidEnemy(npc) then return end
+
     familiar:GetSprite():Play("Hit")
     TriggerPush(npc, familiar, 20 * tearsMult)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
@@ -392,7 +393,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
 
     npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
 
-    if npc.HitPoints <= baseDamage then
+    if baseDamage >= npc.HitPoints then
+        print("Triggered kill enemy callback")
         Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY, familiar, collider)
     end
 end, GHOST_BALL_VAR)
