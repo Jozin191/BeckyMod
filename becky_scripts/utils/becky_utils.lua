@@ -237,3 +237,9 @@ function BeckyMod:TryGetPlayer(ent, directOnly)
 		return BeckyMod:TryGetPlayer(ent.SpawnerEntity)
 	end
 end
+
+---@param ent Entity
+---@return boolean
+function BeckyMod.IsEnemy(ent)
+	return ent:IsActiveEnemy() and ent:IsVulnerableEnemy()
+end
