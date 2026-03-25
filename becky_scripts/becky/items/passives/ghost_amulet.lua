@@ -9,6 +9,7 @@ BeckyMod.Callbacks = {}
 --- * Familiar: The ghost entity
 --- * Entity: The entity hit by the ghost
 BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY = "BeckyMod_ON_GHOST_HIT_ENEMY"
+BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY = "BeckyMod_ON_GHOST_KILL_ENEMY"
 
 ---@param npc EntityNPC
 ---@return boolean
@@ -384,4 +385,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider)
 
     npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
+
+    if npc.HitPoints <= baseDamage then
+        Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY, familiar, collider)
+    end
 end, GHOST_BALL_VAR)
