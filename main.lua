@@ -104,6 +104,7 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechX")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.BothPeppers")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Techs")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.JacobsLadder")
 
 --challenges
 include("becky_scripts.becky.challenges.path_of_pain")
