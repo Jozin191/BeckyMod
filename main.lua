@@ -111,6 +111,7 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.HolyLight")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Athame")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Apple")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.ChemicalPeel")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Euthanasia")
 
 --challenges
 include("becky_scripts.becky.challenges.path_of_pain")
