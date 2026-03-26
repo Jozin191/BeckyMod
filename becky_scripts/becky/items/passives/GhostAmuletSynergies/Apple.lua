@@ -7,7 +7,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam)
 
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_APPLE)
     local luck = player.Luck
-    if luck > 15 then luck = 15
+    if luck > 14 then luck = 14
     elseif luck < 0 then luck = 0 end
     local chance = 1/ (15- luck)
     
