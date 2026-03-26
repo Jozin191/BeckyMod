@@ -6,14 +6,10 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_APPLE) then return end
 
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_APPLE)
-    local luck = player.Luck
-    if luck > 14 then luck = 14
-    elseif luck < 0 then luck = 0 end
-    local chance = 1/ (15- luck)
+    local formula = 1 / math.max(15 - player.Luck, 1)
+
+    if rng:RandomFloat() > formula then return end
     
-    print("spawn apple chance",chance)
-    if rng:RandomFloat() > chance then return end
-    
-    local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.RAZOR, 0, fam.Position, Vector(1,0):Resized(player.ShotSpeed *10):Rotated(rng:RandomInt(360)), fam)
-    tear.CollisionDamage = player.Damage * 3.2
+    local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.RAZOR, 0, fam.Position,rng:RandomVector():Resized(player.ShotSpeed * 10), fam)
+    tear.CollisionDamage = player.Damage * 4
 end)
