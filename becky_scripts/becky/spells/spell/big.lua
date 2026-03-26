@@ -16,7 +16,7 @@ local function fun(player)
     --tear.Scale = 2
     --tear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
 
-    for _, weap in ipairs(BeckyMod.Character.BECKY_B:FireWeapon(player, player, Vector(1,0):Rotated(angle), 2.25, false)) do
+    for _, weap in ipairs(BeckyMod.Character.BECKY_B:FireWeapon(player, player, Vector(1,0):Rotated(angle), 2.25, false, false)) do
         weap:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
         if weap.Velocity:Length() >0 then
             weap.Velocity = TEAR_VEL:Rotated( weap.Velocity:GetAngleDegrees() )

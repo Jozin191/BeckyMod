@@ -29,12 +29,12 @@ BeckyMod.Character.BECKY_B = BECKY_B
 
 local BASE_TEAR_DPS = 30 /11
 local MAX_TEARS_DPS_C_SECTION = 30 / (149.66666667*3+1)
-local DirToAngle = {
-    [Direction.NO_DIRECTION] = 90,
-    [Direction.LEFT] = 180,
-    [Direction.RIGHT] = 0,
-    [Direction.UP] = -90,
-    [Direction.DOWN] = 90,
+local DirToVector = {
+    [Direction.NO_DIRECTION] = Vector(0,-1),
+    [Direction.LEFT] = Vector(-1,0),
+    [Direction.RIGHT] = Vector(1,0),
+    [Direction.UP] = Vector(0,1),
+    [Direction.DOWN] = Vector(0,-1),
 }
 
 BECKY_B.FamiliarWhiteList = {
@@ -91,22 +91,43 @@ local function FindGridInRadius(pos, tileRadius, fromCenter,  squareRadius)
 end
 
 
+local function GetAimVector(owner, player)
+    local markTarget = player:GetMarkedTarget()
 
-local function GetPlayerAimAngle(owner, player)
-    local angle = player:GetAimDirection()
-    --if owner.Type == 3 then angle = player:GetLastDirection() end
+    if owner.Type == 3 and player:HasCollectible(CollectibleType.COLLECTIBLE_KING_BABY) then
+        local ptr = GetPtrHash(entShooting:ToFamiliar().Player)
+        local kingBaby = nil
+        for _, e in pairs(Isaac.FindByType(3, FamiliarVariant.KING_BABY)) do
+            local f = e:ToFamiliar()
+            if f and f.Player and GetPtrHash(f.Player) == ptr then
+                if f.Parent == nil then
+                    kingBaby = f
+                    break
+                else
+                    kingBaby = f
+                end
+            end
+        end
+        if kingBaby.Target then
+            return (owner.Position - kingBaby.Target.Position):Normalized()
+        end
+    end
 
     if angle:Length() == 0 then
         angle = player:GetMovementJoystick()
-        if angle:Length() == 0 then angle = 90
-        else angle = angle:GetAngleDegrees() end
-
-    elseif player:GetMarkedTarget() or player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK) then
-        angle = angle:GetAngleDegrees()
-    else
-        angle = DirToAngle[player:GetHeadDirection()]
+        if angle:Length() == 0 then
+            return DirToVector[1]
+        end
+    elseif markTarget then
+        return (owner.Position - markTarget.Position):Normalized()
+    elseif player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK) then
+        return player:GetAimDirection()
     end
-    return angle
+    return DirToVector[player:GetHeadDirection()]
+end
+
+local function GetAimAngle(owner, player)
+    return GetAimVector(owner, player):GetAngleDegrees()
 end
 
 --- * Make Mana Tears auto fire when the "tear per second" is to high (for stuff like "Soy Milk")
@@ -156,7 +177,7 @@ local function ProcessStaffSwing(entShooting, player)
             local scale = knife.Scale
             data.MagicStaff_SwingCool = BECKY_B.MagicStaff_SwingCooldown
             
-            local angle = GetPlayerAimAngle(entShooting, player)
+            local angle = GetAimAngle(entShooting, player)
             if entShooting.Type == 3 and entShooting.Variant == FamiliarVariant.CAINS_OTHER_EYE then
                 local rng = entShooting:GetDropRNG()
                 if player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK) then
@@ -203,7 +224,7 @@ local function ProcessStaffSwing(entShooting, player)
             if entShooting.Type == 1 then
                 entShooting:SetHeadDirectionLockTime(10)
             elseif entShooting.Type == 3 then
-                entShooting.FireCooldown = BECKY_B.MagicStaff_SwingCooldown //10
+                entShooting.FireCooldown = BECKY_B.MagicStaff_SwingCooldown
             end
         else
             knife:SetIsSwinging(false)
@@ -428,7 +449,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
 
     local sp = knife:GetSprite()
     if not ( (sp:IsPlaying("Swing") or sp:IsPlaying("Swing2")) and sp:GetFrame() >0) then
-        local angle = GetPlayerAimAngle(owner, player)
+        local angle = GetAimAngle(owner, player)
         if owner.Type == 3 and owner.Variant == FamiliarVariant.CAINS_OTHER_EYE then
             local rng = owner:GetDropRNG()
             if player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK) then
@@ -562,15 +583,23 @@ end)
 ---     * overwrite the "GetMarkedTarget" function to return this mark entity
 ---     * the mark line
 --- * Make Incubus, Gello, Twisted Pair, etc. use this knife variant and other stuff
-function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye)
-    local shotDir
+
+---@param entShooting   - the entity that is shooting. can be the player or a familiar
+---@param player        - entity player
+---@param forceDir      - force a shooting direction
+---@param forceMult     - force a damage multiplayer
+---@param canBeEye      - can be evil eye. only tears stuff
+---@param extraTears    - can shoot tears like moms contact or lokis horn
+---@return (weapon entity type)[]
+function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, extraTears)
+    local shotDir = forceDir and forceDir or GetAimVector(entShooting, player)
+    if canBeEye == nil then canBeEye = true end
+    if extraTears == nil then extraTears = true end
     local shotSpeed = player.ShotSpeed *10
     local shotPos = entShooting.Position
     local scale = player.Size
     local mult = 1
     local weaponList = {}
-    local markTarget = player:GetMarkedTarget()
-    if canBeEye == nil then canBeEye = true end
     if entShooting.Type == 3 then
         local fam = entShooting:ToFamiliar()
         if entShooting.Variant == FamiliarVariant.TWISTED_BABY then
@@ -581,26 +610,43 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye)
         mult = mult * fam:GetMultiplier()
     end
 
-    if entShooting.Type == 3 and player:HasCollectible(CollectibleType.COLLECTIBLE_KING_BABY) then
-        
-    elseif forceDir then
-        shotDir = forceDir
-    elseif markTarget then
-    else
-        shotDir = player:GetLastDirection()
-    end
     if forceMult then mult = forceMult end
 
     if player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_BOMBS)
 
         for i=0, multishotParams:GetNumTears()-1 do
-            local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_BOMBS, shotDir, shotSpeed, multishotParams)
             local bomb = player:FireBomb(shotPos + posVel.Position *scale, posVel.Velocity, entShooting)
             table.insert(weaponList, bomb)
 
             Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
         end
+
+        if extraTears then
+            if multishotParams:IsShootingBackwards() then
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180) , entShooting)
+                table.insert(weaponList, bomb)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
+            end
+            if multishotParams:IsShootingSideways() then
+                for angle=-90, 90, 180 do
+                    local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
+                    table.insert(weaponList, bomb)
+
+                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
+                end
+            end
+
+            for i=1, multishotParams:GetNumRandomDirTears() do
+                local angle = Random() % 360
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
+                table.insert(weaponList, bomb)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
+            end
+        end
+
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_FETUS)
         local tearFlags = TearFlags.TEAR_FETUS
@@ -613,13 +659,59 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye)
 
         for i=0, multishotParams:GetNumTears()-1 do
             local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_FETUS, shotDir, shotSpeed, multishotParams)
-            local tear = player:FireTear(shotPos + posVel.Position *scale, posVel.Velocity, false, true, true, entShooting, mult)
+            local tear = player:FireTear(
+                shotPos + posVel.Position *scale,
+                posVel.Velocity,
+                false, true, true, entShooting, mult
+            )
             tear:ChangeVariant(TearVariant.FETUS)
             tear:AddTearFlags(tearFlags)
             
             table.insert(weaponList, tear)
-
             Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
+        end
+
+        if extraTears then
+            if multishotParams:IsShootingBackwards() then
+                local tear = player:FireTear(
+                    shotPos,
+                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
+                    false, true, true, entShooting, mult
+                )
+                tear:ChangeVariant(TearVariant.FETUS)
+                tear:AddTearFlags(tearFlags)
+
+                table.insert(weaponList, tear)
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
+            end
+            if multishotParams:IsShootingSideways() then
+                for angle=-90, 90, 180 do
+                    local tear = player:FireTear(
+                        shotPos,
+                        shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle),
+                        false, true, true, entShooting, mult
+                    )
+                    tear:ChangeVariant(TearVariant.FETUS)
+                    tear:AddTearFlags(tearFlags)
+                
+                    table.insert(weaponList, tear)
+                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
+                end
+            end
+
+            for i=1, multishotParams:GetNumRandomDirTears() do
+                local angle = Random() % 360
+                local tear = player:FireTear(
+                    shotPos,
+                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
+                    false, true, true, entShooting, mult
+                )
+                tear:ChangeVariant(TearVariant.FETUS)
+                tear:AddTearFlags(tearFlags)
+                
+                table.insert(weaponList, tear)
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
+            end
         end
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_BOMBS)
@@ -631,6 +723,31 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye)
 
             Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
         end
+
+        if extraTears then
+            if multishotParams:IsShootingBackwards() then
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180) , entShooting)
+                table.insert(weaponList, bomb)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
+            end
+            if multishotParams:IsShootingSideways() then
+                for angle=-90, 90, 180 do
+                    local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
+                    table.insert(weaponList, bomb)
+
+                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
+                end
+            end
+
+            for i=1, multishotParams:GetNumRandomDirTears() do
+                local angle = Random() % 360
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
+                table.insert(weaponList, bomb)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
+            end
+        end
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_TECH_X)
 
@@ -640,6 +757,31 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye)
             table.insert(weaponList, tech_x)
             
             Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_X_LASER, tech_x)
+        end
+
+        if extraTears then
+            if multishotParams:IsShootingBackwards() then
+                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180), 40 *mult, entShooting, mult)
+                table.insert(weaponList, tech_x)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_X_LASER, tech_x)
+            end
+            if multishotParams:IsShootingSideways() then
+                for angle=-90, 90, 180 do
+                    local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle), 40 *mult, entShooting, mult)
+                    table.insert(weaponList, tech_x)
+
+                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_X_LASER, tech_x)
+                end
+            end
+
+            for i=1, multishotParams:GetNumRandomDirTears() do
+                local angle = Random() % 360
+                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle), 40 *mult, entShooting, mult)
+                table.insert(weaponList, tech_x)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_X_LASER, tech_x)
+            end
         end
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_BRIMSTONE)
@@ -651,15 +793,86 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye)
 
             Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BRIMSTONE, brim)
         end
+        
+        if extraTears then
+            if multishotParams:IsShootingBackwards() then
+                local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180), entShooting, mult)
+                table.insert(weaponList, brim)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BRIMSTONE, brim)
+            end
+            if multishotParams:IsShootingSideways() then
+                for angle=-90, 90, 180 do
+                    local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle), entShooting, mult)
+                    table.insert(weaponList, brim)
+
+                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BRIMSTONE, brim)
+                end
+            end
+
+            for i=1, multishotParams:GetNumRandomDirTears() do
+                local angle = Random() % 360
+                local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle), entShooting, mult)
+                table.insert(weaponList, brim)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BRIMSTONE, brim)
+            end
+        end
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_LASER)
 
         for i=0, multishotParams:GetNumTears()-1 do
             local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_LASER, shotDir, shotSpeed, multishotParams)
-            local tech = player:FireTechLaser(shotPos + posVel.Position *scale, LaserOffset.LASER_TECH1_OFFSET, posVel.Velocity, false, false, entShooting, mult)
+            local tech = player:FireTechLaser(
+                shotPos + posVel.Position *scale,
+                LaserOffset.LASER_TECH1_OFFSET,
+                posVel.Velocity,
+                false, false, entShooting, mult
+            )
             table.insert(weaponList, tech)
 
             Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_LASER, tech)
+        end
+
+        if extraTears then
+            if multishotParams:IsShootingBackwards() then
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180) , entShooting)
+                local tech = player:FireTechLaser(
+                    shotPos,
+                    LaserOffset.LASER_TECH1_OFFSET,
+                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
+                    false, false, entShooting, mult
+                )
+                table.insert(weaponList, tech)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_LASER, tech)
+            end
+            if multishotParams:IsShootingSideways() then
+                for angle=-90, 90, 180 do
+                    local tech = player:FireTechLaser(
+                        shotPos,
+                        LaserOffset.LASER_TECH1_OFFSET,
+                        shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle),
+                        false, false, entShooting, mult
+                    )
+                    table.insert(weaponList, tech)
+
+                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_LASER, tech)
+                end
+            end
+
+            for i=1, multishotParams:GetNumRandomDirTears() do
+                local angle = Random() % 360
+                local tech = player:FireTechLaser(
+                    shotPos,
+                    LaserOffset.LASER_TECH1_OFFSET,
+                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle),
+                    false, false, entShooting, mult
+                )
+                table.insert(weaponList, tech)
+
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_LASER, tech)
+            end
         end
     --elseif player:HasCollectible(CollectibleType.COLLECTIBLE_) then
     --elseif player:HasCollectible(CollectibleType.COLLECTIBLE_) then
@@ -669,10 +882,51 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye)
 
         for i=0, multishotParams:GetNumTears()-1 do
             local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_TEARS, shotDir, shotSpeed, multishotParams)
-            local tear = player:FireTear(shotPos + posVel.Position *scale, posVel.Velocity, canBeEye, false, true, entShooting, mult)
+            local tear = player:FireTear(
+                shotPos + posVel.Position *scale,
+                posVel.Velocity,
+                false, true, true, entShooting, mult
+            )
             table.insert(weaponList, tear)
 
             Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
+        end
+
+        if extraTears then
+            if multishotParams:IsShootingBackwards() then
+                local tear = player:FireTear(
+                    shotPos,
+                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
+                    false, true, true, entShooting, mult
+                )
+
+                table.insert(weaponList, tear)
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
+            end
+            if multishotParams:IsShootingSideways() then
+                for angle=-90, 90, 180 do
+                    local tear = player:FireTear(
+                        shotPos,
+                        shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle),
+                        false, true, true, entShooting, mult
+                    )
+                
+                    table.insert(weaponList, tear)
+                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
+                end
+            end
+
+            for i=1, multishotParams:GetNumRandomDirTears() do
+                local angle = Random() % 360
+                local tear = player:FireTear(
+                    shotPos,
+                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
+                    false, true, true, entShooting, mult
+                )
+                
+                table.insert(weaponList, tear)
+                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
+            end
         end
     end
 
