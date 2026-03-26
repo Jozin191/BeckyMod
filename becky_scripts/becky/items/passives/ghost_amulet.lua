@@ -87,8 +87,6 @@ end
 local function SpawnTrail(entity)
     local entData = entity:GetData()
 
-    if entData.GhostTrail then return end
-
     local entityParent = entity -- Set this to the parent of the trail
     local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, entityParent.Position, Vector.Zero, entityParent):ToEffect() ---@cast trail EntityEffect
     trail:FollowParent(entityParent)
@@ -207,7 +205,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         local ghostData = ghost:GetData()
         local ghostTrail = ghostData.GhostTrail 
 
-        if not ghostTrail then
+        if not ghostTrail or not ghostTrail:Exists() then
             ghostTrail = SpawnTrail(ghost)
         end
 
@@ -220,7 +218,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
         local maxDistIdle = 40
         local room = BeckyMod.Game:GetRoom()
-        -- SpawnTrail(familiar)
         
         local color = ghostTrail.Color
 
