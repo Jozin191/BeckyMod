@@ -133,14 +133,28 @@ local MultiShotItems = {
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
     local data = player:GetData()
-
+    
     data.BookWormFlag = data.BookWormFlag or false 
+    data.HomingFlag = data.HomingFlag or false 
 
-    if data.BookWormFlag == true then return end
-    if not player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then return end
+    local updateFamCache = false
+    if not data.BookWormFlag and player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
+        updateFamCache = true
+        data.BookWormFlag = true
+    end
+
+    if player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING then
+        if not data.HomingFlag then
+            updateFamCache = true
+            data.HomingFlag = true
+        end
+    elseif data.HomingFlag then
+        updateFamCache = true
+        data.HomingFlag = false
+    end
+
+    if not updateFamCache then return end
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
-
-    data.BookWormFlag = true
 end)
 
 ---@param id CollectibleType
@@ -169,6 +183,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     local num = player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears() + (player:GetCollectibleNum(ITEM_GHOST_AMULET)-1) + BookWormExtra
 
     player:CheckFamiliar(GHOST_BALL_VAR, num, rng)
+    if player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING then
+        player:CheckFamiliar(GHOST_BALL_VAR, 1, rng, nil, 1)
+    end
 end, CacheFlag.CACHE_FAMILIARS)
 
 ---@param familiar EntityFamiliar
@@ -176,6 +193,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
     familiar:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
     familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS 
+
+    if familiar.SubType == 1 then
+        familiar.Color = Color(0.4, 0.15, 0.38, 1, 0.27843, 0, 0.4549)
+    end
 end, GHOST_BALL_VAR)
 
 ---Expontential function
@@ -222,7 +243,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         
         local color = ghostTrail.Color
 
-        if ghost.State == 1 then
+        if ghost.State >= 1 then
            color.A = math.min(color.A + .05, 1)
         else
            color.A = math.max(color.A - .05, 0)
@@ -230,7 +251,57 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
         ghostTrail.Color = Color(color.R, color.G, color.B, color.A, color.RO, color.GO, color.BO)
 
-        if isShooting then
+        if ghost.SubType == 1 then
+            local target = ghost.Target
+            local ghostPos = ghost.Position
+            if target == nil or target:IsDead() or not target:Exists() then
+                if ghost.FrameCount % 5 == 0 then
+                    local dis
+                    for _, ent in ipairs(Isaac.FindInRadius(ghostPos, 80, EntityPartition.ENEMY)) do
+                        if dis == nil or ent.Position:Distance(ghostPos) < dis then
+                            target = ent
+                            dis = ent.Position:Distance(ghostPos)
+                        end
+                    end
+                    if target then
+                        ghost.State = 2
+                        ghost.Target = target
+                    end
+                end
+            else
+                ghost.State = 2
+                if ghost.FrameCount % 6 == 0 then
+                    local dis
+                    for _, ent in ipairs(Isaac.FindInRadius(ghostPos, 40, EntityPartition.ENEMY)) do
+                        if dis == nil or ent.Position:Distance(ghostPos) < dis then
+                            target = ent
+                            dis = ent.Position:Distance(ghostPos)
+                        end
+                    end
+                    if target then
+                        ghost.Target = target
+                    end
+                elseif ghost.FrameCount % 3 == 0 and target.Position:Distance(ghostPos) >= 120 then
+                    target = nil
+                    ghost.State = 0
+                end
+            end
+        end
+
+        if ghost.State == 2 then
+            local target = ghost.Target
+            if target == nil or target:IsDead() or not target:Exists() then
+                target = nil
+                ghost.State = 0
+                return
+            end
+            local resizer = 1.5 * shotSpeed
+            ghost.Velocity = ghost.Velocity + ((ghost.Target.Position - ghost.Position):Normalized():Resized(resizer))
+
+            if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
+                ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
+            end
+        elseif isShooting then
             if not player:AreOpposingShootDirectionsPressed() then
                 ghost.State = 1
                 local input = {
@@ -268,24 +339,19 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         if sprite:GetAnimation() == "Appear" then
             ghost.Velocity = Vector.Zero
         end
-
-        for _, gh in ipairs(Isaac.FindInCapsule(ghost:GetCollisionCapsule())) do
-            if gh.Type == ghost.Type then
-                local vel = (ghost.Position - gh.Position):Resized(1)
-                ghost.Velocity = ghost.Velocity + vel
-                gh.Velocity = gh.Velocity - vel
-            end
-        end
         ::continue::
     end
 end)
 
-BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
+
+local function RepositionFamiliars()
     for _, ghost in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOST_BALL_VAR)) do
         local fam = ghost:ToFamiliar() ---@cast fam EntityFamiliar
         fam.Position = fam.Player.Position + Vector(3, 0):Rotated(math.random(360))
     end
-end)
+end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, RepositionFamiliars)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, RepositionFamiliars)
 
 local function CheckTableForGhost(tab, ghost)
     for i, gh in ipairs(tab) do
@@ -349,6 +415,14 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         end
 
         gridFromPos:Hurt(hurtVal)
+    end
+
+    for _, gh in ipairs(Isaac.FindInCapsule(familiar:GetCollisionCapsule())) do
+        if gh.Type == familiar.Type then
+            local vel = (familiar.Position - gh.Position):Normalized():Resized(0.5)
+            familiar.Velocity = familiar.Velocity + vel
+            gh.Velocity = gh.Velocity - vel
+        end
     end
 end, GHOST_BALL_VAR)
 
