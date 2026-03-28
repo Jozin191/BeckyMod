@@ -4,6 +4,7 @@
 if not EID then return end
 
 local loader = BeckyMod.PatchesLoader
+local synergiesFun = include("becky_scripts.mod_compatibility.patches.eid_ghost_amulet_synergies")
 
 local function EIDPatch()
 	local Mod = BeckyMod
@@ -254,6 +255,15 @@ local function EIDPatch()
 				},
 			},
 		},]]
+		[Item.GHOST_AMULET.ID] = { -- EN: [X] | SPA: [X] 
+			en_us = {
+				Name = "Ghost Amulet",
+				Description = {
+					"Isaac's tears are replaced with a controllable familiar",
+					"#{{Damage}} The damage it does depends on Isaac's damage and tear rate"
+				},
+			},
+		},
 		[Item.DREAM_BANISHER.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Dream Banisher",
@@ -555,6 +565,7 @@ local function EIDPatch()
 		end
 	)
 
+	synergiesFun()
 	--EID._currentMod = "" --So items added after this with no set mod don't display as the becky mod
 end
 

@@ -3,6 +3,7 @@ local BeckyPlayerType = Isaac.GetPlayerTypeByName("Becky", false)
 local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
 local GHOST_BALL_DMG = 1.25
 
+BeckyMod.Item.GHOST_AMULET = { ID = ITEM_GHOST_AMULET }
 
 BeckyMod.Callbacks = {}
 --- Called every time the ghost hits an enemy
