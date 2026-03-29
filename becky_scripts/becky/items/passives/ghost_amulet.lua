@@ -5,12 +5,20 @@ local GHOST_BALL_DMG = 1.25
 
 BeckyMod.Item.GHOST_AMULET = { ID = ITEM_GHOST_AMULET }
 
+
 BeckyMod.Callbacks = {}
 --- Called every time the ghost hits an enemy
 --- * Familiar: The ghost entity
 --- * Entity: The entity hit by the ghost
 BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY = "BeckyMod_ON_GHOST_HIT_ENEMY"
 BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY = "BeckyMod_ON_GHOST_KILL_ENEMY"
+
+local RoomLimits = {
+    X1 = 0,
+    Y1 = 0,
+    X2 = 0,
+    Y2 = 0,
+}
 
 ---@param npc EntityNPC
 ---@return boolean
@@ -132,8 +140,19 @@ local MultiShotItems = {
 
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
+    if not HasGhostAmulet(player) then return end
+
     local data = player:GetData()
-    
+    local ghostBalls = data.GhostBalls
+    if ghostBalls then
+        for idx=#ghostBalls, 1, -1 do
+            local ghost = ghostBalls[idx]
+            if not ghost:Exists() or ghost:IsDead() then
+                table.remove(data.GhostBalls, idx)
+            end
+        end
+    end
+
     data.BookWormFlag = data.BookWormFlag or false 
     data.HomingFlag = data.HomingFlag or false 
 
@@ -162,12 +181,34 @@ end)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, id, _, _, _, _, player)
     StopShooting(id, player)
     if not HasGhostAmulet(player) then return end
+    if id == CollectibleType.COLLECTIBLE_CONTINUUM then
+        local playerData = player:GetData()
+        local ghosts = playerData.GhostBalls
+
+        if not ghosts then return end
+        for _, ghost in ipairs(ghosts) do
+            if not ghost then goto continue end
+            ghost.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
+            ::continue::
+        end
+    end
     if not MultiShotItems[id] then return end
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(player, ID)
     if ID ~= ITEM_GHOST_AMULET then return end
+    if id == CollectibleType.COLLECTIBLE_CONTINUUM then
+        local playerData = player:GetData()
+        local ghosts = playerData.GhostBalls
+
+        if not ghosts then return end
+        for _, ghost in ipairs(ghosts) do
+            if not ghost then goto continue end
+            ghost.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS
+            ::continue::
+        end
+    end
     player:SetCanShoot(true)
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
@@ -192,7 +233,19 @@ end, CacheFlag.CACHE_FAMILIARS)
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
     familiar:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
-    familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS 
+    local player = familiar.Player
+
+    if player then
+        local playerData = player:GetData()
+        playerData.GhostBalls = playerData.GhostBalls or {}
+        table.insert(playerData.GhostBalls, familiar)
+    end
+
+    if player and player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) then
+        familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
+    else
+        familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS 
+    end
 
     if familiar.SubType == 1 then
         familiar.Color = Color(0.4, 0.15, 0.38, 1, 0.27843, 0, 0.4549)
@@ -221,6 +274,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
     if not ghosts then return end
 
+    local isShooting = IsPlayerShooting(player)
+    local marked = player:GetMarkedTarget()
+    local shotSpeed = player.ShotSpeed
+    local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
+    local maxDistIdle = 40
+    local room = BeckyMod.Game:GetRoom()
     for _, ghost in ipairs(ghosts) do ---@cast ghost EntityFamiliar
         if not ghost then goto continue end
 
@@ -231,15 +290,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             ghostTrail = SpawnTrail(ghost)
         end
 
-        local isShooting = IsPlayerShooting(player)
         local famPos = ghost.Position
         local playerPos = player.Position
-        local shotSpeed = player.ShotSpeed
         local posDif = famPos - playerPos
-        local posDifLenght = posDif:Length()	
-        local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
-        local maxDistIdle = 40
-        local room = BeckyMod.Game:GetRoom()
+        local posDifLenght = posDif:Length()
         
         local color = ghostTrail.Color
 
@@ -296,38 +350,124 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 return
             end
             local resizer = 1.5 * shotSpeed
-            ghost.Velocity = ghost.Velocity + ((ghost.Target.Position - ghost.Position):Normalized():Resized(resizer))
+            ghost.Velocity = ghost.Velocity + (ghost.Target.Position - ghost.Position):Normalized():Resized(resizer)
 
             if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
                 ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
             end
-        elseif isShooting then
-            if not player:AreOpposingShootDirectionsPressed() then
+        elseif marked or isShooting then
+            if marked or not player:AreOpposingShootDirectionsPressed() then
                 ghost.State = 1
-                local input = {
-                    up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
-                    down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
-                    left = Input.GetActionValue(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex),
-                    right = Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex),
-                }
+                local targetPos
+                if marked then
+                    targetPos = marked.Position - ghost.Position
+                else
+                    
+                    local input = {
+                        up = Input.GetActionValue(ButtonAction.ACTION_SHOOTUP, player.ControllerIndex),
+                        down = Input.GetActionValue(ButtonAction.ACTION_SHOOTDOWN, player.ControllerIndex),
+                        left = Input.GetActionValue(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex),
+                        right = Input.GetActionValue(ButtonAction.ACTION_SHOOTRIGHT, player.ControllerIndex),
+                    }
 
-                local MirrorInversor = room:IsMirrorWorld() and -1 or 1
+                    local MirrorInversor = room:IsMirrorWorld() and -1 or 1
 
-                local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * MirrorInversor
-                local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
+                    local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * MirrorInversor
+                    local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
+                    
+                    targetPos = Vector(VectorX, VectorY)
+                end
+
+                if player:HasCollectible(CollectibleType.COLLECTIBLE_CONTINUUM) then
+                    local removeTrail = false
+                    if not ghostData.Continuum_X then
+                        if famPos.X < RoomLimits.X1 then
+                            ghostData.Continuum_X = true
+                            ghostData.Continuum_RightLoop = true
+                            famPos.X = RoomLimits.X2
+                            removeTrail = true
+                        elseif famPos.X > RoomLimits.X2 then
+                            ghostData.Continuum_X = true
+                            famPos.X = RoomLimits.X1
+                            removeTrail = true
+                        end
+                    else
+                        if not ghostData.Continuum_RightLoop and famPos.X < RoomLimits.X1 then
+                            ghostData.Continuum_X = false
+                            famPos.X = RoomLimits.X2
+                            removeTrail = true
+                        elseif ghostData.Continuum_RightLoop and famPos.X > RoomLimits.X2 then
+                            ghostData.Continuum_X = false
+                            ghostData.Continuum_RightLoop = false
+                            famPos.X = RoomLimits.X1
+                            removeTrail = true
+                        end
+                    end
+                    if not ghostData.Continuum_Y then
+                        if famPos.Y < RoomLimits.Y1 then
+                            ghostData.Continuum_Y = true
+                            ghostData.Continuum_BottomLoop = true
+                            famPos.Y = RoomLimits.Y2
+                            removeTrail = true
+                        elseif famPos.Y > RoomLimits.Y2 then
+                            ghostData.Continuum_Y = true
+                            famPos.Y = RoomLimits.Y1
+                            removeTrail = true
+                        end
+                    else
+                        if not ghostData.Continuum_BottomLoop and famPos.Y < RoomLimits.Y1 then
+                            ghostData.Continuum_Y = false
+                            famPos.Y = RoomLimits.Y2
+                            removeTrail = true
+                        elseif ghostData.Continuum_BottomLoop and famPos.Y > RoomLimits.Y2 then
+                            ghostData.Continuum_Y = false
+                            ghostData.Continuum_BottomLoop = false
+                            famPos.Y = RoomLimits.Y1
+                            removeTrail = true
+                        end
+                    end
+
+                    if removeTrail then
+                        ghost.Position = famPos
+                        ghostTrail:Remove()
+                    end
+                    
+                    if ghostData.Continuum_X then
+                        if ghostData.Continuum_RightLoop then
+                            playerPos.X = RoomLimits.X2 + (playerPos.X - RoomLimits.X1)
+                        else
+                            playerPos.X = RoomLimits.X1 - (RoomLimits.X2 - playerPos.X)
+                        end
+                    end
+                    if ghostData.Continuum_Y then
+                        if ghostData.Continuum_BottomLoop then
+                            playerPos.Y = RoomLimits.Y2 + (playerPos.Y - RoomLimits.Y1)
+                        else
+                            playerPos.Y = RoomLimits.Y1 - (RoomLimits.Y2 - playerPos.Y)
+                        end
+                    end
+                    posDif = famPos - playerPos
+                    posDifLenght = posDif:Length()
+                end
+
                 local resizer = 1.5 * shotSpeed
-
-                ghost.Velocity = ghost.Velocity + (Vector(VectorX, VectorY):Normalized():Resized(resizer))
-
+                ghost.Velocity = ghost.Velocity + targetPos:Normalized():Resized(resizer)
 
                 if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
                     ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
                 end
 
-                local dir = (famPos - playerPos):Normalized()
-                player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
+                if not marked then
+                    local dir = (famPos - playerPos):Normalized()
+                    player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
+                end
             end
         else
+            ghostData.Continuum_X = false
+            ghostData.Continuum_RightLoop = false
+            ghostData.Continuum_Y = false
+            ghostData.Continuum_BottomLoop = false
+
             ghost.State = 0    
             if posDifLenght > maxDistIdle then
                 ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
@@ -375,22 +515,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     familiar.SizeMulti = GhostSize
     familiar.SpriteScale = GhostSize
 
-    local playerData = player:GetData()
 
     if player:HasCollectible(CollectibleType.COLLECTIBLE_LOST_CONTACT) then
         for _, proj in ipairs(Isaac.FindInCapsule(familiar:GetCollisionCapsule(), EntityPartition.BULLET)) do
             proj:Kill()
-        end
-    end
-
-    playerData.GhostBalls = playerData.GhostBalls or {}
-    if not CheckTableForGhost(playerData.GhostBalls, familiar) then
-        table.insert(playerData.GhostBalls, familiar)
-    end
-
-    for k, v in ipairs(playerData.GhostBalls) do
-        if not v:Exists() or v:IsDead() then
-            table.remove(playerData.GhostBalls, k)
         end
     end
 
@@ -419,11 +547,14 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 
     for _, gh in ipairs(Isaac.FindInCapsule(familiar:GetCollisionCapsule())) do
         if gh.Type == familiar.Type then
-            local vel = (familiar.Position - gh.Position):Normalized():Resized(0.5)
+            local vel = (familiar.Position - gh.Position):Resized(1)
+            if vel:Length() < 1 then vel = Vector(1,0):Rotated(vel:GetAngleDegrees()) end
+
             familiar.Velocity = familiar.Velocity + vel
             gh.Velocity = gh.Velocity - vel
         end
     end
+    
 end, GHOST_BALL_VAR)
 
 local DestroyableFireplaces = {
@@ -470,3 +601,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
         Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY, familiar, collider)
     end
 end, GHOST_BALL_VAR)
+
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
+    local room = BeckyMod.Game:GetRoom()
+    local width = (room:GetGridWidth() /2 +2) *40
+    local height = (room:GetGridHeight() /2 +2) *40
+    local center = room:GetCenterPos()
+    RoomLimits.X1 = center.X - width
+    RoomLimits.Y1 = center.Y - height
+    RoomLimits.X2 = center.X + width
+    RoomLimits.Y2 = center.Y + height
+
+    print(RoomLimits.X1, RoomLimits.Y1, "-", RoomLimits.X2, RoomLimits.Y2)
+end)
