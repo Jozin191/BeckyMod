@@ -172,6 +172,41 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
         data.HomingFlag = false
     end
 
+    if IsPlayerShooting(player) or player:GetMarkedTarget() then
+        if player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_WIG) and Isaac.CountEnemies() > 0 then
+            if Isaac.CountEntities(player, 3, FamiliarVariant.BLUE_SPIDER) < 5 then
+                data.MomsWigCooldown = data.MomsWigCooldown or 0
+                if data.MomsWigCooldown > 0 then
+                    data.MomsWigCooldown = data.MomsWigCooldown - 0.5
+                else
+                    local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MOMS_WIG)
+                    local formula = 1/ math.max(20 - player.Luck *2,1)
+                    if rng:RandomFloat() <= formula then
+                        player:ThrowBlueSpider(player.Position, player.Position + rng:RandomVector():Resized(30))
+                    end
+                    data.MomsWigCooldown = player.MaxFireDelay
+                end
+            end
+        end
+        if player:HasCollectible(CollectibleType.COLLECTIBLE_DEAD_TOOTH) then
+            local aura = data.DeadToothEnt
+            if not aura then
+                aura = Isaac.Spawn(1000, EffectVariant.FART_RING, 0, player.Position, Vector.Zero, player):ToEffect()
+                aura:SetTimeout(-1)
+                aura.Parent = player
+                aura:FollowParent(player)
+                aura.SpriteScale = aura.SpriteScale *0.8
+                aura.SpriteOffset = Vector(0, -10)
+                data.DeadToothEnt = aura
+            end
+        end
+    else
+        if data.DeadToothEnt then
+            data.DeadToothEnt:Die()
+            data.DeadToothEnt = nil
+        end
+    end
+
     if not updateFamCache then return end
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
@@ -590,7 +625,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
         TriggerPush(familiar, npc, 10)
     end
-    SFXManager():Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
+    BeckyMod.SFX:Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
 
     Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider)
 
@@ -613,5 +648,4 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
     RoomLimits.X2 = center.X + width
     RoomLimits.Y2 = center.Y + height
 
-    print(RoomLimits.X1, RoomLimits.Y1, "-", RoomLimits.X2, RoomLimits.Y2)
 end)
