@@ -68,8 +68,6 @@ include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
 include("becky_scripts.becky.items.actives.butcher's_cookbook")
 
-include("becky_scripts.becky.items.actives.magic_staff")
-
 --trinkets
 include("becky_scripts.becky.items.trinkets.sanguine_feather")
 include("becky_scripts.becky.items.trinkets.holy_bookmark")
@@ -79,8 +77,6 @@ include("becky_scripts.becky.items.trinkets.corpse_tag")
 --characters
 include("becky_scripts.becky.characters.becky")
 include("becky_scripts.becky.characters.sofia")
-
-include("becky_scripts.becky.characters.becky_b")
 
 --Mod compatibility! (all patches are loaded in this file)
 include("becky_scripts.mod_compatibility.load_patches")
@@ -108,9 +104,26 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechX")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.BothPeppers")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Techs")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.JacobsLadder")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.LokisHorns")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MysteriousLiquid")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.HolyLight")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Athame")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Apple")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.ChemicalPeel")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Euthanasia")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Pop")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.IBS")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Stye")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.CommonCold")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.FireMind")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.BallOfTar")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MomsContact")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.IronBar")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.RottenTomato")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.FearTears")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MomsKnife")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Parasotoid")
 
 --challenges
 include("becky_scripts.becky.challenges.path_of_pain")
-
---spells
-include("becky_scripts.becky.spells.spells")

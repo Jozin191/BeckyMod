@@ -1,58 +1,9 @@
-local function HasBitFlags(flags, checkFlag)
-	return flags & checkFlag == checkFlag
-end
-
 ---@param familiar EntityFamiliar
 ---@param entity EntityNPC
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, familiar, entity)
+    if not BeckyMod.IsEnemy(entity) then return end
+    
     local player = familiar.Player
-    local tearFlags = player.TearFlags
-    local tearEffects = {
-        [TearFlags.TEAR_SLOW] = function()
-            local SlowColor = Color(0.5, 0.5, 0.5, 1)
-            entity:AddSlowing(EntityRef(player), 90, 0.6, SlowColor)
-        end,
-        [TearFlags.TEAR_POISON] = function()
-            entity:AddPoison(EntityRef(player), 90, player.Damage)
-        end,
-        [TearFlags.TEAR_FREEZE] = function()
-            entity:AddFreeze(EntityRef(player), 90)
-        end,
-        [TearFlags.TEAR_CHARM] = function()
-            entity:AddCharmed(EntityRef(player), 90)
-        end,
-        [TearFlags.TEAR_CONFUSION] = function()
-            entity:AddConfusion(EntityRef(player), 90, false)
-        end,
-        [TearFlags.TEAR_FEAR] = function()
-            entity:AddFear(EntityRef(player), 90)
-        end,
-        [TearFlags.TEAR_SHRINK] = function()
-            entity:AddShrink(EntityRef(player), 90)
-        end,
-        [TearFlags.TEAR_KNOCKBACK] = function()
-            entity.Velocity = entity.Velocity * 1.025
-        end,
-        [TearFlags.TEAR_ICE] = function()
-            entity:AddEntityFlags(EntityFlag.FLAG_ICE)
-        end,
-        [TearFlags.TEAR_MAGNETIZE] = function()
-            entity:AddKnockback(EntityRef(player), entity.Position, 15, false)
-        end,
-        [TearFlags.TEAR_BAIT] = function()
-            entity:AddBaited(EntityRef(player), 90)
-        end,
-        [TearFlags.TEAR_BACKSTAB] = function()
-            entity:AddBleeding(EntityRef(player), 150)
-        end,
-		[TearFlags.TEAR_BURN] = function()
-            entity:AddBurn(EntityRef(player), 90, player.Damage)
-        end,
-    }
-
-    for flag, func in pairs(tearEffects) do
-        if HasBitFlags(tearFlags, flag) then
-            func()
-        end
-    end
+    local npc = entity:ToNPC() ---@cast npc EntityNPC
+    npc:ApplyTearflagEffects(npc.Position, player.TearFlags, player, player.Damage)
 end)
