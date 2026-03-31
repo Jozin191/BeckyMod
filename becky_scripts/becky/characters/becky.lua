@@ -5,7 +5,6 @@ BECKY.PLAYERTYPE = Isaac.GetPlayerTypeByName("Becky", false)
 BECKY.HAIR_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_hair.anm2")
 BECKY.BODY_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_body.anm2")
 
-local ITEM_GHOST_AMULET = Isaac.GetItemIdByName("Ghost Amulet")
 
 BECKY.ExcludeSpikePickupVariants = {
     [PickupVariant.PICKUP_CHEST] = true,
@@ -81,7 +80,7 @@ function BECKY:OnInit(player)
     PlayerAnimLib:SetDefaultAnm2(player, "gfx/player_becky.anm2")
     player:AddNullCostume(BECKY.HAIR_COSTUME)
     player:AddNullCostume(BECKY.BODY_COSTUME)
-    player:AddCollectible(ITEM_GHOST_AMULET)
+    player:AddCollectible(BeckyMod.Item.GHOST_AMULET.ID)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit, 0)
 

@@ -1,9 +1,11 @@
-local ITEM_GHOST_AMULET = Isaac.GetItemIdByName("Ghost Amulet")
+local GHOST_AMULET = {}
+GHOST_AMULET.ID = Isaac.GetItemIdByName("Ghost Amulet")
+
 local BeckyPlayerType = Isaac.GetPlayerTypeByName("Becky", false)
 local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
 local GHOST_BALL_DMG = 1.25
 
-BeckyMod.Item.GHOST_AMULET = { ID = ITEM_GHOST_AMULET }
+BeckyMod.Item.GHOST_AMULET = GHOST_AMULET
 
 
 BeckyMod.Callbacks = {}
@@ -20,6 +22,7 @@ local RoomLimits = {
     Y2 = 0,
 }
 
+
 ---@param npc EntityNPC
 ---@return boolean
 local function IsValidEnemy(npc)
@@ -29,7 +32,7 @@ end
 ---@param player EntityPlayer
 ---@return boolean
 local function HasGhostAmulet(player)
-    return player:HasCollectible(ITEM_GHOST_AMULET)
+    return player:HasCollectible(GHOST_AMULET.ID)
 end
 
 ---@param player EntityPlayer
@@ -68,6 +71,19 @@ local function Round(n, decimalPlaces)
 	local mult = 10^(decimalPlaces or 0)
 	return math.floor(n * mult + 0.5) / mult
 end
+
+---@param player EntityPlayer
+---@return float
+function GHOST_AMULET:GetGhostTearMult(player)
+    return Round(BeckyMod:toTearsPerSecond(player.MaxFireDelay), 2) / 2.73
+end
+
+---@param player EntityPlayer
+---@return float
+function GHOST_AMULET:GetGhostDamage(player)
+    return (GHOST_BALL_DMG * player.Damage) * GHOST_AMULET:GetGhostTearMult(player)
+end
+
 
 --- Helper function to convert a given amount of angle degrees into the corresponding `Direction` enum (From Library of Isaac, tweaked a bit)
 ---@param angleDegrees number
@@ -127,7 +143,7 @@ end)
 ---@param ID CollectibleType
 ---@param player EntityPlayer
 local function StopShooting(ID, player)
-    if ID ~= ITEM_GHOST_AMULET then return end
+    if ID ~= GHOST_AMULET.ID then return end
     player:SetCanShoot(false)
 end 
 
@@ -232,7 +248,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, id, _, _
 end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(player, ID)
-    if ID ~= ITEM_GHOST_AMULET then return end
+    if ID ~= GHOST_AMULET.ID then return end
     if id == CollectibleType.COLLECTIBLE_CONTINUUM then
         local playerData = player:GetData()
         local ghosts = playerData.GhostBalls
@@ -256,7 +272,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     rng:SetSeed(seed, 35)
 
     local BookWormExtra = player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) and 1 or 0
-    local num = player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears() + (player:GetCollectibleNum(ITEM_GHOST_AMULET)-1) + BookWormExtra
+    local num = player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears() + (player:GetCollectibleNum(GHOST_AMULET.ID)-1) + BookWormExtra
 
     player:CheckFamiliar(GHOST_BALL_VAR, num, rng)
     if player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING then
@@ -266,6 +282,7 @@ end, CacheFlag.CACHE_FAMILIARS)
 
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
+    local ghostData = familiar:GetData()
     familiar:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
     local player = familiar.Player
@@ -285,6 +302,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
     if familiar.SubType == 1 then
         familiar.Color = Color(0.4, 0.15, 0.38, 1, 0.27843, 0, 0.4549)
     end
+    ghostData.ChocolateMilkMult = 1
 end, GHOST_BALL_VAR)
 
 ---Expontential function
@@ -539,12 +557,13 @@ end
 
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
+    local ghostData = familiar:GetData()
     local GhostSprite = familiar:GetSprite()
     local player = familiar.Player
     local room = BeckyMod.Game:GetRoom()
     local currentAnim = GhostSprite:GetAnimation()
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
-    local GhostSize = Vector.One * exp((player.Damage / 5), 1, 1.2)
+    local GhostSize = Vector.One * exp((player.Damage / 5) * ghostData.ChocolateMilkMult, 1, 1.2)
     local gridFromPos = room:GetGridEntityFromPos(familiar.Position)
 
     familiar.SizeMulti = GhostSize
@@ -557,8 +576,14 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         end
     end
 
+    if player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then
+        ghostData.ChocolateMilkMult = math.min(ghostData.ChocolateMilkMult +0.035, 2.5)
+    else
+        ghostData.ChocolateMilkMult = 1
+    end
+
     if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then
-        local rng = player:GetCollectibleRNG(ITEM_GHOST_AMULET)
+        local rng = player:GetCollectibleRNG(GHOST_AMULET.ID)
         local randomNum = rng:RandomInt(1, 4)
 
         if randomNum ~= 4 then
@@ -604,8 +629,8 @@ local DestroyableFireplaces = {
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, familiar, collider)
     local npc = collider and collider:ToNPC()
     local player = familiar.Player
-    local tearsMult = Round(BeckyMod:toTearsPerSecond(player.MaxFireDelay), 2) / 2.73
-    local baseDamage = (GHOST_BALL_DMG * player.Damage) * tearsMult
+    local ghostData = familiar:GetData()
+    local baseDamage = GHOST_AMULET:GetGhostDamage(player) * ghostData.ChocolateMilkMult
 
     if collider.Type == EntityType.ENTITY_MOVABLE_TNT or (collider.Type == EntityType.ENTITY_FIREPLACE and DestroyableFireplaces[collider.Variant]) then
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
@@ -621,13 +646,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if not IsValidEnemy(npc) then return end
 
     familiar:GetSprite():Play("Hit")
-    TriggerPush(npc, familiar, 20 * tearsMult)
+    TriggerPush(npc, familiar, 20 * GHOST_AMULET:GetGhostTearMult(player))
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
         TriggerPush(familiar, npc, 10)
     end
     BeckyMod.SFX:Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
 
     Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider)
+
+    if player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then ghostData.ChocolateMilkMult = 0.75 end
 
     npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
 

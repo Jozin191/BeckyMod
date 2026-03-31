@@ -122,6 +122,8 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MomsContact")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.IronBar")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.RottenTomato")
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.FearTears")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MomsKnife")
+include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Parasotoid")
 
 --challenges
 include("becky_scripts.becky.challenges.path_of_pain")
