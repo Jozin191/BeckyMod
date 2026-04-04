@@ -39,7 +39,7 @@ SPELLS.SPELL_FUNC = {}
 SPELLS.SPELL_FUNC_CAN_SELECT = {}
 
 local SELECTION_POS = {
-    POS = Vector(0, -50),
+    POS = Vector(0, -60),
     OFFSETS = {
         Vector(-24, 0), -- left
         Vector(0, -24), -- top
@@ -99,7 +99,7 @@ local SPELLS_COST = {
 BeckyMod.Spells = SPELLS
 local game = BeckyMod.Game
 
-
+--- BeckyMod.Spells:SetSpellType(Isaac.GetPlayer(), slot, spellType) <- this is for testing on the game
 function SPELLS:GetSpells(player)
     local save = BeckyMod:RunSave(player)
     save.RunSpells = save.RunSpells or {
@@ -140,6 +140,7 @@ for _, file in ipairs({
     "big",
     "summon",
     "shield",
+    "sacrificial_buff",
 }) do
     local data = include(SPELLS_RUTE .. file)
     local spell = data[1]
@@ -294,6 +295,10 @@ local function resetPlayerSelection(player)
     data.MaxManaOffset = 0
     data.ManaDischarge = 0
     data.NoChargeMana = false
+    if data.Spell_Sacrificial_Buff and data.Spell_Sacrificial_Buff >0 then
+        data.Spell_Sacrificial_Buff = 0
+        player:AddCacheFlags(CacheFlag.CACHE_ALL, true)
+    end
 
     if data.MagicStaff_SelectingSpell then
         data.MagicStaff_SelectingSpell = false

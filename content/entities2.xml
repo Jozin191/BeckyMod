@@ -11,9 +11,17 @@
 
     <!--Ghost Ball-->
     <entity name = "Ghost Ball" id = "3" anm2path = "items/GHOST_BALL.anm2" shadowSize="10" collisionRadius="17" friction = "0.8"/>
+    
+    <!-- Slot -->
+    <entity id="6" variant="1999" name="Sketchy Beggar" anm2path="sketchy_beggar.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="15" stageHP="0">
+        <gibs amount="6" blood="1" bone="1" eye="1" gut="1" large="0"/>
+    </entity>
 
     <!--Effect entities-->
     <entity name="Butcher's Cookbook Sawblade" id="1000" anm2path="familiar/sawblade.anm2"/>
+    <entity name="Knife (Ghost Ball Synergy)" id="1000" anm2path="ghost amulet moms knife.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="8" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0"/>
+    </entity>
 
     <!-- Magic Staff weapon stuff -->
     <entity name="Magic Staff (Dummy)" id="1000" anm2path="becky_magic_staff.anm2" collisionDamage="0" collisionMass="0" collisionRadius="0" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />

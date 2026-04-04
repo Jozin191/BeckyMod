@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="Jozin191" CreatedOn="03/04/2026 17:23:02" Version="1" Fps="30"/>
+	<Info CreatedBy="Jozin191" CreatedOn="03/04/2026 10:09:45 p.m." Version="2" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="items\slots\sketchy_beggar.png" Id="0"/>
@@ -13,7 +13,7 @@
 		<Events/>
 	</Content>
 	<Animations DefaultAnimation="Idle">
-		<Animation Name="Idle" FrameNum="1" Loop="false">
+		<Animation Name="Idle" FrameNum="1" Loop="true">
 			<RootAnimation>
 				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
 			</RootAnimation>

@@ -113,17 +113,16 @@ local function GetAimVector(owner, player)
         end
     end
 
-    if angle:Length() == 0 then
-        angle = player:GetMovementJoystick()
-        if angle:Length() == 0 then
+    if player:GetLastDirection():Length() == 0 then
+        local movement = player:GetMovementJoystick()
+        if movement:Length() == 0 then
             return DirToVector[1]
         end
+        return movement
     elseif markTarget then
         return (owner.Position - markTarget.Position):Normalized()
-    elseif player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK) then
-        return player:GetAimDirection()
     end
-    return DirToVector[player:GetHeadDirection()]
+    return player:GetLastDirection()
 end
 
 local function GetAimAngle(owner, player)
@@ -449,7 +448,20 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
 
     local sp = knife:GetSprite()
     if not ( (sp:IsPlaying("Swing") or sp:IsPlaying("Swing2")) and sp:GetFrame() >0) then
-        local angle = GetAimAngle(owner, player)
+        local angle
+        if owner.Type ~= 1 then
+            angle = GetAimAngle(owner, player)
+        else
+            angle = player:GetAimDirection()
+            if angle:Length() == 0 then
+                angle = player:GetMovementJoystick()
+                if angle:Length() == 0 then
+                    angle = DirToVector[1]
+                end
+            end
+            angle = angle:GetAngleDegrees()
+        end
+
         if owner.Type == 3 and owner.Variant == FamiliarVariant.CAINS_OTHER_EYE then
             local rng = owner:GetDropRNG()
             if player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK) then
