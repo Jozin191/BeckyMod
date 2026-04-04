@@ -242,11 +242,18 @@ end
 -- end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BECKY.checkAngelRoomGen)
 
-function BECKY:DamageMult(player)
+---@param player EntityPlayer
+---@param flag CacheFlag
+function BECKY:BeckyStats(player, flag)
     if player:GetPlayerType() ~= BECKY.PLAYERTYPE then return end
-    player.Damage = player.Damage * 1.2
+
+    if flag == CacheFlag.CACHE_DAMAGE then
+        player.Damage = player.Damage * 1.2
+    elseif flag == CacheFlag.CACHE_SHOTSPEED then
+        player.ShotSpeed = player.ShotSpeed + 0.2
+    end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BECKY.DamageMult, CacheFlag.CACHE_DAMAGE)
+BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, BECKY.BeckyStats)
 
 function BeckyMod:SetItemPrice(pickup)
     
