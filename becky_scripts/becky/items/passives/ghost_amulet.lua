@@ -639,7 +639,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if familiar.State == 0 then return true end
 
     if collider.Type == EntityType.ENTITY_BOMB then
-        TriggerPush(collider, familiar, 10)
+        TriggerPush(collider, familiar, 8)
     end
 
     if not npc then return end
