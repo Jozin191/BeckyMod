@@ -5,12 +5,10 @@
 
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams)
     local player = fam.Player
 
     if not player then return end
-    if not player:HasCollectible(CollectibleType.COLLECTIBLE_IPECAC) then return end
-    local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_IPECAC)
-
-    BeckyMod.Game:BombExplosionEffects(fam.Position, player.Damage * 10, TearFlags.TEAR_POISON)
+    if not (tearParams.TearFlags & TearFlags.TEAR_EXPLOSIVE == TearFlags.TEAR_EXPLOSIVE) then return end
+    BeckyMod.Game:BombExplosionEffects(fam.Position, tearParams.TearDamage, tearParams.TearFlags, tearParams.TearColor)
 end)

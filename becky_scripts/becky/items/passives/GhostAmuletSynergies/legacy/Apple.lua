@@ -1,4 +1,4 @@
----@param fam EntityFamiliar
+--[[---@param fam EntityFamiliar
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam)
     local player = fam.Player
 
@@ -12,4 +12,4 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam)
     
     local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.RAZOR, 0, fam.Position,rng:RandomVector():Resized(player.ShotSpeed * 10), fam)
     tear.CollisionDamage = player.Damage * 4
-end)
+end)]]

@@ -1,3 +1,4 @@
+--[[
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY, function(_, fam, enemy)
@@ -14,4 +15,4 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY, function(_, fam, en
     local voidring = player:SpawnMawOfVoid(30)
     voidring.Position = fam.Position
     voidring.DisableFollowParent = true
-end)
+end)]]

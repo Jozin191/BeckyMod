@@ -1,3 +1,4 @@
+--[[
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
@@ -13,4 +14,4 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     else
         ghostData.ChemicalPeel = true
     end
-end)
+end)]]

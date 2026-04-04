@@ -1,8 +1,9 @@
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, enemy)
+---@param tearParams TearParams
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, enemy, tearParams)
     local player = fam.Player
 
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_JACOBS_LADDER) then return end
-    BeckyMod.Game:ChainLightning(enemy.Position, player.Damage / 2, player.TearFlags, fam)    
+    BeckyMod.Game:ChainLightning(fam.Position, player.Damage / 2, tearParams.TearFlags, fam)    
 end)

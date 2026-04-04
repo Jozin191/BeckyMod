@@ -1,3 +1,4 @@
+--[[
 ---@param fam EntityFamiliar
 ---@param enemy Entity
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY, function(_, fam, enemy)
@@ -12,4 +13,4 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY, function(_, fam, en
 
     local tear = player:FireTear(enemy.Position, rng:RandomVector() * (player.ShotSpeed * 10))
     tear:ChangeVariant(TearVariant.NEEDLE)
-end)
+end)]]

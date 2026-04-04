@@ -5,5 +5,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, familiar
     
     local player = familiar.Player
     local npc = entity:ToNPC() ---@cast npc EntityNPC
-    npc:ApplyTearflagEffects(npc.Position, player.TearFlags, player, player.Damage)
+    
+    local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 1, 1, familiar)
+    npc:ApplyTearflagEffects((npc.Position+familiar.Position)/2, tearParams.TearFlags, player, tearParams.TearDamage)
 end)

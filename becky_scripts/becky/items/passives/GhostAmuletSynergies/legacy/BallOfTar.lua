@@ -1,4 +1,4 @@
-local SLOWDOWN_COLOR = Color(0.2,0.2,0.2, 1, 0,0,0)
+--[[local SLOWDOWN_COLOR = Color(0.2,0.2,0.2, 1, 0,0,0)
 
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
@@ -14,4 +14,4 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     if rng:RandomFloat() > formula then return end
 
     enemy:AddSlowing(EntityRef(player), 60, 0.5, SLOWDOWN_COLOR)
-end)
+end)]]

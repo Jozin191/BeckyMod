@@ -1,4 +1,4 @@
----@param fam EntityFamiliar
+--[[---@param fam EntityFamiliar
 ---@param enemy EntityNPC
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
     local player = fam.Player
@@ -15,4 +15,4 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     enemy:TakeDamage(player.Damage * 3, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)
 
     -- local bomb = player:FireBomb(fam.Position, Vector.Zero, player)
-end)
+end)]]

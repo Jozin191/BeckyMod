@@ -1,6 +1,7 @@
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
+---@param tearParams TearParams
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams)
     local player = fam.Player
 
     if not player then return end
@@ -10,7 +11,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     local formula = 1 / math.max(10 - player.Luck * 0.7, 1)
 
     if rng:RandomFloat() > formula then return end
-    BeckyMod.Game:BombExplosionEffects(fam.Position, player.Damage, 0)
+    BeckyMod.Game:BombExplosionEffects(fam.Position, tearParams.TearDamage, tearParams.TearFlags, tearParams.TearColor)
     local fire = Isaac.Spawn(1000, EffectVariant.RED_CANDLE_FLAME, 0, fam.Position, Vector.Zero, player):ToEffect()
     fire.CollisionDamage = 23
     fire:SetTimeout(360)

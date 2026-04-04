@@ -1,4 +1,4 @@
----@param fam EntityFamiliar
+--[[---@param fam EntityFamiliar
 ---@param enemy EntityNPC
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
     local player = fam.Player
@@ -13,4 +13,4 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     else
         ghostData.Stye = true
     end
-end)
+end)]]

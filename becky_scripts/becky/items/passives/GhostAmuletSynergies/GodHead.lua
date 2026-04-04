@@ -2,20 +2,21 @@ local mod = BeckyMod
 local GHOST_BALL = Isaac.GetEntityVariantByName("Ghost Ball")
 
 ---@param fam EntityFamiliar
-mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
+---@param tearParams TearParams
+BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, tearParams)
     local ghostData = fam:GetData()
+    if (tearParams.TearFlags & TearFlags.TEAR_GLOW == TearFlags.TEAR_GLOW) then 
+        if ghostData.GodHeadAura then return end
 
-    if not fam.Player:HasCollectible(CollectibleType.COLLECTIBLE_GODHEAD) then return end
-    if ghostData.GodHeadAura then return end
+        ghostData.GodHeadAura = BeckyMod.Game:Spawn(EntityType.ENTITY_TEAR, 0, fam.Position, Vector.Zero, fam, 0, math.max(Random(), 1)):ToTear()
+        
+        local tear = ghostData.GodHeadAura ---@cast tear EntityTear
 
-    ghostData.GodHeadAura = BeckyMod.Game:Spawn(EntityType.ENTITY_TEAR, 0, fam.Position, Vector.Zero, fam, 0, math.max(Random(), 1)):ToTear()
-    
-    local tear = ghostData.GodHeadAura ---@cast tear EntityTear
-
-    tear:AddTearFlags(TearFlags.TEAR_GLOW | TearFlags.TEAR_PIERCING | TearFlags.TEAR_SPECTRAL)
-    tear:GetData().GhostBallTear = true
-    tear.Color = Color(1, 1, 1, 0)
-end, GHOST_BALL)
+        tear:AddTearFlags(TearFlags.TEAR_GLOW | TearFlags.TEAR_PIERCING | TearFlags.TEAR_SPECTRAL)
+        tear:GetData().GhostBallTear = true
+        tear.Color = Color(1, 1, 1, 0)
+    end
+end)
 
 ---@param tear EntityTear
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function (_, tear)

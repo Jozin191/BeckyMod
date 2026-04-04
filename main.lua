@@ -88,42 +88,36 @@ include("becky_scripts.becky.pickups.dead_battery")
 include("becky_scripts.utils.achievements_revamp")
 
 --ghost synergies
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.CSection")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.DrFetus")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechZero")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Brimstone")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.StatusEffects")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.GodHead")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Haemolacria")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Ipecac")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Explosivo")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Booger")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Spore")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TearSplit")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.SpiritSword")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.TechX")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.BothPeppers")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Techs")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.JacobsLadder")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.LokisHorns")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MysteriousLiquid")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.HolyLight")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Athame")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Apple")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.ChemicalPeel")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Euthanasia")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Pop")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.IBS")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Stye")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.CommonCold")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.FireMind")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.BallOfTar")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MomsContact")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.IronBar")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.RottenTomato")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.FearTears")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.MomsKnife")
-include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Parasotoid")
-
+for i, name in pairs({
+    "CSection",
+    "BothPeppers",
+    "DrFetus",
+    "TechZero",
+    "Brimstone",
+    "StatusEffects",
+    "GodHead",
+    "Haemolacria",
+    "Ipecac",
+    "Explosivo",
+    "Booger",
+    "Spore",
+    "TearSplit",
+    "SpiritSword",
+    "TechX",
+    "JacobsLadder",
+    "Techs",
+    "LokisHorns",
+    "MysteriousLiquid",
+    "Pop",
+    "IBS",
+    "FireMind",
+    "MomsKnife",
+    "StrangeAttractor",
+    "LostContact",
+    "LeadPencil",
+    "EpicFetus",
+}) do
+    include("becky_scripts.becky.items.passives.GhostAmuletSynergies." .. name)
+end
 --challenges
 include("becky_scripts.becky.challenges.path_of_pain")
