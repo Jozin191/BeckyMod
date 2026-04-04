@@ -62,10 +62,22 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, function(_, slot)
 
             local beggarPayouts = save.SketchyBeggar[slot.InitSeed] or 0
 
-            if beggarPayouts > 3 and rng:RandomInt(5) == 0 or beggarPayouts >= 12 then
+            if beggarPayouts > 3 and (rng:RandomInt(5) == 0 or beggarPayouts >= 12) then
                 sprite:Play("Teleport")
                 slot:SetState(SlotState.PAYOUT)
                 save.SketchyBeggar[slot.InitSeed] = nil
+
+                local game = BeckyMod.Game
+
+                local itemPayout
+                if Isaac.GetPersistentGameData():Unlocked(Achievement.EVERYTHING_JAR) and game:GetItemPool():HasCollectible(CollectibleType.COLLECTIBLE_EVERYTHING_JAR) and rng:RandomInt(5) == 0 then
+                    itemPayout = CollectibleType.COLLECTIBLE_EVERYTHING_JAR
+                else
+                    itemPayout = game:GetItemPool():GetCollectible(ItemPoolType.POOL_BEGGAR, true, rng:Next(), CollectibleType.COLLECTIBLE_BREAKFAST)
+                end
+
+                local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(slot.Position, 40, true, false)
+                Isaac.Spawn(5, 100, itemPayout, spawnPos, Vector.Zero, nil)
             else
                 slot:SetState(SlotState.IDLE)
                 save.SketchyBeggar[slot.InitSeed] = beggarPayouts +1

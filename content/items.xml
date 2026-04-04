@@ -142,6 +142,21 @@
         achievement="Sanguine Feather"
         />
 
+        <trinket id="15"
+        name="Alarm Clock"
+        description="Time is ticking"
+        gfx="alarm_clock.png"
+        cache=""
+        achievement="Alarm Clock"
+        />
+
+        <trinket id="16"
+        name="Bug Spray"
+        description="Super effective on flies and spider"
+        gfx="bug_spray.png"
+        achievement="Bug Spray"
+        />
+
         <!-- Null Items -->
 
         <null id="1" 

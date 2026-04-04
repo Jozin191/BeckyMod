@@ -74,6 +74,8 @@ include("becky_scripts.becky.items.trinkets.sanguine_feather")
 include("becky_scripts.becky.items.trinkets.holy_bookmark")
 include("becky_scripts.becky.items.trinkets.devilzon_prime")
 include("becky_scripts.becky.items.trinkets.corpse_tag")
+include("becky_scripts.becky.items.trinkets.alarm_clock")
+include("becky_scripts.becky.items.trinkets.bug_spray")
 
 --characters
 include("becky_scripts.becky.characters.becky")
