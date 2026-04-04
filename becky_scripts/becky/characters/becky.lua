@@ -248,7 +248,7 @@ function BECKY:BeckyStats(player, flag)
     if player:GetPlayerType() ~= BECKY.PLAYERTYPE then return end
 
     if flag == CacheFlag.CACHE_DAMAGE then
-        player.Damage = player.Damage * 1.2
+        player.Damage = player.Damage * 1.3
     elseif flag == CacheFlag.CACHE_SHOTSPEED then
         player.ShotSpeed = player.ShotSpeed + 0.2
     end
