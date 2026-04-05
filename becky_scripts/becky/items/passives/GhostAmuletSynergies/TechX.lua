@@ -2,25 +2,33 @@ local mod = BeckyMod
 local GHOST_BALL = Isaac.GetEntityVariantByName("Ghost Ball")
 
 ---@param fam EntityFamiliar
-mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
+---@param tearParams TearParams
+BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, tearParams)
     local ghostData = fam:GetData()
-
-    if not fam.Player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then return end
-    if ghostData.TechXRing then return end
-
-    ghostData.TechXRing = BeckyMod.Game:Spawn(EntityType.ENTITY_LASER, LaserVariant.THIN_RED, fam.Position, Vector.Zero, fam, LaserSubType.LASER_SUBTYPE_RING_FOLLOW_PARENT, 1):ToLaser()
-    
-    local laser = ghostData.TechXRing ---@cast laser EntityLaser
-    
-    laser.Parent = fam
-    laser:GetData().GhostBallTear = true
-    laser.Radius = laser.Radius * 0.7
-    laser.CollisionDamage = laser.CollisionDamage / 2
-end, GHOST_BALL)
-
-mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
-    for _, ent in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOST_BALL)) do
-        ent:GetData().TechXRing = nil
+    local laserRef = ghostData.TechXRing and ghostData.TechXRing.Ref 
+    local exists = laserRef and laserRef:Exists()
+    local teching = fam.Player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X)
+    if not exists and teching then 
+        local laser = BeckyMod.Game:Spawn(EntityType.ENTITY_LASER, LaserVariant.THIN_RED, fam.Position, Vector.Zero, fam, LaserSubType.LASER_SUBTYPE_RING_FOLLOW_PARENT, 1):ToLaser()
+        laser.Parent = fam
+        laser.TearFlags = tearParams.TearFlags
+        laser.Radius = fam.SpriteScale:Length()*40
+        ghostData.TechXRing = EntityPtr(laser)
+        -- hack to stop the annoying laser sound every room
+        laser:Update()
+        SFXManager():Stop(SoundEffect.SOUND_REDLIGHTNING_ZAP)
+    elseif exists  then
+        if not teching then
+            if exists then
+                laserRef:Remove()
+            end
+            ghostData.TechXRing = nil
+        elseif teching then
+            local laserRef = laserRef:ToLaser()
+            laserRef.Radius = fam.SpriteScale:Length()*40
+            laserRef:SetScale(fam.SpriteScale:Length()/1.5)
+            laserRef.CollisionDamage = tearParams.TearDamage / 2
+        end
     end
 end)
 

@@ -8,7 +8,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
 
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_DR_FETUS)
 
-    if rng:RandomFloat() > 0.15 then return end
+    if rng:RandomFloat()+player.Luck/20 < 0.75 then return end
 
     local bomb = player:FireBomb(fam.Position, Vector.Zero, player)
     SFXManager():Play(SoundEffect.SOUND_FETUS_FEET)

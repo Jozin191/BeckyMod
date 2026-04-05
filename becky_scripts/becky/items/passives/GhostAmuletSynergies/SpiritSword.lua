@@ -3,12 +3,17 @@ local GHOST_BALL_VAR = Isaac.GetEntityVariantByName("Ghost Ball")
 
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
+---@param tearParams TearParams
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams)
     local player = fam.Player
     local ghostData = fam:GetData()
 
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
     if ghostData.Sword then return end
+
+    -- 99% sure these two are make up the sword spin
+    SFXManager():Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, 1)
+    SFXManager():Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, 1)
 
     ghostData.Sword = player:FireKnife(
         fam,
@@ -24,7 +29,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
 
     knifeSprite:Play("SpinDown", true)
     knife.Visible = false
-
+    
     local effect = Isaac.Spawn(
         EntityType.ENTITY_EFFECT,
         EffectVariant.POOF01,
@@ -39,7 +44,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     effectSprite:Load("gfx/008.010_spirit sword.anm2", true)
     effectSprite:Play("SpinDown")
     
-    local baseDamage = ((player.Damage * 8) + 10)
+    local baseDamage = ((tearParams.TearDamage * 8) + 10)
     local formula = baseDamage * 0.5
 
     knifeData.GhostSword = true

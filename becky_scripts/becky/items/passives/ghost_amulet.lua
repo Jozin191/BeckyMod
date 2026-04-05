@@ -19,10 +19,14 @@ BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY = "BeckyMod_ON_GHOST_HIT_ENEMY"
 --- * Entity: The entity killed by the ghost
 --- * TearParam: TearParams
 BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY = "BeckyMod_ON_GHOST_KILL_ENEMY"
---- Called after the ghosts finishes its main update functions
+--- Called after the ghosts updates, passes frequently used values
 --- * Familiar: The ghost entity
 --- * TearParam: TearParams
 BeckyMod.Callbacks.GHOST_UPDATE_HELPER = "BeckyMod_GHOST_UPDATE_HELPER"
+--- Called after the ghosts updates, passes frequently used values
+--- * Familiar: The ghost entity
+--- * Offset: Render offset
+BeckyMod.Callbacks.GHOST_RENDER_HELPER = "BeckyMod_GHOST_RENDER_HELPER"
 
 local RoomLimits = {
     X1 = 0,
@@ -35,7 +39,7 @@ local RoomLimits = {
 ---@param npc EntityNPC
 ---@return boolean
 local function IsValidEnemy(npc)
-    return (npc:IsEnemy() and npc:IsActiveEnemy() and npc:IsVulnerableEnemy())
+    return (npc:IsEnemy() and npc:IsActiveEnemy() and npc:IsVulnerableEnemy() and not npc:IsInvincible())
 end
 
 ---@param player EntityPlayer
@@ -85,6 +89,11 @@ end
 ---@return number
 function GHOST_AMULET:GetGhostTearMult(player)
     return Round(BeckyMod:toTearsPerSecond(player.MaxFireDelay), 2) / 2.73
+end
+
+function GHOST_AMULET:GetGhostAmount(player)
+    local BookWormExtra = player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) and 1 or 0
+    return player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears() + (player:GetCollectibleNum(GHOST_AMULET.ID)-1) + BookWormExtra
 end
 
 ---@param player EntityPlayer
@@ -282,12 +291,23 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     local seed = math.max(Random(), 1)
     rng:SetSeed(seed, 35)
 
-    local BookWormExtra = player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) and 1 or 0
-    local num = player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears() + (player:GetCollectibleNum(GHOST_AMULET.ID)-1) + BookWormExtra
-
-    player:CheckFamiliar(GHOST_BALL_VAR, num, rng)
+    -- respawning ghosts
+    player:GetData().LAST_GHOST_CHECK = player:GetData().LAST_GHOST_CHECK or 0
+    local num = GHOST_AMULET:GetGhostAmount(player)
+    if player:GetData().LAST_GHOST_CHECK < num then
+        player:CheckFamiliar(GHOST_BALL_VAR,0,rng)
+    end
+    player:GetData().LAST_GHOST_CHECK = num
+    
+    local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, num, rng)
+    for i, ghost in pairs(fams) do
+        ghost:GetData().GHOST_IDX = i
+    end
     if player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING then
-        player:CheckFamiliar(GHOST_BALL_VAR, 1, rng, nil, 1)
+        local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, 1)
+        for _, ghost in pairs(fams) do
+            ghost:GetData().GHOST_IDX = num+1
+        end
     end
 end, CacheFlag.CACHE_FAMILIARS)
 
@@ -342,11 +362,14 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local marked = player:GetMarkedTarget()
     local shotSpeed = player.ShotSpeed
     local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
-    if player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then
-        maxDistMove = maxDistMove+33
-    end
     local maxDistIdle = 40
     local room = BeckyMod.Game:GetRoom()
+
+    -- epic fetus increases range so you dont kill yourself so easily
+    if player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then
+        maxDistMove = maxDistMove+30
+    end
+
     for _, ghost in ipairs(ghosts) do ---@cast ghost EntityFamiliar
         if not ghost then goto continue end
 
@@ -375,11 +398,16 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         if ghost.SubType == 1 then
             local target = ghost.Target
             local ghostPos = ghost.Position
-            if target == nil or target:IsDead() or not target:Exists() then
+            if target and not IsValidEnemy(target) then
+                target = nil
+                ghost.Target = nil
+            end
+            if target == nil then
                 if ghost.FrameCount % 5 == 0 then
-                    local dis
+                    local dis = 80
                     for _, ent in ipairs(Isaac.FindInRadius(ghostPos, 80, EntityPartition.ENEMY)) do
-                        if dis == nil or ent.Position:Distance(ghostPos) < dis then
+                        local ent = ent:ToNPC()
+                        if IsValidEnemy(ent) and dis == nil or ent.Position:Distance(ghostPos) < dis then
                             target = ent
                             dis = ent.Position:Distance(ghostPos)
                         end
@@ -392,9 +420,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             else
                 ghost.State = 2
                 if ghost.FrameCount % 6 == 0 then
-                    local dis
+                    local dis = 40
                     for _, ent in ipairs(Isaac.FindInRadius(ghostPos, 40, EntityPartition.ENEMY)) do
-                        if dis == nil or ent.Position:Distance(ghostPos) < dis then
+                        local ent = ent:ToNPC()
+                        if IsValidEnemy(ent) and dis == nil or ent.Position:Distance(ghostPos) < dis then
                             target = ent
                             dis = ent.Position:Distance(ghostPos)
                         end
@@ -518,10 +547,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 end
 
                 local resizer = 1.5 * shotSpeed
-                ghost.Velocity = ghost.Velocity + targetPos:Normalized():Resized(resizer)
+                local final = targetPos:Normalized():Resized(resizer)
+                if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ) or player:GetEffects():HasNullEffect(NullItemID.ID_WIZARD) then
+                    local angle = 45*((ghostData.GHOST_IDX % 2)*2+-1)
+                    final = final:Rotated(angle)
+                end
+                ghost.Velocity = ghost.Velocity + final
 
                 if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
-                    ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
+                    ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove))
                 end
 
                 if not marked then
@@ -579,7 +613,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
     local GhostSize = Vector.One * exp((player.Damage / 5) * ghostData.ChocolateMilkMult, 1, 1.2)
     local gridFromPos = room:GetGridEntityFromPos(familiar.Position)
-    local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 1, 1, familiar)
+    local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
 
     familiar.SizeMulti = GhostSize
     familiar.SpriteScale = GhostSize
@@ -626,6 +660,13 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     Isaac.RunCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, familiar, tearParams)
 end, GHOST_BALL_VAR)
 
+---@param familiar EntityFamiliar
+---@param offset Vector
+BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function (_, familiar, offset)
+    --local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 1, 1, familiar)
+    Isaac.RunCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, familiar, offset--[[, tearParams]])
+end, GHOST_BALL_VAR)
+
 local DestroyableFireplaces = {
     [0] = true,
     [1] = true,
@@ -639,9 +680,13 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     local npc = collider and collider:ToNPC()
     local player = familiar.Player
     local ghostData = familiar:GetData()
-    local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 1, 1, familiar)
+    local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     local baseDamage = GHOST_AMULET:GetGhostDamage(player, tearParams.TearDamage) * ghostData.ChocolateMilkMult
 
+    local multi = 1
+    if tearParams.TearFlags & TearFlags.TEAR_KNOCKBACK == TearFlags.TEAR_KNOCKBACK then
+        multi = 1.5
+    end
     if collider.Type == EntityType.ENTITY_MOVABLE_TNT or (collider.Type == EntityType.ENTITY_FIREPLACE and DestroyableFireplaces[collider.Variant]) then
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
     end
@@ -649,14 +694,14 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if familiar.State == 0 then return true end
 
     if collider.Type == EntityType.ENTITY_BOMB then
-        TriggerPush(collider, familiar, 8)
+        TriggerPush(collider, familiar, 8*multi)
     end
 
     if not npc then return end
     if not IsValidEnemy(npc) then return end
 
     familiar:GetSprite():Play("Hit")
-    TriggerPush(npc, familiar, 20 * GHOST_AMULET:GetGhostTearMult(player))
+    TriggerPush(npc, familiar, 20 * GHOST_AMULET:GetGhostTearMult(player)*multi)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
         TriggerPush(familiar, npc, 10)
     end
@@ -669,7 +714,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     npc:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
 
     if baseDamage >= npc.HitPoints then
-        print("Triggered kill enemy callback")
+        --print("Triggered kill enemy callback")
         Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY, familiar, collider, tearParams)
     end
 end, GHOST_BALL_VAR)

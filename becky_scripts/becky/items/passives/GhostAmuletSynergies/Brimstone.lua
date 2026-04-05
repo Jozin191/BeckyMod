@@ -13,7 +13,8 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     ghostData.BrimHits = ghostData.BrimHits - 1
 
     if ghostData.BrimHits == 0 then
-        player:FireBrimstoneBall(enemy.Position, Vector.Zero)
+        SFXManager():Play(SoundEffect.SOUND_BLOOD_LASER, .67)
+        local bale = player:FireBrimstoneBall(fam.Position, RandomVector()*5)
         ghostData.BrimHits = 3
     end
 end)

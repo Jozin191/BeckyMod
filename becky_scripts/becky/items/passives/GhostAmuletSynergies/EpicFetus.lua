@@ -7,7 +7,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then return end
 
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_EPIC_FETUS)
-    if rng:RandomFloat()+player.Luck/20 < 0.8 then return end
+    if rng:RandomFloat()+player.Luck/20 < 0.85 then return end
     local rocket = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SMALL_ROCKET, 0, player.Position, Vector.Zero, player):ToEffect()
    
     local lobangle = math.rad(45)

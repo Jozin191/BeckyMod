@@ -1,4 +1,3 @@
--- noop
 local GHOST_BALL = Isaac.GetEntityVariantByName("Ghost Ball")
 local Game = Game()
 ---@param fam EntityFamiliar
@@ -9,8 +8,8 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, te
         local bounce = (tearParams.TearFlags & TearFlags.TEAR_BOUNCE == TearFlags.TEAR_BOUNCE)
         for _, proj in ipairs(Isaac.FindInCapsule(fam:GetCollisionCapsule(), EntityPartition.BULLET)) do
             local proj = proj:ToProjectile()
-            if proj then
-                if bounce then
+            if proj and not (proj.ProjectileFlags & ProjectileFlags.CANT_HIT_PLAYER == ProjectileFlags.CANT_HIT_PLAYER)  then
+                if bounce then --  rubber cement synergy: causes projectiles to bounce off and deal damage to enemies
                     SFXManager():Play(SoundEffect.SOUND_RUBBER_CEMENT, 1, 2, false, 1.2)
                     local angle = (proj.Position-fam.Position):GetAngleDegrees()
                     proj:Deflect(proj.Velocity:Rotated(angle-proj.Velocity:GetAngleDegrees()))
