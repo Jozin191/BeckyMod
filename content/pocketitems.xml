@@ -1,0 +1,22 @@
+<pocketitems>
+	<card type="tarot"
+		pickup="1"
+		description=""
+		name="Ripped Card"
+		hud="Ripped Card_BeckyMod"
+		mimiccharge="2" />
+
+	<card type="tarot"
+		pickup="1"
+		description=""
+		name="Ripped Card"
+		hud="Ripped Card (Complete)_BeckyMod"
+		mimiccharge="6" />
+
+	<card type="rune"
+		pickup="1"
+		description=""
+		name="Soul of Becky"
+		hud="Soul of Becky_BeckyMod"
+		mimiccharge="4" />
+</pocketitems>

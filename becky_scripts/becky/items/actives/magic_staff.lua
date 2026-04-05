@@ -4,7 +4,7 @@ local MAGIC_STAFF = {}
 MAGIC_STAFF.ID = Isaac.GetItemIdByName("Magic Staff")
 
 BeckyMod.Item.MAGIC_STAFF = MAGIC_STAFF
-local staffConfig = Isaac.GetItemConfig():GetCollectible(MAGIC_STAFF.ID)
+
 
 BeckyMod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, itemID, rng, player, useFlags, slot)
 

@@ -2,6 +2,7 @@ local SKETCHY_BEGGAR = {}
 SKETCHY_BEGGAR.ID = Isaac.GetEntityVariantByName("Sketchy Beggar")
 SKETCHY_BEGGAR.Achievement = 1--Isaac.GetAchievementIdByName("Sketchy Beggar")
 
+local game = BeckyMod.Game
 
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_ENTITY_SPAWN, function(_, t, v, s, pos, vel, spawner, seed)
     if t ~= 6 or v ~= SlotVariant.SHELL_GAME --[[or Isaac.GetPersistentGameData():Unlocked(SKETCHY_BEGGAR.Achievement)]] then return end
@@ -20,7 +21,6 @@ end, SKETCHY_BEGGAR.ID)
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_SLOT_COLLISION, function(_, slot, collEnt)
-    print("aaaa")
     if slot:GetState() ~= SlotState.IDLE then return end
     local player = collEnt:ToPlayer()
     if player == nil then return end
@@ -67,7 +67,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, function(_, slot)
                 slot:SetState(SlotState.PAYOUT)
                 save.SketchyBeggar[slot.InitSeed] = nil
 
-                local game = BeckyMod.Game
 
                 local itemPayout
                 if Isaac.GetPersistentGameData():Unlocked(Achievement.EVERYTHING_JAR) and game:GetItemPool():HasCollectible(CollectibleType.COLLECTIBLE_EVERYTHING_JAR) and rng:RandomInt(5) == 0 then

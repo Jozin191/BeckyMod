@@ -24,7 +24,18 @@
         <active id="14"
         name="Magic Staff"
         gfx="magic staff.png"
-        description=""
+        description="Power Soul"
+        quality="2"
+        maxcharges="0"
+        chargetype="normal"
+
+        tags="nocantrip"
+        />
+
+        <active id="17"
+        name="Undead Hand"
+        gfx="undead_hand.png"
+        description="Unkillable servant"
         quality="2"
         maxcharges="0"
         chargetype="normal"
@@ -163,5 +174,25 @@
         name="NULL_BECKY_GHOST" 
         persistent="true" 
         cache="familiars" 
+        />
+
+        <null id="18"
+        name="RIPPED_CARD_The_Magician"
+        />
+        <null id="19"
+        name="RIPPED_CARD_The_Devil"
+        cache="damage"
+        />
+        <null id="20"
+        name="RIPPED_CARD_The_Empress"
+        cache="damage speed"
+        />
+        <null id="21"
+        name="RIPPED_CARD_Strength"
+        cache="damage speed range"
+        />
+        <null id="22"
+        name="RIPPED_CARD_The_Hanged_Man"
+        cache="speed tearflag tearcolor"
         />
 </items>

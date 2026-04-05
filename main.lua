@@ -87,6 +87,7 @@ include("becky_scripts.mod_compatibility.load_patches")
 
 --pickups
 include("becky_scripts.becky.pickups.dead_battery")
+include("becky_scripts.becky.pickups.ripped_card")
 
 --slots
 include("becky_scripts.becky.slots.sketchy_beggar")
