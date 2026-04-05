@@ -294,7 +294,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     -- respawning ghosts
     player:GetData().LAST_GHOST_CHECK = player:GetData().LAST_GHOST_CHECK or 0
     local num = GHOST_AMULET:GetGhostAmount(player)
-    if player:GetData().LAST_GHOST_CHECK < num then
+    if player:GetData().LAST_GHOST_CHECK ~= num then
         player:CheckFamiliar(GHOST_BALL_VAR,0,rng)
     end
     player:GetData().LAST_GHOST_CHECK = num
@@ -549,7 +549,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 local resizer = 1.5 * shotSpeed
                 local final = targetPos:Normalized():Resized(resizer)
                 if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ) or player:GetEffects():HasNullEffect(NullItemID.ID_WIZARD) then
-                    local angle = 45*((ghostData.GHOST_IDX % 2)*2+-1)
+                    local angle = 45*(((ghostData.GHOST_IDX or 1) % 2)*2+-1)
                     final = final:Rotated(angle)
                 end
                 ghost.Velocity = ghost.Velocity + final
