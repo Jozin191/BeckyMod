@@ -106,7 +106,7 @@ for i, name in pairs({
     "TechX",
     "JacobsLadder",
     "Techs",
-    "LokisHorns",
+    "LokisHornsMomsEye",
     "MysteriousLiquid",
     "Pop",
     "IBS",
@@ -116,7 +116,8 @@ for i, name in pairs({
     "LostContact",
     "LeadPencil",
     "EpicFetus",
-    "Rainbow"
+    "Rainbow",
+    "OcularRift"
 }) do
     include("becky_scripts.becky.items.passives.GhostAmuletSynergies." .. name)
 end

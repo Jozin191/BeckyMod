@@ -10,5 +10,5 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
 
     if not player then return end
     if not (tearParams.TearFlags & TearFlags.TEAR_EXPLOSIVE == TearFlags.TEAR_EXPLOSIVE) then return end
-    BeckyMod.Game:BombExplosionEffects(fam.Position, tearParams.TearDamage, tearParams.TearFlags, tearParams.TearColor)
+    BeckyMod.Game:BombExplosionEffects(fam.Position, tearParams.TearDamage/2, tearParams.TearFlags, tearParams.TearColor)
 end)

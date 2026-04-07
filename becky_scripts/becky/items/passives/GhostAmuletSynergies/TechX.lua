@@ -11,7 +11,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, te
     if not exists and teching then 
         local laser = BeckyMod.Game:Spawn(EntityType.ENTITY_LASER, LaserVariant.THIN_RED, fam.Position, Vector.Zero, fam, LaserSubType.LASER_SUBTYPE_RING_FOLLOW_PARENT, 1):ToLaser()
         laser.Parent = fam
-        laser.TearFlags = tearParams.TearFlags
+        
         laser.Radius = fam.SpriteScale:Length()*40
         ghostData.TechXRing = EntityPtr(laser)
         -- hack to stop the annoying laser sound every room
@@ -27,7 +27,9 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, te
             local laserRef = laserRef:ToLaser()
             laserRef.Radius = fam.SpriteScale:Length()*40
             laserRef:SetScale(fam.SpriteScale:Length()/1.5)
-            laserRef.CollisionDamage = tearParams.TearDamage / 2
+            laserRef.TearFlags = tearParams.TearFlags
+            laserRef.Color = fam.Player.LaserColor
+            laserRef.CollisionDamage = tearParams.TearDamage / 2.5
         end
     end
 end)

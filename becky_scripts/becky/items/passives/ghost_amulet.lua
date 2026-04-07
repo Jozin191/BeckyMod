@@ -645,6 +645,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         end
 
         gridFromPos:Hurt(hurtVal)
+        if math.random()<=.45 and ((tearParams.TearFlags & TearFlags.TEAR_ACID == TearFlags.TEAR_ACID) or (tearParams.TearFlags & TearFlags.TEAR_ROCK == TearFlags.TEAR_ROCK)) then
+            gridFromPos:Destroy()
+        end
     end
 
     for _, gh in ipairs(Isaac.FindInCapsule(familiar:GetCollisionCapsule())) do

@@ -1,4 +1,3 @@
--- noop
 local GHOST_BALL = Isaac.GetEntityVariantByName("Ghost Ball")
 local Game = Game()
 ---@param fam EntityFamiliar

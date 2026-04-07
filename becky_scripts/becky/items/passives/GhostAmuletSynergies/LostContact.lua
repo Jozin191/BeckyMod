@@ -13,6 +13,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, te
                     SFXManager():Play(SoundEffect.SOUND_RUBBER_CEMENT, 1, 2, false, 1.2)
                     local angle = (proj.Position-fam.Position):GetAngleDegrees()
                     proj:Deflect(proj.Velocity:Rotated(angle-proj.Velocity:GetAngleDegrees()))
+                    proj.Velocity = proj.Velocity*1.3
                     proj.Position = fam.Position+Vector.FromAngle(angle)*(proj.Size+fam.Size)
                 else
                     proj:Die()

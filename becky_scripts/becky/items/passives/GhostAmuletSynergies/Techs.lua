@@ -20,6 +20,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MUCORMYCOSIS)
 
     local laser = player:FireTechLaser(fam.Position, LaserOffset.LASER_TECH1_OFFSET, rng:RandomVector())
+    laser.CollisionDamage = laser.CollisionDamage/2
     
     -- local bomb = player:FireBomb(fam.Position, Vector.Zero, player)
 end)

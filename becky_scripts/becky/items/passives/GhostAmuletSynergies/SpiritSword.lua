@@ -12,8 +12,12 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     if ghostData.Sword then return end
 
     -- 99% sure these two are make up the sword spin
-    SFXManager():Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, 1)
-    SFXManager():Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, 1)
+    local pitch = 1
+    if fam.SpriteScale:Length() > 2 then
+        pitch = .6
+    end
+    SFXManager():Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, pitch)
+    SFXManager():Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, pitch)
 
     ghostData.Sword = player:FireKnife(
         fam,
@@ -29,6 +33,9 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
 
     knifeSprite:Play("SpinDown", true)
     knife.Visible = false
+    knife.TearFlags = tearParams.TearFlags
+    knife.Color = tearParams.TearColor
+    knife.SpriteScale = fam.SpriteScale
     
     local effect = Isaac.Spawn(
         EntityType.ENTITY_EFFECT,
@@ -43,7 +50,8 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     local effectSprite = effect:GetSprite()
     effectSprite:Load("gfx/008.010_spirit sword.anm2", true)
     effectSprite:Play("SpinDown")
-    
+    effectSprite.Scale = fam.SpriteScale
+
     local baseDamage = ((tearParams.TearDamage * 8) + 10)
     local formula = baseDamage * 0.5
 
