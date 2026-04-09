@@ -15,6 +15,200 @@ RIPPED_CARD.Achievement = Isaac.GetEntityVariantByName("Ripped Card")
 local game = BeckyMod.Game
 
 
+
+local CARDS_EFFECTS = {
+    [Card.CARD_FOOL] = function(player, rng)
+        local level = game:GetLevel()
+        level.LeaveDoor = -1
+        game:StartRoomTransition(
+            level:GetRandomRoomIndex(false, rng:Next()),
+            -1,
+            RoomTransitionAnim.TELEPORT,
+            player,
+            level:GetDimension()
+        )
+    end,
+    [Card.CARD_MAGICIAN] = function(player, rng)
+        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.The_Magician)
+
+    end,
+    [Card.CARD_HIGH_PRIESTESS] = function(player, rng)
+        if Isaac.CountEnemies() == 0 then return end
+        local enemyList = Isaac.FindInRadius(game:GetRoom():GetCenterPos(), 50000, EntityPartition.ENEMY)
+        
+        enemyList = BeckyMod:ShuffleTable(enemyList, rng)
+        local target
+        for i=1, #enemyList do
+            if enemyList[i]:CanShutDoors() then
+                target = enemyList[i]
+                break
+            end
+        end
+        if target == nil then return end
+        local hand = Isaac.Spawn(1000, EffectVariant.MOMS_HAND, 0, target.Position, Vector.Zero, player):ToEffect()
+        hand.Target = target
+
+    end,
+    [Card.CARD_EMPRESS] = function(player, rng)
+        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.The_Empress)
+
+    end,
+    [Card.CARD_EMPEROR] = function(player, rng)
+        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_BOSS, rng)
+
+    end,
+    [Card.CARD_HIEROPHANT] = function(player, rng)
+        local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
+        Isaac.Spawn(5, 10, HeartSubType.HEART_SOUL, spawnPos, Vector.Zero, player)
+
+    end,
+    [Card.CARD_LOVERS] = function(player, rng)
+        local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
+        Isaac.Spawn(5, 10, HeartSubType.HEART_FULL, spawnPos, Vector.Zero, player)
+
+    end,
+    [Card.CARD_CHARIOT] = function(player, rng)
+        player:AddCollectibleEffect(CollectibleType.COLLECTIBLE_MY_LITTLE_UNICORN, true, 165, false) -- activates my little unicorn for 3.5 seconds
+
+    end,
+    [Card.CARD_JUSTICE] = function(player, rng)
+        local coins = player:GetNumCoins()
+        local bombs = player:GetNumBombs()
+        local keys = player:GetNumKeys()
+        local hearts = (player:GetEffectiveMaxHearts() - player:GetHearts()) *2
+
+        local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
+        
+        if coins < bombs and coins < keys and coins < hearts then
+            Isaac.Spawn(5, 20, 0, spawnPos, Vector.Zero, player)
+
+        elseif keys < bombs and keys < coins and keys < hearts then
+            Isaac.Spawn(5, 30, 0, spawnPos, Vector.Zero, player)
+
+        elseif bombs < coins and bombs < keys and bombs < hearts then
+            Isaac.Spawn(5, 40, 0, spawnPos, Vector.Zero, player)
+
+        elseif hearts < bombs and hearts < keys and hearts < coins then
+            Isaac.Spawn(5, 10, 0, spawnPos, Vector.Zero, player)
+        else
+            Isaac.Spawn(5, rng:RandomInt(1,4) *10, 0, spawnPos, Vector.Zero, player)
+        end
+
+    end,
+    [Card.CARD_HERMIT] = function(player, rng)
+        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_SHOP, rng)
+
+    end,
+    [Card.CARD_WHEEL_OF_FORTUNE] = function(player, rng)
+        player:UseActiveItem(CollectibleType.COLLECTIBLE_PORTABLE_SLOT, UseFlag.USE_MIMIC)
+
+    end,
+    [Card.CARD_STRENGTH] = function(player, rng)
+        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.Strength)
+
+    end,
+    [Card.CARD_HANGED_MAN] = function(player, rng)
+        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.The_Hanged_Man)
+
+    end,
+    [Card.CARD_DEATH] = function(player, rng)
+        if Isaac.CountEnemies() == 0 then return end
+        local prevDis
+        local target
+        local playerPos = player.Position
+        for _, ent in ipairs(Isaac.FindInRadius(game:GetRoom():GetCenterPos(), 50000, EntityPartition.ENEMY)) do
+            if ent:CanShutDoors() and (target == nil or ent.Position:Distance(playerPos) < prevDis) then
+                prevDis = ent.Position:Distance(playerPos)
+                target = ent
+            end
+        end
+        if target then
+            target:TakeDamage(40, 0, EntityRef(player), 0)
+        end
+    end,
+    [Card.CARD_TEMPERANCE] = function(player, rng)
+        player:UseActiveItem(CollectibleType.COLLECTIBLE_IV_BAG, UseFlag.USE_MIMIC)
+
+    end,
+    [Card.CARD_DEVIL] = function(player, rng)
+        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.The_Devil)
+
+    end,
+    [Card.CARD_TOWER] = function(player, rng)
+        Isaac.Spawn(EntityType.ENTITY_BOMB, BombVariant.BOMB_TROLL, 0, player.Position, Vector.Zero, player)
+
+    end,
+    [Card.CARD_STARS] = function(player, rng)
+        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_TREASURE, rng)
+
+    end,
+    [Card.CARD_MOON] = function(player, rng)
+        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_SECRET, rng)
+
+    end,
+    [Card.CARD_SUN] = function(player, rng)
+        player:AddHearts(6)
+
+        local levelRooms = BeckyMod:ShuffleTable(RIPPED_CARD.GetRooms(), rng)
+        local roomsReveal = rng:RandomInt(3, 5)
+        
+        local level = game:GetLevel()
+
+        for idx = #levelRooms, 1, -1 do
+            if roomsReveal <= 0 then return end
+
+            local room = level:GetRoomByIdx(levelRooms[idx])
+            local displayFlags = room.DisplayFlags
+
+            if displayFlags & (1<<2) > 0 then
+                table.remove(levelRooms, idx)
+            else
+                room.DisplayFlags = displayFlags | RoomDescriptor.DISPLAY_ICON
+                level:UpdateVisibility()
+                roomsReveal = roomsReveal -1
+            end
+        end
+
+    end,
+    [Card.CARD_JUDGEMENT] = function(player, rng)
+        --- TO DO
+    end,
+    [Card.CARD_WORLD] = function(player, rng)
+        game:GetLevel():ApplyCompassEffect()
+    end
+}
+
+
+local CARD_GROUPS = {
+    {
+        Card.CARD_FOOL,
+        Card.CARD_EMPEROR,
+        Card.CARD_HERMIT,
+        Card.CARD_STARS,
+        Card.CARD_MOON,
+        Card.CARD_MAGICIAN,
+        Card.CARD_WHEEL_OF_FORTUNE,
+        Card.CARD_HANGED_MAN,
+        Card.CARD_TEMPERANCE,
+        Card.CARD_DEATH,
+        Card.CARD_DEVIL,
+    },
+    {
+        Card.CARD_JUDGEMENT,
+        Card.CARD_HIGH_PRIESTESS,
+        Card.CARD_EMPRESS,
+        Card.CARD_HIEROPHANT,
+        Card.CARD_LOVERS,
+        Card.CARD_CHARIOT,
+        Card.CARD_JUSTICE,
+        Card.CARD_STRENGTH,
+        Card.CARD_TOWER,
+        Card.CARD_SUN,
+        Card.CARD_WORLD,
+    }
+}
+
+
 function RIPPED_CARD.GetRooms()
 	local returnList = {}
 	local checkedSafeGrids = {}
@@ -66,7 +260,7 @@ function RIPPED_CARD.TeleportOutsideOf(roomType, rng)
     local neighbors = {}
 
     for doorSlot, neighDesc in pairs(roomDesc:GetNeighboringRooms()) do
-        if neighDesc.Data.Type ~= RoomType.ROOM_SECRET then
+        if neighDesc.Data and neighDesc.Data.Type ~= RoomType.ROOM_SECRET then
             table.insert(neighbors, neighDesc)
         end
     end
@@ -87,11 +281,11 @@ function RIPPED_CARD.TeleportOutsideOf(roomType, rng)
     level.LeaveDoor = -1
 
     game:StartRoomTransition(
-        neighbors.SafeGridIndex,
+        targetRoom.SafeGridIndex,
         -1,
         RoomTransitionAnim.TELEPORT,
         player,
-        level:GetDimension()
+        targetRoom:GetDimension()
     )
 end
 
@@ -107,150 +301,32 @@ function RIPPED_CARD:UseCard(CardId, player, useFlags)
     --print(copyCard)
     --Isaac.DebugString("Ripped Card copy "..copyCard)
 
-    if copyCard == Card.CARD_FOOL then
-        local level = game:GetLevel()
-        level.LeaveDoor = -1
-        game:StartRoomTransition(
-            level:GetRandomRoomIndex(false, rng:Next()),
-            -1,
-            RoomTransitionAnim.TELEPORT,
-            player,
-            level:GetDimension()
-        )
-    elseif copyCard == Card.CARD_MAGICIAN then
-        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.The_Magician)
-
-    elseif copyCard == Card.CARD_HIGH_PRIESTESS then
-        if Isaac.CountEnemies() == 0 then return end
-        local enemyList = Isaac.FindInRadius(game:GetRoom():GetCenterPos(), 50000, EntityPartition.ENEMY)
-        
-        local target = BeckyMod:ShuffleTable(enemyList, rng)[1]
-        local hand = Isaac.Spawn(1000, EffectVariant.MOMS_HAND, 0, target.Position, Vector.Zero, player):ToEffect()
-        hand.Target = target
-
-    elseif copyCard == Card.CARD_EMPRESS then
-        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.The_Empress)
-
-    elseif copyCard == Card.CARD_EMPEROR then
-        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_BOSS, rng)
-
-    elseif copyCard == Card.CARD_HIEROPHANT then
-        local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
-        Isaac.Spawn(5, 10, HeartSubType.HEART_SOUL, spawnPos, Vector.Zero, player)
-
-    elseif copyCard == Card.CARD_LOVERS then
-        local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
-        Isaac.Spawn(5, 10, HeartSubType.HEART_FULL, spawnPos, Vector.Zero, player)
-
-    elseif copyCard == Card.CARD_CHARIOT then
-        player:AddCollectibleEffect(CollectibleType.COLLECTIBLE_MY_LITTLE_UNICORN, true, 165, false) -- activates my little unicorn for 3.5 seconds
-
-    elseif copyCard == Card.CARD_JUSTICE then
-        local coins = player:GetNumCoins()
-        local bombs = player:GetNumBombs()
-        local keys = player:GetNumKeys()
-        local hearts = (player:GetEffectiveMaxHearts() - player:GetHearts()) *2
-
-        local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
-        
-        if coins < bombs and coins < keys and coins < hearts then
-            Isaac.Spawn(5, 20, 0, spawnPos, Vector.Zero, player)
-
-        elseif keys < bombs and keys < coins and keys < hearts then
-            Isaac.Spawn(5, 30, 0, spawnPos, Vector.Zero, player)
-
-        elseif bombs < coins and bombs < keys and bombs < hearts then
-            Isaac.Spawn(5, 40, 0, spawnPos, Vector.Zero, player)
-
-        elseif hearts < bombs and hearts < keys and hearts < coins then
-            Isaac.Spawn(5, 10, 0, spawnPos, Vector.Zero, player)
-        else
-            Isaac.Spawn(5, rng:RandomInt(1,4) *10, 0, spawnPos, Vector.Zero, player)
-        end
-
-    elseif copyCard == Card.CARD_HERMIT then
-        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_SHOP, rng)
-
-    elseif copyCard == Card.CARD_WHEEL_OF_FORTUNE then
-        player:UseActiveItem(CollectibleType.COLLECTIBLE_PORTABLE_SLOT, UseFlag.USE_MIMIC)
-
-    elseif copyCard == Card.CARD_STRENGTH then
-        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.Strength)
-
-    elseif copyCard == Card.CARD_HANGED_MAN then
-        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.The_Hanged_Man)
-
-    elseif copyCard == Card.CARD_DEATH then
-        if Isaac.CountEnemies() == 0 then return end
-        local prevDis
-        local target
-        local playerPos = player.Position
-        for _, ent in ipairs(Isaac.FindInRadius(game:GetRoom():GetCenterPos(), 50000, EntityPartition.ENEMY)) do
-            if target == nil or ent.Position:Distance(playerPos) < prevDis then
-                prevDis = ent.Position:Distance(playerPos)
-                target = ent
-            end
-        end
-        if target then
-            target:TakeDamage(40, 0, EntityRef(player), 0)
-        end
-    elseif copyCard == Card.CARD_TEMPERANCE then
-        player:UseActiveItem(CollectibleType.COLLECTIBLE_IV_BAG, UseFlag.USE_MIMIC)
-
-    elseif copyCard == Card.CARD_DEVIL then
-        player:AddNullItemEffect(RIPPED_CARD.NULL_Items.The_Devil)
-
-    elseif copyCard == Card.CARD_TOWER then
-        Isaac.Spawn(EntityType.ENTITY_BOMB, BombVariant.BOMB_TROLL, 0, player.Position, Vector.Zero, player)
-
-    elseif copyCard == Card.CARD_STARS then
-        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_TREASURE, rng)
-
-    elseif copyCard == Card.CARD_MOON then
-        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_SECRET, rng)
-
-    elseif copyCard == Card.CARD_SUN then
-        player:AddHearts(6)
-
-        local levelRooms = BeckyMod:ShuffleTable(RIPPED_CARD.GetRooms(), rng)
-        local roomsReveal = rng:RandomInt(3, 5)
-        
-        local level = game:GetLevel()
-
-        for idx = #levelRooms, 1, -1 do
-            if roomsReveal <= 0 then return end
-
-            local room = level:GetRoomByIdx(levelRooms[idx])
-            local displayFlags = room.DisplayFlags
-
-            if displayFlags & (1<<2) > 0 then
-                table.remove(levelRooms, idx)
-            else
-                room.DisplayFlags = displayFlags | RoomDescriptor.DISPLAY_ICON
-                level:UpdateVisibility()
-                roomsReveal = roomsReveal -1
-            end
-        end
-
-    elseif copyCard == Card.CARD_JUDGEMENT then
-
-        --- TO DO
-
-    elseif copyCard == Card.CARD_WORLD then
-        game:GetLevel():ApplyCompassEffect()
-    end
+    CARDS_EFFECTS[copyCard](player, rng)
 end
 
-function RIPPED_CARD:UseCard2(CardId, player, useFlags) --- full stuff
+function RIPPED_CARD:UseCard2(CardId, player, useFlags) --- patched stuff
+    if useFlags & UseFlag.USE_CARBATTERY > 0 then return end
     local rng = player:GetCardRNG(RIPPED_CARD.ID)
+    local card1 = CARD_GROUPS[1][rng:RandomInt(1, #CARD_GROUPS[1])]
+    local card2 = CARD_GROUPS[2][rng:RandomInt(1, #CARD_GROUPS[2])]
 
-    local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
-    Isaac.Spawn(5, 300, rng:RandomInt(Card.CARD_FOOL, Card.CARD_WORLD), spawnPos, Vector.Zero, player)
+    if player:HasCollectible(CollectibleType.COLLECTIBLE_TAROT_CLOTH) then
+        player:UseCard(card1, UseFlag.USE_MIMIC | UseFlag.USE_NOANNOUNCER)
+        player:UseCard(card2, UseFlag.USE_MIMIC | UseFlag.USE_NOANNOUNCER)
+        return
+    end
+    
+    CARDS_EFFECTS[card1](player, rng)
+    CARDS_EFFECTS[card2](player, rng)
+
+    --local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
+    --Isaac.Spawn(5, 300, rng:RandomInt(Card.CARD_FOOL, Card.CARD_WORLD), spawnPos, Vector.Zero, player)
 end
 
 
 function RIPPED_CARD:TearHitParams(player, tearParams, weaponType, damageScale, tearDisplacement, src)
-    if player:GetEffects():HasNullEffect(RIPPED_CARD.NULL_Items.The_Magician) then
+    local effects = player:GetEffects()
+    if effects:HasNullEffect(RIPPED_CARD.NULL_Items.The_Magician) then
         local rng = player:GetCardRNG(Card.CARD_MAGICIAN)
         if rng:RandomInt(6) == 0 then
             tearParams.TearFlags = tearParams.TearFlags | TearFlags.TEAR_HOMING
@@ -260,6 +336,9 @@ function RIPPED_CARD:TearHitParams(player, tearParams, weaponType, damageScale, 
                 tearParams.TearColor = tearParams.TearColor * Color.TearHoming
             end
         end
+    end
+    if effects:HasNullEffect(RIPPED_CARD.NULL_Items.The_Hanged_Man) then
+        tearParams.TearColor = tearParams.TearColor * Color(1.5, 2, 2, 0.5, 0, 0, 0)
     end
 end
 
@@ -294,10 +373,6 @@ function RIPPED_CARD:Cache(player, cacheFlags)
         if effects:HasNullEffect(RIPPED_CARD.NULL_Items.The_Hanged_Man) then
             player.TearFlags = player.TearFlags | TearFlags.TEAR_SPECTRAL
         end
-    elseif cacheFlags & CacheFlag.CACHE_TEARCOLOR == CacheFlag.CACHE_TEARCOLOR then
-        if effects:HasNullEffect(RIPPED_CARD.NULL_Items.The_Hanged_Man) then
-            player.TearColor = player.TearColor * Color(1.5, 2, 2, 0.5, 0, 0, 0)
-        end
     end
 end
 
@@ -328,8 +403,9 @@ function RIPPED_CARD:PreCollectCard(player, pickup)
 end
 
 
-function RIPPED_CARD:GetCard(rng, cardId)
+function RIPPED_CARD:GetCard(rng, cardId, includePlay, includeRunes, runesOnly)
     --if not Isaac.GetPersistentGameData():Unlocked(RIPPED_CARD.Achievement) then return end
+    if runesOnly then return end
     for _, player in ipairs(PlayerManager.GetPlayers()) do
         for slot=0, PillCardSlot.QUATERNARY do
             if player:GetCard(slot) == RIPPED_CARD.ID then

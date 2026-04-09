@@ -67,6 +67,7 @@ include("becky_scripts.becky.items.passives.ghost_amulet")
 include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
 include("becky_scripts.becky.items.actives.butcher's_cookbook")
+include("becky_scripts.becky.items.actives.undead_hand")
 include("becky_scripts.becky.items.actives.magic_staff")
 
 --trinkets

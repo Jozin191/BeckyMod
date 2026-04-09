@@ -2,15 +2,21 @@
     <!-- FAMILIAR -->
     <entity id="3" name="Becky Ghost" collisionRadius="10" friction="1" shadowSize="11" anm2path="familiar/BeckyGhostSheet.anm2"/>
     <entity id="3" name="Tainted Becky" collisionRadius="10" friction="1" shadowSize="16" anm2path="familiar/TBecky.anm2"/>
+    <entity id="3" name="Becky Sinner" anm2path="familiar/SinBat.anm2" collisionInterval="2" collisionMass="3" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="8" tags="cansacrifice"/>
+    <entity id="3" name="Becky Zombie" anm2path="familiar/zombie.anm2" baseHP="10" boss="0" champion="0" collisionDamage="1.36" collisionMass="5" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="16" stageHP="0" customtags="nocharm familiarblockprojectiles familiarcantakedamage familiarignorebffs">
+        <gibs amount="6" blood="1" bone="1" eye="1" gut="1" large="0" />
+    </entity>
+    <!--Ghost Ball-->
+    <entity name = "Ghost Ball" id = "3" anm2path = "items/GHOST_BALL.anm2" shadowSize="10" collisionRadius="17" friction = "0.8"/>
 
+    <!--Pick ups-->
     <entity anm2path="items/pick ups/bombs/null_copper0.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" id="4" variant="1510" name="Null Bomb" numGridCollisionPoints="12" shadowSize="18" stageHP="0">
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
     </entity>
     <entity name="Dead Battery" id="5" variant="90" subtype="145" anm2path="pickup_becky_deadbattery.anm2" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17"/>
-    <entity id="3" name="Becky Sinner" anm2path="familiar/SinBat.anm2" collisionInterval="2" collisionMass="3" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="8" tags="cansacrifice"/>
-
-    <!--Ghost Ball-->
-    <entity name = "Ghost Ball" id = "3" anm2path = "items/GHOST_BALL.anm2" shadowSize="10" collisionRadius="17" friction = "0.8"/>
+    <entity name="Soul of Becky" id="5" variant="300" subtype="230" anm2path="Soul_of_Becky.anm2" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17"/>
+    <entity name="Ripped Card" id="5" variant="300" subtype="231" anm2path="Ripped_card.anm2" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17"/>
+    <entity name="Patched Card" id="5" variant="300" subtype="232" anm2path="Patched_card.anm2" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17"/>
     
     <!-- Slot -->
     <entity id="6" variant="1999" name="Sketchy Beggar" anm2path="sketchy_beggar.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="15" stageHP="0">

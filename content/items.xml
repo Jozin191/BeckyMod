@@ -36,9 +36,10 @@
         name="Undead Hand"
         gfx="undead_hand.png"
         description="Unkillable servant"
-        quality="2"
-        maxcharges="0"
+        quality="3"
+        maxcharges="5"
         chargetype="normal"
+        cache="familiars"
 
         tags="nocantrip"
         />
@@ -193,6 +194,6 @@
         />
         <null id="22"
         name="RIPPED_CARD_The_Hanged_Man"
-        cache="speed tearflag tearcolor"
+        cache="speed tearflag"
         />
 </items>
