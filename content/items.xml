@@ -10,6 +10,7 @@
         chargetype="normal"
 
         tags="nolostbr nocantrip"
+        achievement="Night of the Slasher"
         />
 
         <active id="11"
@@ -19,6 +20,7 @@
         quality="2"
         maxcharges="1"
         chargetype="normal"
+        achievement="Butcher's Cookbook"
         />
 
         <active id="14"
@@ -29,7 +31,20 @@
         maxcharges="0"
         chargetype="normal"
 
+        tags="nocantrip noeden"
+        hidden="true"
+        achievement="Magic Staff"
+        />
+        <active id="14"
+        name="Magic Staff"
+        gfx="magic staff.png"
+        description="Power Soul"
+        quality="2"
+        maxcharges="150"
+        chargetype="timed"
+
         tags="nocantrip"
+        achievement="Magic Staff"
         />
 
         <active id="17"
@@ -42,6 +57,7 @@
         cache="familiars"
 
         tags="nocantrip"
+        achievement="Undead Hand"
         />
 
         <!--PASSIVE ITEMS-->
@@ -57,6 +73,7 @@
         hearts="6"
 
         tags="nolostbr"
+        achievement="Coxinha"
         />
 
         <passive id="4"
@@ -67,6 +84,7 @@
         cache=""
         hearts="2"
         devilprice="1"
+        achievement="Defiled Chalice"
         />
 
         <passive id="5"
@@ -76,6 +94,7 @@
         quality="2"
 
         tags="offensive summonable"
+        achievement="Scarecrow"
         />
 
         <passive id="6"
@@ -86,6 +105,7 @@
 		persistent="true"
 
         tags="offensive summonable nocantrip battery"
+        achievement="Dead Socket"
         />
 
         <passive id="7"
@@ -95,6 +115,7 @@
         quality="3"
         devilprice="2"
         bombs="5"
+        achievement="Null Bombs"
         />
 
         <passive id="8"
@@ -102,6 +123,7 @@
         gfx="dream_banisher.png"
         description="Curse the cursed"
         quality="2"
+        achievement="Dream Banisher"
         />
 
         <familiar id="9"
@@ -111,6 +133,7 @@
         quality="2"
         tags="offensive summonable monstermanual"
         devilprice="1"
+        achievement="Sinner"
         />
 
         <familiar id="10"
@@ -120,6 +143,17 @@
         quality="4"
         cache="familiars"
         tags="offensive summonable"
+        achievement="Ghost Amulet"
+        />
+
+        <familiar id="23"
+        name="Poul"
+        gfx="poul.png"
+        description="It hunts you!"
+        quality="2"
+        tags="offensive summonable monstermanual"
+        devilprice="1"
+        achievement="Poul"
         />
 
         <!--TRINKETS-->
@@ -130,6 +164,7 @@
         gfx="holy_bookmark.png"
         cache="luck"
         passivecache="true"
+        achievement="Holy Bookmark"
         />
 
         <trinket id="3"
@@ -137,6 +172,7 @@
         description="Premium subscription… at a price"
         gfx="devilzon_prime.png"
         cache=""
+        achievement="Devilzon Prime"
         />
 
         <trinket id="4"
@@ -144,6 +180,7 @@
         description="A bone to pick"
         gfx="corpse_tag.png"
         cache=""
+        achievement="Corpse Tag"
         />
 
         <trinket id="12"

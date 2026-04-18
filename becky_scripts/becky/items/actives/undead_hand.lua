@@ -121,12 +121,9 @@ end
 
 function UNDEAD_HAND:PostKillEntity(ent, killerRef)
     local killer = killerRef.Entity
-    print("aaaaa")
     if killer and killer.Type == 3 and killer.Variant == UNDEAD_HAND.FAMILIAR then
-        print("hhhhhh")
         local player = killer:ToFamiliar().Player
         if player and killer:GetDropRNG():RandomInt(8) == 0 then
-            print("fffff")
             spawnPos = ent.Position
             player:AddCollectibleEffect(UNDEAD_HAND.ID, false, nil, false)
             --player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)

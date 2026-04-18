@@ -1,3 +1,9 @@
 <challenges version="1">
     <challenge playertype="Sofia" name="Path of pain" endstage="10" startingitems="45" roomfilter="0" startingtrinkets="34" cursefilter="1" canshoot="true" altpath="true" unlockachievement="Sanguine Feather" /> 
+    <challenge
+        name="Poltergeist"
+        endstage="8" canshoot="true" startingitems="51"
+        roomfilter="2"
+        achievement="Poltergeist Challenge"
+        unlockachievement="Poul" /> 
 </challenges>

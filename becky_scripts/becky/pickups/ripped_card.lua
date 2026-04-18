@@ -1,9 +1,9 @@
 local RIPPED_CARD = {}
+RIPPED_CARD.ID = Isaac.GetCardIdByName("Ripped Card_BeckyMod")
+RIPPED_CARD.ID2 = Isaac.GetCardIdByName("Ripped Card (Complete)_BeckyMod")
     
 BeckyMod.Pickup.RIPPED_CARD = RIPPED_CARD
 
-RIPPED_CARD.ID = Isaac.GetCardIdByName("Ripped Card_BeckyMod")
-RIPPED_CARD.ID2 = Isaac.GetCardIdByName("Ripped Card (Complete)_BeckyMod")
 RIPPED_CARD.NULL_Items = {
     The_Magician = Isaac.GetNullItemIdByName("RIPPED_CARD_The_Magician"),
     The_Devil = Isaac.GetNullItemIdByName("RIPPED_CARD_The_Devil"),
@@ -205,6 +205,13 @@ local CARD_GROUPS = {
         Card.CARD_TOWER,
         Card.CARD_SUN,
         Card.CARD_WORLD,
+    },
+    TeleportCards = {
+        [Card.CARD_FOOL] = true,
+        [Card.CARD_EMPEROR] = true,
+        [Card.CARD_HERMIT] = true,
+        [Card.CARD_STARS] = true,
+        [Card.CARD_MOON] = true,
     }
 }
 
@@ -304,6 +311,8 @@ function RIPPED_CARD:UseCard(CardId, player, useFlags)
     CARDS_EFFECTS[copyCard](player, rng)
 end
 
+
+local DO_ON_NEW_ROOM = {}
 function RIPPED_CARD:UseCard2(CardId, player, useFlags) --- patched stuff
     if useFlags & UseFlag.USE_CARBATTERY > 0 then return end
     local rng = player:GetCardRNG(RIPPED_CARD.ID)
@@ -312,15 +321,37 @@ function RIPPED_CARD:UseCard2(CardId, player, useFlags) --- patched stuff
 
     if player:HasCollectible(CollectibleType.COLLECTIBLE_TAROT_CLOTH) then
         player:UseCard(card1, UseFlag.USE_MIMIC | UseFlag.USE_NOANNOUNCER)
-        player:UseCard(card2, UseFlag.USE_MIMIC | UseFlag.USE_NOANNOUNCER)
+        if CARD_GROUPS.TeleportCards[card1] then
+            table.insert(DO_ON_NEW_ROOM, {Player = player, CardId = card2, TarotCloth = true})
+        else
+            player:UseCard(card2, UseFlag.USE_MIMIC | UseFlag.USE_NOANNOUNCER)
+        end
         return
     end
     
     CARDS_EFFECTS[card1](player, rng)
-    CARDS_EFFECTS[card2](player, rng)
+    if CARD_GROUPS.TeleportCards[card1] then
+        table.insert(DO_ON_NEW_ROOM, {Player = player, CardId = card2, TarotCloth = false})
+    else
+        CARDS_EFFECTS[card2](player, rng)
+    end
 
     --local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
     --Isaac.Spawn(5, 300, rng:RandomInt(Card.CARD_FOOL, Card.CARD_WORLD), spawnPos, Vector.Zero, player)
+end
+
+function RIPPED_CARD:OnNewRoom()
+    for _, data in ipairs(DO_ON_NEW_ROOM) do
+
+        local player = data.Player
+        if data.TarotCloth then
+            player:UseCard(data.CardId, UseFlag.USE_MIMIC | UseFlag.USE_NOANNOUNCER)
+        else
+            CARDS_EFFECTS[data.CardId](player, player:GetCardRNG(RIPPED_CARD.ID))
+        end
+    end
+    
+    DO_ON_NEW_ROOM = {}
 end
 
 
@@ -408,7 +439,8 @@ function RIPPED_CARD:GetCard(rng, cardId, includePlay, includeRunes, runesOnly)
     if runesOnly then return end
     for _, player in ipairs(PlayerManager.GetPlayers()) do
         for slot=0, PillCardSlot.QUATERNARY do
-            if player:GetCard(slot) == RIPPED_CARD.ID then
+            local cardSlot = player:GetCard(slot)
+            if cardSlot == RIPPED_CARD.ID or cardSlot == RIPPED_CARD.ID2 then
                 if rng:RandomInt(10) == 0 then return RIPPED_CARD.ID end
                 break
             end
@@ -423,3 +455,4 @@ BeckyMod:AddCallback(ModCallbacks.MC_USE_CARD, RIPPED_CARD.UseCard2, RIPPED_CARD
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, RIPPED_CARD.Cache)
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLECT_CARD, RIPPED_CARD.PreCollectCard, RIPPED_CARD.ID)
 BeckyMod:AddCallback(ModCallbacks.MC_GET_CARD, RIPPED_CARD.GetCard)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM , RIPPED_CARD.OnNewRoom)

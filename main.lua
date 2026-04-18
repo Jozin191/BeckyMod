@@ -63,6 +63,7 @@ include("becky_scripts.becky.items.passives.defiled_chalice")
 include("becky_scripts.becky.items.passives.dead_battery")
 include("becky_scripts.becky.items.passives.sinner")
 include("becky_scripts.becky.items.passives.ghost_amulet")
+include("becky_scripts.becky.items.passives.poul")
 
 include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
@@ -83,9 +84,6 @@ include("becky_scripts.becky.characters.becky")
 include("becky_scripts.becky.characters.sofia")
 include("becky_scripts.becky.characters.becky_b")
 
---Mod compatibility! (all patches are loaded in this file)
-include("becky_scripts.mod_compatibility.load_patches")
-
 --pickups
 include("becky_scripts.becky.pickups.dead_battery")
 include("becky_scripts.becky.pickups.ripped_card")
@@ -95,6 +93,7 @@ include("becky_scripts.becky.slots.sketchy_beggar")
 
 --misc stuff
 include("becky_scripts.utils.achievements_revamp")
+include("becky_scripts.becky.characters.becky_deal_stuff")
 
 --ghost synergies
 include("becky_scripts.becky.items.passives.GhostAmuletSynergies.CSection")
@@ -136,6 +135,11 @@ include("becky_scripts.becky.items.passives.GhostAmuletSynergies.Parasotoid")
 
 --challenges
 include("becky_scripts.becky.challenges.path_of_pain")
+include("becky_scripts.becky.challenges.poltergeist")
 
 --spells
 include("becky_scripts.becky.spells.spells")
+
+
+--Mod compatibility! (all patches are loaded in this file)
+include("becky_scripts.mod_compatibility.load_patches")

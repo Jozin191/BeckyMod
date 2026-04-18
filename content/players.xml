@@ -23,12 +23,11 @@
         modcostume="7"
 		birthright="!!!TO BE ADDED!!!"
         pocketActive="Magic Staff"
-    />
-		<!--
         canShoot="false"
         achievement="Tainted Becky"
-        -->
-        <player name="Sofia"
+    />
+    
+    <player name="Sofia"
         skin="character_sofia.png"
         skinColor = "0"
         nameimage="playername_sofia.png"

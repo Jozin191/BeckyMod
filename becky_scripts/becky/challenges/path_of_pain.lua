@@ -1,10 +1,10 @@
 local PATH_OF_PAIN = Isaac.GetChallengeIdByName("Path of pain")
 
-local function addGulpedShit(_, IsContinued)
-    if Isaac.GetChallenge() ~= PATH_OF_PAIN or IsContinued then return end
-
-    for _, player in ipairs(PlayerManager:GetPlayers()) do
-        player:AddSmeltedTrinket(BeckyMod.Trinket.SANGUINE_FEATHER.ID)
-    end
+local function addGulpedShit(player)
+    if Isaac.GetChallenge() ~= PATH_OF_PAIN then return end
+    
+    local list = player:GetSmeltedTrinketDesc(BeckyMod.Trinket.SANGUINE_FEATHER.ID)
+    if list and list.trinketAmount + list.goldenTrinketAmount > 0 then return end
+    player:AddSmeltedTrinket(BeckyMod.Trinket.SANGUINE_FEATHER.ID)
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, addGulpedShit)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, addGulpedShit)

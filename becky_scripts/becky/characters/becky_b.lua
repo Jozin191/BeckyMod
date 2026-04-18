@@ -133,7 +133,7 @@ end
 local function ProcessStaffSwing(entShooting, player)
     local data = entShooting:GetData()
     --local save = BeckyMod:RunSave(player)
-    if not player:CanShoot() or not player:IsExtraAnimationFinished() then
+    if not player:IsExtraAnimationFinished() then
         data.MagicStaff_HasSwing = false
 
         if data.MagicStaff_ChargeBar then
@@ -174,7 +174,7 @@ local function ProcessStaffSwing(entShooting, player)
             knife:GetSprite():Play(anim, true)
             knife:SetIsSwinging(true)
             local scale = knife.Scale
-            data.MagicStaff_SwingCool = BECKY_B.MagicStaff_SwingCooldown
+            data.MagicStaff_SwingCool = math.max(player.MaxFireDelay, 0)
             
             local angle = GetAimAngle(entShooting, player)
             if entShooting.Type == 3 and entShooting.Variant == FamiliarVariant.CAINS_OTHER_EYE then
@@ -306,13 +306,21 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function(_, player)
 end)
 
 
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, 200, function(_, player, cacheFlags)
+    if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
+    if CacheFlag.CACHE_DAMAGE & cacheFlags > 0 then
+        player.Damage = player.Damage * 1.35
+    elseif CacheFlag.CACHE_FIREDELAY & cacheFlags > 0 then
+        local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
+        tps = tps * 0.6666 + 0.12
+        player.MaxFireDelay = BeckyMod:toMaxFireDelay(tps)
+    end
+end)
+
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
-    local weapon = player:GetWeapon(1)
-    if weapon ~= nil then
-        Isaac.DestroyWeapon(weapon)
-    end
+    if player:CanShoot() then player:SetCanShoot(false) end
     if player:IsDead() then return end
     local data = player:GetData()
     local effects = player:GetEffects()
@@ -348,10 +356,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
     local player = fam.Player
     if player == nil or player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     
-    local weapon = player:GetWeapon(1)
-    if weapon ~= nil then
-        Isaac.DestroyWeapon(weapon)
-    end
+    if player:CanShoot() then player:SetCanShoot(false) end
     if player:IsDead() then return end
     local data = fam:GetData()
     local effects = player:GetEffects()
@@ -382,17 +387,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
     local save = BeckyMod:RunSave(player)
     local data = player:GetData()
     local manaCap = 100 - (data.MaxManaOffset or 0)
-    --[[
-    if save.ManaCharge and save.ManaCharge < manaCap then
-        local manaRegen = 0
-        if not (data.NoChargeMana and data.NoChargeMana > 0) then
-            manaRegen = 30 / (player.MaxFireDelay + 1) * 0.25
-            --if save.ManaCharge < BECKY_B.ManaRegenBuffZone then
-            --    manaRegen = manaRegen *2.25
-            --end
-        end
-        save.ManaCharge = save.ManaCharge + manaRegen
-    end]]
+
     if save.ManaCharge > 0 and data.ManaDischarge and data.ManaDischarge > 0 then
         save.ManaCharge = math.max(save.ManaCharge -data.ManaDischarge, 0)
     end
@@ -413,7 +408,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, function(_, ent, dmg,
         local data = player:GetData()
         if not (data.NoChargeMana and data.NoChargeMana > 0) then
             local save = BeckyMod:RunSave(player)
-            save.ManaCharge = save.ManaCharge + dmg --*1.36
+            save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *1.36
         end
     end
 end)
@@ -614,10 +609,9 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
     local weaponList = {}
     if entShooting.Type == 3 then
         local fam = entShooting:ToFamiliar()
+        mult = 0.75
         if entShooting.Variant == FamiliarVariant.TWISTED_BABY then
-            mult = 0.5
-        else
-            mult = 0.75
+            mult = mult /2
         end
         mult = mult * fam:GetMultiplier()
     end

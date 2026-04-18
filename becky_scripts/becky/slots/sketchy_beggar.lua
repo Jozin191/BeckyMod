@@ -1,18 +1,7 @@
 local SKETCHY_BEGGAR = {}
 SKETCHY_BEGGAR.ID = Isaac.GetEntityVariantByName("Sketchy Beggar")
-SKETCHY_BEGGAR.Achievement = 1--Isaac.GetAchievementIdByName("Sketchy Beggar")
 
 local game = BeckyMod.Game
-
-BeckyMod:AddCallback(ModCallbacks.MC_PRE_ENTITY_SPAWN, function(_, t, v, s, pos, vel, spawner, seed)
-    if t ~= 6 or v ~= SlotVariant.SHELL_GAME --[[or Isaac.GetPersistentGameData():Unlocked(SKETCHY_BEGGAR.Achievement)]] then return end
-    if BeckyMod.Game:GetRoom():GetType() ~= RoomType.ROOM_ARCADE then return end
-
-    local rng = RNG(seed, 35)
-    if rng:RandomInt(9) == 0 then
-        return {t, SKETCHY_BEGGAR.ID, 0, seed}
-    end
-end)
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_SLOT_INIT, function(_, slot)

@@ -30,7 +30,6 @@ SPELLS.SpellType = {
 SPELLS.ENTITIES = {
     MANA_TEAR =     { Type = 2, Variant = Isaac.GetEntityVariantByName("Mana Tear") },
     BIG_MANA_TEAR = { Type = 2, Variant = Isaac.GetEntityVariantByName("Big Mana Tear") },
-    POLTY_FAM =     { Type = 3, Variant = Isaac.GetEntityVariantByName("Polty Familiar") },
     SHIELD =        { Type = 1000, Variant = Isaac.GetEntityVariantByName("Mana Shield") },
 }
 

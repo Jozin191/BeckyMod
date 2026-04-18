@@ -1,7 +1,7 @@
 --luacheck: no max line length
 -- Markdown guide https://github.com/wofsauge/External-Item-Descriptions/wiki
 
-if not EID then return end
+--if not EID then return end
 
 local loader = BeckyMod.PatchesLoader
 local synergiesFun = include("becky_scripts.mod_compatibility.patches.eid_ghost_amulet_synergies")
@@ -15,6 +15,7 @@ local function EIDPatch()
 	local Item = BeckyMod.Item
 	local Trinket = BeckyMod.Trinket
 	local Character = BeckyMod.Character
+	local Pickup = BeckyMod.Pickup
 
 	function BECKY_EID:ClosestPlayerTo(entity) --This seems to error for some people sooo yeah
 		if not entity then return EID.player end
@@ -25,18 +26,6 @@ local function EIDPatch()
 			return EID.player
 		end
 	end
-
-
-	--[[
-	local player_icons = Sprite()
-	player_icons:Load("gfx/ui/eid_character_icons.anm2", true)
-
-	local offsetX, offsetY = 6, 6
-
-	EID:addIcon("Becky", "Main", 1, 16, 16, offsetX, offsetY, player_icons)
-
-	EID.InlineIcons["Player" .. Character.BECKY.PLAYERTYPE] = EID.InlineIcons["Becky"]
-	]]
 
 
 	--#region Helper functions
@@ -245,7 +234,8 @@ local function EIDPatch()
 
 	-- Items
 
-	local EID_Collectibles = {--[[
+	local EID_Collectibles
+	EID_Collectibles = {--[[
 		[Item.HAND_MADE_BIBLE.ID] = { -- EN: [X] | SPA: [X] 
 			en_us = {
 				Name = "Hand Made Bible",
@@ -255,7 +245,7 @@ local function EIDPatch()
 				},
 			},
 		},]]
-		[Item.GHOST_AMULET.ID] = { -- EN: [X] | SPA: [X] 
+		[Item.GHOST_AMULET.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Ghost Amulet",
 				Description = {
@@ -345,6 +335,27 @@ local function EIDPatch()
 				Description = {
 					"{{HealingRed}} Heals 1 heart",
 					"#Killing an enemy drops creep that damages other enemies"
+				},
+			},
+		},
+
+		[Item.UNDEAD_HAND.ID] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Undead Hand",
+				Description = {
+					"On use, if enemies are present",
+					"#Spawns a familiar that chases enemies and dealing contact damage",
+					"#The familiar can take damage, going down if its hp goes to zero",
+					"#The familiar gets up again after 10 seconds",
+					"#Enemies killed by the familiar have a 13% to spawn this familiar"
+				},
+			},
+		},
+		[Item.MAGIC_STAFF.ID] = { -- EN: [X] | SPA: [X] 
+			en_us = {
+				Name = "Magic Staff",
+				Description = {
+					""
 				},
 			},
 		},
@@ -458,7 +469,54 @@ local function EIDPatch()
 					"Has a 1/3 chance of giving flight after receiving damage for the room"
 				}
 			}
-		}
+		},
+
+		[Trinket.ALARM_CLOCK.ID] = {
+			_modifier = function(descObj, line) ---@param descObj EID_DescObj
+				local mult = getTrinketMult(descObj)
+				local chanceTxt = tostring((1-(19/20)^mult) *100)
+
+				if mult > 1 then
+					chanceTxt = "{{ColorGold}}" .. chanceTxt .. "{{CR}}"
+				end
+
+				return EID:SimpleReplace(line, "{1}", chanceTxt, 1)
+			end,
+
+			en_us = {
+				Name = "Alarm Clock",
+				Description = {
+					function(descObj)
+						return EID_Trinkets[Trinket.ALARM_CLOCK.ID]._modifier(descObj, 
+							"Upon clearing a room#{{Timer}} -{1} seconds of the game timer"
+						)
+					end,
+				}
+			}
+		},
+		[Trinket.BUG_SPRAY.ID] = {
+			_modifier = function(descObj, line) ---@param descObj EID_DescObj
+				local mult = getTrinketMult(descObj)
+				local chanceTxt = tostring(0.36 *mult *100)
+
+				if mult > 1 then
+					chanceTxt = "{{ColorGold}}" .. chanceTxt .. "{{CR}}"
+				end
+
+				return EID:SimpleReplace(line, "{1}", chanceTxt, 1)
+			end,
+
+			en_us = {
+				Name = "Bug Spray",
+				Description = {
+					function(descObj)
+						return EID_Trinkets[Trinket.BUG_SPRAY.ID]._modifier(descObj, 
+							"Flies and spider type enemies take {1}% more damage"
+						)
+					end,
+				}
+			}
+		},
 	}
 
 	for id, trinketDescData in pairs(EID_Trinkets) do
@@ -488,6 +546,87 @@ local function EIDPatch()
 			end
 	
 			::continue::
+		end
+	end
+
+	-- Cards
+
+	local EID_Cards
+	EID_Cards = {
+		[Pickup.RIPPED_CARD.ID] = {
+			_metadata = {2, false},
+
+			_modifier = function(descObj)
+				if BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_TAROT_CLOTH) then
+					return "Activates a random {{ColorShinyPurple}}tarot card{{CR}}"
+				end
+
+				return "Activates a random but weaker version of a tarot card"
+			end,
+
+			en_us = {
+				Name = "Ripped Card",
+				Description = {
+					function(descObj)
+						return EID_Cards[Pickup.RIPPED_CARD.ID]._modifier(descObj) .. "#This card is more likely to spawn while holding it"
+					end,
+				}
+			}
+		},
+		[Pickup.RIPPED_CARD.ID2] = {
+			_metadata = {4, false},
+
+			_modifier = function(descObj)
+				if BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_TAROT_CLOTH) then
+					return "Activates 2 random {{ColorShinyPurple}}tarot card{{CR}}"
+				end
+
+				return "Activates 2 random but weaker version of a tarot card"
+			end,
+
+			en_us = {
+				Name = "Patched Card",
+				Description = {
+					function(descObj)
+						return EID_Cards[Pickup.RIPPED_CARD.ID2]._modifier(descObj) .. "#Ripped Card is more likely to spawn while holding this"
+					end,
+				}
+			}
+		},
+	}
+
+	for id, cardDescData in pairs(EID_Cards) do
+		for language, descData in pairs(cardDescData) do
+			if language:match('^_') then goto continue end -- skip helper private fields
+
+			local name = descData.Name
+			local description = descData.Description
+
+			if not DD:IsValidDescription(description) then
+				Mod:Log("Invalid card description for " .. name .. " (" .. id .. ")", "Language: " .. language)
+				goto continue
+			end
+
+			local minimized = DD:MakeMinimizedDescription(description)
+
+			if not containsFunction(minimized) and not cardDescData._AppendToEnd then
+				EID:addCard(id, table.concat(minimized, ""), name, language)
+			else
+				-- don't add descriptions for vanilla cards that already have one
+				if not EID.descriptions[language].cards[id] then
+					EID:addCard(id, "", name, language) -- description only contains name/language, the actual description is generated at runtime
+				end
+
+				DD:SetCallback(DD:CreateCallback(minimized, cardDescData._AppendToEnd), EntityType.ENTITY_PICKUP,
+					PickupVariant.PICKUP_TAROTCARD, id, language)
+			end
+
+			::continue::
+		end
+
+		local metadata = cardDescData._metadata
+		if metadata then
+			EID:addCardMetadata(id, metadata[1], metadata[2])
 		end
 	end
 
@@ -564,12 +703,13 @@ local function EIDPatch()
 			return descObj
 		end
 	)
+	
+
+	EID:addBirthright(Character.BECKY.PLAYERTYPE, "The Ghost's range becomes unlimited.")
+	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "!!!! TO BE ADDED !!!!")
 
 	synergiesFun()
 	--EID._currentMod = "" --So items added after this with no set mod don't display as the becky mod
 end
-
-local myPlayerID = Isaac.GetPlayerTypeByName("Becky")
-EID:addBirthright(myPlayerID, "The Ghost's range becomes unlimited.")
 
 loader:RegisterPatch("EID", EIDPatch)
