@@ -615,8 +615,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local gridFromPos = room:GetGridEntityFromPos(familiar.Position)
     local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
 
-    familiar.SizeMulti = GhostSize
-    familiar.SpriteScale = GhostSize
+    local wide = (player:GetTrinketMultiplier(TrinketType.TRINKET_FLAT_WORM)+player:GetCollectibleNum(CollectibleType.COLLECTIBLE_PUPULA_DUPLEX))*.5
+    familiar.SizeMulti = GhostSize*Vector(1+wide, 1+wide) -- making it an oval would probably mess some other stuff up
+    familiar.SpriteScale = GhostSize*Vector(1+wide, 1)
+
 
     if player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then
         ghostData.ChocolateMilkMult = math.min(ghostData.ChocolateMilkMult +0.035, 2.5)
@@ -667,6 +669,11 @@ end, GHOST_BALL_VAR)
 ---@param offset Vector
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function (_, familiar, offset)
     --local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 1, 1, familiar)
+            local ghostData = familiar:GetData()
+        local ghostTrail = ghostData.GhostTrail 
+    if ghostTrail then
+        ghostTrail.ParentOffset = familiar.PositionOffset
+    end
     Isaac.RunCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, familiar, offset--[[, tearParams]])
 end, GHOST_BALL_VAR)
 

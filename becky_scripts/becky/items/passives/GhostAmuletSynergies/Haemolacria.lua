@@ -20,27 +20,24 @@ local function RandomFloat(rng, min, max)
 end
 
 ---comment
----@param ent Entity
+---@param ent EntityFamiliar
 ---@param rng RNG
 ---@param tearParams TearParams
 local function ShootHaemolacriaTear(ent, rng, tearParams)
 	local tear
 	local fallSpeedVar
-
-        tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.BALLOON, 0, ent.Position, rng:RandomVector():Resized(20), ent):ToTear()
-
+    local player = ent.Player
+        tear = player:FireTear(ent.Position, rng:RandomVector():Resized(20), false, true, false, ent, .5)--Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.BALLOON, 0, ent.Position, rng:RandomVector():Resized(20), ent):ToTear()
         if not tear then return end
-
         fallSpeedVar = RandomFloat(rng, 1.2, 1.4)
         tear.Color = tearParams.TearColor
 		tear.Height = baseHeight * 4
         tear.Velocity = tear.Velocity * RandomFloat(rng, 0.1, 0.6)
         tear.FallingAcceleration = (RandomFloat(rng, 0.7, 1.2)) 
         tear.FallingSpeed = (baseMultiplier * (fallSpeedVar)) 
-        tear.CollisionDamage = tearParams.TearDamage/2 * RandomFloat(rng, 1, 1.2) 
-        tear:AddTearFlags(TearFlags.TEAR_BURSTSPLIT | tearParams.TearFlags | TearFlags.TEAR_PIERCING)
+        tear.CollisionDamage = tear.CollisionDamage * RandomFloat(rng, 1, 1.2) 
+        tear:AddTearFlags(TearFlags.TEAR_BURSTSPLIT | TearFlags.TEAR_PIERCING)
         tear:AddToHitList(ent)
-		tear.Scale = tear.CollisionDamage/3.5
     -- end
 end
 

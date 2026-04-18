@@ -10,7 +10,7 @@
     <entity id="3" name="Becky Sinner" anm2path="familiar/SinBat.anm2" collisionInterval="2" collisionMass="3" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="8" tags="cansacrifice"/>
 
     <!--Ghost Ball-->
-    <entity name = "Ghost Ball" id = "3" anm2path = "items/GHOST_BALL.anm2" shadowSize="10" collisionRadius="17" friction = "0.8"/>
+    <entity name = "Ghost Ball" id = "3" anm2path = "items/GHOST_BALL.anm2" shadowSize="15" collisionRadius="17" friction = "0.8"/>
 
     <!--Effect entities-->
     <entity name="Butcher's Cookbook Sawblade" id="1000" anm2path="familiar/sawblade.anm2"/>
