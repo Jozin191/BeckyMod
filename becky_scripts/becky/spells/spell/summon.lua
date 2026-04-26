@@ -1,4 +1,4 @@
-local SPELL_COST = 50
+local SPELL_COST = 30
 local CanPickupGridList = {}
 
 local game = BeckyMod.Game
@@ -8,24 +8,53 @@ local COOLDOWN = 90
 local ATTACKING_COOLDOWN = 7
 local PROJ_SPEED = Vector(15,0)
 
+local NULL_ITEM_ID = Isaac.GetNullItemIdByName("SPELL_Summon_BroberBobby")
+
+
+BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player)
+    player:CheckFamiliar(
+        FamiliarVariant.BROTHER_BOBBY,
+        player:GetEffects():GetNullEffectNum(NULL_ITEM_ID),
+        player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_BROTHER_BOBBY),
+        nil,
+        120
+    )
+end, CacheFlag.CACHE_FAMILIARS)
+
+BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function(_, fam)
+    if fam.SubType ~= 120 then return end
+    local color = fam:GetSprite().Color
+    color:SetColorize(1, 1, 1, 1)
+    color.A = 0.85
+    fam:GetSprite().Color = color
+end, FamiliarVariant.BROTHER_BOBBY)
+
 
 local function fun(player)
     local data = player:GetData()
-    data.SpellsData = data.SpellsData or {}
-
-    data.SpellsData.SummonActive = (not data.SpellsData.SummonActive)
-    if data.SpellsData.SummonActive then
-        --player:CheckFamiliar(BeckyMod.Spells.ENTITIES.POLTY_FAM.Variant, 1, player:GetCollectibleRNG(BeckyMod.Item.MAGIC_STAFF.ID))
-        data.MaxManaOffset = (data.MaxManaOffset or 0) + SPELL_COST
-    else
-        --player:CheckFamiliar(BeckyMod.Spells.ENTITIES.POLTY_FAM.Variant, 0, player:GetCollectibleRNG(BeckyMod.Item.MAGIC_STAFF.ID))
-        data.MaxManaOffset = data.MaxManaOffset -SPELL_COST
+    if data.MagicStaff_SelectSpellDir == nil then
+        data.MagicStaff_SelectSpellDir = { Type = BeckyMod.Spells.SpellType.SUMMON, Choices = {
+            [Direction.LEFT] = 2, --Shooting familiar
+            [Direction.RIGHT] = 3,--Mr Me
+        } }
+        return
     end
+
+    local data = player:GetData()
+
+    if data.MagicStaff_SelectSpellDir.Dir == Direction.RIGHT then
+        player:UseActiveItem(CollectibleType.COLLECTIBLE_MR_ME, UseFlag.USE_MIMIC)
+    else
+        player:AddNullItemEffect(NULL_ITEM_ID)
+    end
+
+    data.MagicStaff_SelectSpellDir = nil
 end
 
-local function canSelectFun(player)
-    local data = player:GetData()
-    return (data.SpellsData and data.SpellsData.SummonActive) or 100 - (data.MaxManaOffset or 0) > SPELL_COST
+local function canSelectFun(player, manaLeft)
+    --local data = player:GetData()
+    --return (data.SpellsData and data.SpellsData.SummonActive) or 100 - (data.MaxManaOffset or 0) > SPELL_COST
+    return manaLeft >= SPELL_COST
 end
 
 return {

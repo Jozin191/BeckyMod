@@ -5,7 +5,7 @@ local TEAR_VEL = Vector(2.5 *10, 0)
 local function fun(player)
     local pos = player.Position
 
-    for angle=0, 270, 90 do
+    for angle=-180, 135, 45 do
         for _, weap in ipairs(BeckyMod.Character.BECKY_B:FireWeapon(player, player, Vector(1,0):Rotated(angle), 1, false, false)) do
             if weap.Velocity:Length() >0 then
                 weap.Velocity = TEAR_VEL:Rotated( weap.Velocity:GetAngleDegrees() )

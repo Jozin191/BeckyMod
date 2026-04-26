@@ -359,6 +359,21 @@ local function EIDPatch()
 				},
 			},
 		},
+
+		[Item.POUL.ID] = {
+			en_us = {
+				_BFFSMod = function(descObj, line)
+					if not BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_BFFS) then return end
+					return "#{{Colletible".. CollectibleType.COLLECTIBLE_BFFS .."}} The familiar can pick up various rocks at the same time"
+				end,
+				Name = "Poul",
+				Description = {
+					"Spawns a familiar that moves around picking rocks and throwing it to enemies",
+					"#Pickups tainted rocks and throws it to Isaac if no enemy is pressent",
+					function(descObj) return EID_Collectibles[Item.POUL.ID]._BFFSMod(descObj) end,
+				},
+			},
+		},
 	}
 
 	for id, collectibleDescData in pairs(EID_Collectibles) do
@@ -486,9 +501,10 @@ local function EIDPatch()
 			en_us = {
 				Name = "Alarm Clock",
 				Description = {
+					"Upon clearing a room",
 					function(descObj)
 						return EID_Trinkets[Trinket.ALARM_CLOCK.ID]._modifier(descObj, 
-							"Upon clearing a room#{{Timer}} -{1} seconds of the game timer"
+							"#{{Timer}} -{1} seconds of the game timer"
 						)
 					end,
 				}

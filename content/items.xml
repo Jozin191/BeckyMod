@@ -28,22 +28,23 @@
         gfx="magic staff.png"
         description="Power Soul"
         quality="2"
+        maxcharges="150"
+        chargetype="timed"
+
+        tags="nocantrip"
+        achievement="Magic Staff"
+        />
+        <!-- v T. Becky's unique magic staff -->
+        <active id="14"
+        name="​Magic Staff"
+        gfx="magic staff.png"
+        description="Power Soul"
+        quality="2"
         maxcharges="0"
         chargetype="normal"
 
         tags="nocantrip noeden"
         hidden="true"
-        achievement="Magic Staff"
-        />
-        <active id="14"
-        name="Magic Staff"
-        gfx="magic staff.png"
-        description="Power Soul"
-        quality="2"
-        maxcharges="150"
-        chargetype="timed"
-
-        tags="nocantrip"
         achievement="Magic Staff"
         />
 
@@ -232,5 +233,10 @@
         <null id="22"
         name="RIPPED_CARD_The_Hanged_Man"
         cache="speed tearflag"
+        />
+
+        <null
+        name="SPELL_Summon_BroberBobby"
+        cache="familiars"
         />
 </items>

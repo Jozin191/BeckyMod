@@ -22,10 +22,10 @@
         costumeSuffix="becky"
         modcostume="7"
 		birthright="!!!TO BE ADDED!!!"
-        pocketActive="Magic Staff"
-        canShoot="false"
+        pocketActive="​Magic Staff"
         achievement="Tainted Becky"
     />
+        <!--canShoot="false"-->
     
     <player name="Sofia"
         skin="character_sofia.png"

@@ -251,7 +251,7 @@ mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompl
 
 
 function unlocks:PostAchievementUnlock(achievementID)
-    if achievementID == Achievement.JACOB_AND_ESAU then
+    if achievementID == Achievement.SECRET_EXIT then
         Isaac.GetPersistentGameData():TryUnlock(achievements.ACHIEVEMENT_POLTERGEIST_CHALLENGE, false)
     end
 end
@@ -259,7 +259,7 @@ mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, unlocks.PostAchievement
 
 function unlocks:PostLoadSaveslot()
     local pgd = Isaac.GetPersistentGameData()
-    if pgd:Unlocked(Achievement.JACOB_AND_ESAU) then
+    if pgd:Unlocked(Achievement.SECRET_EXIT) then
         pgd:TryUnlock(achievements.ACHIEVEMENT_POLTERGEIST_CHALLENGE, true)
     end
 end

@@ -9,16 +9,6 @@ local taintedBeckysWandAnim = "gfx/becky_magic_staff.anm2"
 BECKY_B.StaffFireSprite = Sprite(taintedBeckysWandAnim, true)
 BECKY_B.ManaBarSprite = Sprite("gfx/ui/taintedBecky/mana_bar.anm2", true)
 
-BECKY_B.MagicStaffId =      Isaac.GetEntityVariantByName("Magic Staff (Weapon)")
-BECKY_B.MagicStaffDummyId = Isaac.GetEntityVariantByName("Magic Staff (Dummy)")
-BECKY_B.MagicStaff_Offset = Vector(8,0)
-BECKY_B.MagicStaff_PositionOffset = Vector(0,-8)
-BECKY_B.MagicStaff_SwingCooldown = 30 -- 1 seconds
-BECKY_B.MagicStaff_CapsuleSize = 48
-BECKY_B.MagicStaff_CapsulePosition = Vector(32,0)
-BECKY_B.MagicStaff_Damage = 3.75
-BECKY_B.MagicStaff_PushStrength = Vector(14, 0)
-
 BECKY_B.ManaTearCost = 10
 BECKY_B.ManaRegenBuffZone = 15   -- (og thing ->) 1/16 * 100 
 
@@ -45,49 +35,17 @@ BECKY_B.FamiliarWhiteList = {
     [FamiliarVariant.BLOOD_BABY] = true,
 }
 
-local getGridPosVector = Vector(0,0)
-local gridRadiusCapVector = Vector(0,0)
-local function FindGridInRadius(pos, tileRadius, fromCenter,  squareRadius)
-	local tab = {}
-	local tileRadius = math.max(tileRadius, 0)
-	local room = game:GetRoom()
-
-	if squareRadius then
-		for x = -tileRadius, tileRadius do
-			getGridPosVector.X = pos.X + x *40
-			for y = -tileRadius, tileRadius do
-				getGridPosVector.Y = pos.Y + y *40
-				local grid = room:GetGridEntityFromPos(getGridPosVector)
-				if grid then
-					table.insert(tab, grid)
-				end
-			end
-		end
-	else
-		gridRadiusCapVector.X = pos.X + tileRadius*40
-		gridRadiusCapVector.Y = pos.Y
-
-		if not fromCenter then gridRadiusCapVector.X = gridRadiusCapVector.X +20 end -- taking the full grid end
+BECKY_B.ValidBoneClubs = {
+    [KnifeVariant.BONE_CLUB] = true,
+    [KnifeVariant.BONE_SCYTHE] = true,
+}
 
 
-		local cap = gridRadiusCapVector:Distance(pos)
-
-		local angle = 0
-		for x = -tileRadius, tileRadius do
-			getGridPosVector.X = pos.X + x *40
-			for y = -tileRadius, tileRadius do
-				getGridPosVector.Y = pos.Y + y *40
-				
-				local grid = room:GetGridEntityFromPos(getGridPosVector)
-
-				if grid and getGridPosVector:Distance(pos) <= cap then
-					table.insert(tab, grid)
-				end
-			end
-		end
-	end
-
-	return tab
+local function GetBecky(entity)
+    local player = BeckyMod:TryGetPlayer(entity, false)
+    if player then player = player:ToPlayer() else return end
+    if player == nil or player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
+    return player
 end
 
 
@@ -95,18 +53,22 @@ local function GetAimVector(owner, player)
     local markTarget = player:GetMarkedTarget()
 
     if owner.Type == 3 and player:HasCollectible(CollectibleType.COLLECTIBLE_KING_BABY) then
-        local ptr = GetPtrHash(entShooting:ToFamiliar().Player)
-        local kingBaby = nil
-        for _, e in pairs(Isaac.FindByType(3, FamiliarVariant.KING_BABY)) do
-            local f = e:ToFamiliar()
-            if f and f.Player and GetPtrHash(f.Player) == ptr then
-                if f.Parent == nil then
-                    kingBaby = f
-                    break
-                else
-                    kingBaby = f
+        local kingBaby = player:GetData().knownKingBaby
+
+        if kingBaby == nil or not kingBaby:Exists() then
+            local ptr = GetPtrHash(player)
+            for _, e in pairs(Isaac.FindByType(3, FamiliarVariant.KING_BABY)) do
+                local f = e:ToFamiliar()
+                if f and f.Player and GetPtrHash(f.Player) == ptr then
+                    if f.Parent == nil then
+                        kingBaby = f
+                        break
+                    else
+                        kingBaby = f
+                    end
                 end
             end
+            player:GetData().knownKingBaby = kingBaby
         end
         if kingBaby.Target then
             return (owner.Position - kingBaby.Target.Position):Normalized()
@@ -129,13 +91,11 @@ local function GetAimAngle(owner, player)
     return GetAimVector(owner, player):GetAngleDegrees()
 end
 
---- * Make Mana Tears auto fire when the "tear per second" is to high (for stuff like "Soy Milk")
+
 local function ProcessStaffSwing(entShooting, player)
     local data = entShooting:GetData()
     --local save = BeckyMod:RunSave(player)
     if not player:IsExtraAnimationFinished() then
-        data.MagicStaff_HasSwing = false
-
         if data.MagicStaff_ChargeBar then
             if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
                 --save.ManaCharge = save.ManaCharge -BECKY_B.ManaTearCost
@@ -146,10 +106,17 @@ local function ProcessStaffSwing(entShooting, player)
         end
         return 
     end
-    local knife = data.MagicStaff_Ent
+    local weapon
+    if entShooting.Type == 1 then weapon = entShooting:GetWeapon(1)
+    elseif entShooting.Type == 3 then weapon = entShooting:GetWeapon()
+    end
+    if weapon == nil then return end
+    local knife = weapon:GetMainEntity() --data.MagicStaff_Ent
+    knife = knife and knife:ToKnife()
+    if knife == nil or not knife:Exists() then return end
 
     local aimVec = player:GetAimDirection()
-
+    
     if not data.MagicStaff_ChargeBar then
         data.MagicStaff_ChargeBar = {
             Charge = 0,
@@ -158,102 +125,37 @@ local function ProcessStaffSwing(entShooting, player)
         }
     end
     if aimVec:Length() ~= 0 then
-        if not data.MagicStaff_HasSwing and data.MagicStaff_SwingCool <= 0 then
-
-            local anim = "Swing"
-            if data.MagicStaff_SwingSide then
-                anim = "Swing2"
-                data.MagicStaff_SwingSide = false
-            else
-                data.MagicStaff_SwingSide = true
-            end
-
-            local pitch = (7 + knife:GetDropRNG():RandomInt(5)) /10
-
-            sfx:Play(SoundEffect.SOUND_SHELLGAME, 1, 0, false, pitch)
-            knife:GetSprite():Play(anim, true)
-            knife:SetIsSwinging(true)
-            local scale = knife.Scale
-            data.MagicStaff_SwingCool = math.max(player.MaxFireDelay, 0)
-            
-            local angle = GetAimAngle(entShooting, player)
-            if entShooting.Type == 3 and entShooting.Variant == FamiliarVariant.CAINS_OTHER_EYE then
-                local rng = entShooting:GetDropRNG()
-                if player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK) then
-                    angle = rng:RandomInt(360) -180
-                else
-                    angle = -180 + (90 * rng:RandomInt(4))
-                end
-            end
-
-            local shootPos = entShooting.Position + BECKY_B.MagicStaff_Offset:Rotated(angle) + BECKY_B.MagicStaff_CapsulePosition:Rotated(angle) *scale
-            local list = Isaac.FindInRadius(
-                shootPos,
-                BECKY_B.MagicStaff_CapsuleSize * scale,
-                EntityPartition.ENEMY
-            )
-            local entRef = EntityRef(entShooting)
-            local entPos = entShooting.Position
-            for _, ent in ipairs(list) do
-                if ent.Type == EntityType.ENTITY_BOMB then
-                    local strength = BECKY_B.MagicStaff_PushStrength * (ent.Position:Distance(entPos) / 64)
-                    ent:AddVelocity( strength:Rotated( (ent.Position - entPos):GetAngleDegrees() ) )
-                else
-                    ent:TakeDamage(BECKY_B.MagicStaff_Damage, 0, entRef, 0)
-                    ent:AddKnockback(
-                        entRef,
-                        BECKY_B.MagicStaff_PushStrength:Rotated( (ent.Position - entPos):GetAngleDegrees() ),
-                        3,
-                        false
-                    )
-                end
-            end
-
-            local gridList = FindGridInRadius(shootPos, 2 *scale)
-            for _, grid in ipairs(gridList) do
-                if grid:GetType() == GridEntityType.GRID_POOP then
-                    grid:HurtWithSource(350, entRef)
-                else
-                    grid:HurtWithSource(35, entRef)
-                end
-            end
-
-            data.MagicStaff_HasSwing = true
-
-            if entShooting.Type == 1 then
-                entShooting:SetHeadDirectionLockTime(10)
-            elseif entShooting.Type == 3 then
-                entShooting.FireCooldown = BECKY_B.MagicStaff_SwingCooldown
-            end
-        else
-            knife:SetIsSwinging(false)
-        end
-
+        local sprite = knife:GetSprite()
+        local SoyMilkMod = weapon:GetModifiers() & (WeaponModifier.CHOCOLATE_MILK | WeaponModifier.SOY_MILK) > 0
+        if not SoyMilkMod and sprite:GetAnimation():match("Swing") and sprite:GetFrame() < sprite:GetCurrentAnimationData():GetLength() - 3 then return end
         --if entShooting.Type == 1 and save.ManaCharge < BECKY_B.ManaTearCost then return end
         local addToCharge = 1
         if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) then
             local c_sectionCharge = 30 /(player.MaxFireDelay *3 +1)
             if c_sectionCharge < MAX_TEARS_DPS_C_SECTION then c_sectionCharge = MAX_TEARS_DPS_C_SECTION end
-            addToCharge = addToCharge * (c_sectionCharge /BASE_TEAR_DPS)
+            addToCharge = addToCharge * (c_sectionCharge /BASE_TEAR_DPS * 1.25)
         else
-            addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(player.MaxFireDelay) /BASE_TEAR_DPS)
+            addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(player.MaxFireDelay) /BASE_TEAR_DPS * 1.25)
         end
-    
+        if entShooting.Type == 3 and player:HasTrinket(TrinketType.TRINKET_FORGOTTEN_LULLABY) then
+            addToCharge = addToCharge * 2
+        end
         data.MagicStaff_ChargeBar.Charge = math.min(data.MagicStaff_ChargeBar.Charge +addToCharge, data.MagicStaff_ChargeBar.MaxCharge)
-
-        if player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
+        
+        if player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) or SoyMilkMod then
             if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
                 --save.ManaCharge = save.ManaCharge -BECKY_B.ManaTearCost
                 --ShootManaTear(player, entShooting)
                 BECKY_B:FireWeapon(entShooting, player)
-                data.MagicStaff_HasSwing = false
             end
 
             data.MagicStaff_ChargeBar.Charge = 0
+        else
+            local fireDelay = weapon:GetFireDelay()
+            if fireDelay < 0.5 then fireDelay = 0.5 end
+            weapon:SetFireDelay(fireDelay)
         end
     else
-        data.MagicStaff_HasSwing = false
-
         if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
             --save.ManaCharge = save.ManaCharge -BECKY_B.ManaTearCost
             --ShootManaTear(player, entShooting)
@@ -262,39 +164,6 @@ local function ProcessStaffSwing(entShooting, player)
         data.MagicStaff_ChargeBar.Charge = 0
     end
 end
-
-
-function BECKY_B:SetMagicStaffWeapon(owner)
-    local knife = Isaac.Spawn(8, BECKY_B.MagicStaffId, 0, owner.Position, Vector.Zero, owner):ToKnife()
-    knife:GetSprite():Load(taintedBeckysWandAnim, true)
-
-    -- Doing this because a player cannot be the parent of a spawned knife (i guess)
-    local eff = Isaac.Spawn(1000, BECKY_B.MagicStaffDummyId, 0, owner.Position, Vector.Zero, owner):ToEffect()
-    eff.Timeout = -1
-    eff.Visible = false
-    eff.Child = knife -- if the knife is not the child of something gets deleted (this does not work on the player as far i tested :[ )
-    knife.Parent = eff
-    knife:AddEntityFlags(EntityFlag.FLAG_PERSISTENT)
-    eff:AddEntityFlags(EntityFlag.FLAG_PERSISTENT)
-    knife:GetSprite():Play("Idle", true)
-    eff.Parent = owner
-    eff:FollowParent(owner)
-    if owner.Type == 3 then
-        if owner.Variant == FamiliarVariant.TWISTED_BABY then
-            knife.Scale = 0.5
-            knife.SpriteScale = Vector(0.5, 0.5)
-        else
-            knife.Scale = 0.75
-            knife.SpriteScale = Vector(0.75, 0.75)
-        end
-    else knife.Scale = 1
-    end
-
-    local data = owner:GetData()
-    data.MagicStaff_Ent = knife
-    data.MagicStaff_SwingCool = data.MagicStaff_SwingCool or 0
-end
-
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function(_, player)
@@ -309,10 +178,10 @@ end)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, 200, function(_, player, cacheFlags)
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     if CacheFlag.CACHE_DAMAGE & cacheFlags > 0 then
-        player.Damage = player.Damage * 1.35
+        player.Damage = player.Damage * 0.5
     elseif CacheFlag.CACHE_FIREDELAY & cacheFlags > 0 then
         local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
-        tps = tps * 0.6666 + 0.12
+        --tps = tps * 0.42
         player.MaxFireDelay = BeckyMod:toMaxFireDelay(tps)
     end
 end)
@@ -320,33 +189,30 @@ end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
-    if player:CanShoot() then player:SetCanShoot(false) end
     if player:IsDead() then return end
-    local data = player:GetData()
-    local effects = player:GetEffects()
-    if effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_BERSERK) or effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_NOTCHED_AXE) then
-        if data.MagicStaff_Ent and data.MagicStaff_Ent:Exists() then
-            data.MagicStaff_Ent:Remove()
-        end
-        return
+    local weapon = player:GetWeapon(1)
+    if weapon == nil or weapon:GetWeaponType() ~= WeaponType.WEAPON_BONE then
+        if weapon then Isaac.DestroyWeapon(weapon) end
+        weapon = Isaac.CreateWeapon(WeaponType.WEAPON_BONE, player)
+        player:SetWeapon(weapon, 1)
+        player:EnableWeaponType(WeaponType.WEAPON_BONE, 1)
+        --player:SetWeapon()
+        player:AddCacheFlags(CacheFlag.CACHE_DAMAGE| CacheFlag.CACHE_FIREDELAY, true)
     end
-
-    if not data.MagicStaff_Ent or not data.MagicStaff_Ent:Exists() then
-        --print("no ent")
-        BECKY_B:SetMagicStaffWeapon(player)
+    if weapon:GetMainEntity() == nil then return end
+    local data = player:GetData()
+    if data.MagicStaff_ChargeBar and data.MagicStaff_ChargeBar.Charge > 0 then
+        weapon:SetCharge(1.0)
+    else
+        weapon:SetCharge(0.0)
     end
 end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE or player:IsDead() then return end
     local data = player:GetData()
-
-    if data.MagicStaff_Ent then
-        if data.MagicStaff_SwingCool > 0 then
-            data.MagicStaff_SwingCool = data.MagicStaff_SwingCool -1
-        end
-        ProcessStaffSwing(player, player)
-    end
+    
+    ProcessStaffSwing(player, player)
 end)
 
 
@@ -356,26 +222,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
     local player = fam.Player
     if player == nil or player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     
-    if player:CanShoot() then player:SetCanShoot(false) end
     if player:IsDead() then return end
+    local weapon = fam:GetWeapon()
+    if weapon == nil or weapon:GetMainEntity() == nil then return end
+    
     local data = fam:GetData()
-    local effects = player:GetEffects()
-    if effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_BERSERK) or effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_NOTCHED_AXE) then
-        if data.MagicStaff_Ent and data.MagicStaff_Ent:Exists() then
-            data.MagicStaff_Ent:Remove()
-        end
-        return
+    if data.MagicStaff_ChargeBar and data.MagicStaff_ChargeBar.Charge > 0 then
+        weapon:SetCharge(1.0)
+    else
+        weapon:SetCharge(0.0)
     end
-
-    if not data.MagicStaff_Ent or not data.MagicStaff_Ent:Exists() then
-        BECKY_B:SetMagicStaffWeapon(fam)
-    elseif data.MagicStaff_SwingCool then
-        if data.MagicStaff_SwingCool > 0 then
-            data.MagicStaff_SwingCool = data.MagicStaff_SwingCool -1
-        end
-        ProcessStaffSwing(fam, player)
-    end
-
+    ProcessStaffSwing(fam, player)
 end)
 
 
@@ -397,6 +254,8 @@ end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, function(_, ent, dmg, dmgFlags, src, cooldown)
     if ent.Type == 1 or dmg <= 0 then return end
+    if not BeckyMod.IsEnemy(ent) or not ent:CanShutDoors() or ent:ToNPC() == nil then return end
+    if not (ent:GetEntityFlags() & (EntityFlag.FLAG_FRIENDLY | EntityFlag.FLAG_ICE_FROZEN) > 0 or dmgFlags & (DamageFlag.DAMAGE_FAKE | DamageFlag.DAMAGE_CLONES) ) then return end
     local player = src.Entity
     if player == nil then return
     else player = BeckyMod:TryGetPlayer(player, false) end
@@ -404,12 +263,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, function(_, ent, dmg,
         player = player:ToPlayer()
     else return end
 
-    if player:GetPlayerType() == BECKY_B.PLAYERTYPE then
-        local data = player:GetData()
-        if not (data.NoChargeMana and data.NoChargeMana > 0) then
-            local save = BeckyMod:RunSave(player)
-            save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *1.36
-        end
+    if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
+    local data = player:GetData()
+    if not (data.NoChargeMana and data.NoChargeMana > 0) then
+        local save = BeckyMod:RunSave(player)
+        save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *1.36
     end
 end)
 
@@ -417,69 +275,9 @@ end)
 -------------------------------------------------
 ----------------MAGIC STAFF STUFF----------------
 -------------------------------------------------
-BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_INIT, function(_, knife)
-    if knife.Variant ~= BECKY_B.MagicStaffId then return end
-    knife:GetSprite():Play("Idle", true)
-end)
-
-BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
-    if knife.Variant ~= BECKY_B.MagicStaffId then return end
-    
-    knife.PathOffset = 5
-    knife.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
-    knife.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_NONE
-
-    local owner = knife.SpawnerEntity
-    if owner == nil then return end
-    local player
-    if owner.Type == 1 then
-        player = knife.SpawnerEntity:ToPlayer()
-    elseif owner.Type == 3 then
-        local fam = knife.SpawnerEntity:ToFamiliar()
-        if fam.FireCooldown > 0 then return end
-        player = fam.Player
-    end
-    if player == nil then return end
-
-    local sp = knife:GetSprite()
-    if not ( (sp:IsPlaying("Swing") or sp:IsPlaying("Swing2")) and sp:GetFrame() >0) then
-        local angle
-        if owner.Type ~= 1 then
-            angle = GetAimAngle(owner, player)
-        else
-            angle = player:GetAimDirection()
-            if angle:Length() == 0 then
-                angle = player:GetMovementJoystick()
-                if angle:Length() == 0 then
-                    angle = DirToVector[1]
-                end
-            end
-            angle = angle:GetAngleDegrees()
-        end
-
-        if owner.Type == 3 and owner.Variant == FamiliarVariant.CAINS_OTHER_EYE then
-            local rng = owner:GetDropRNG()
-            if player:HasCollectible(CollectibleType.COLLECTIBLE_ANALOG_STICK) then
-                angle = rng:RandomInt(360) -180
-            else
-                angle = -180 + (90 * rng:RandomInt(4))
-            end
-        end
-
-        knife.Rotation = angle
-    end
-    
-    knife.Position = owner.Position + BECKY_B.MagicStaff_Offset:Rotated(knife.Rotation)
-    if owner.Type == 3 then
-        knife.PositionOffset = BECKY_B.MagicStaff_PositionOffset * 2
-    else
-        knife.PositionOffset = BECKY_B.MagicStaff_PositionOffset
-    end
-end)
-
-local WEIRD_ROTATION_OFFSET = Vector(0,8)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_RENDER, function(_, knife, offset)
-    if knife.Variant ~= BECKY_B.MagicStaffId then return end
+    if not BECKY_B.ValidBoneClubs[knife.Variant] or knife.SubType == KnifeSubType.CLUB_HITBOX then return end
+    if GetBecky(knife.Parent) == nil then return end
 
     local sp = knife:GetSprite()
     local nullFrame = sp:GetNullFrame("flame")
@@ -487,15 +285,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_RENDER, function(_, knife, offse
     if nullFrame and nullFrame:IsVisible() then
         BECKY_B.StaffFireSprite.Scale = sp.Scale
         local pos = knife:GetNullOffset("flame")
-        if sp.Rotation < 180 and sp.Rotation > 0 then -- fixing the nullframe pos being wrong
-            pos.X = -pos.X
-            pos.Y = -pos.Y
-            
-            local mult = 1
-            if knife.SpawnerEntity and knife.SpawnerEntity:GetData().MagicStaff_SwingSide then mult = -1 end
-
-            pos = pos + (WEIRD_ROTATION_OFFSET * mult):Rotated(sp.Rotation)
-        end
 
         local room = game:GetRoom()
         BECKY_B.StaffFireSprite:SetFrame("flame", knife.FrameCount %4)
@@ -503,14 +292,37 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_RENDER, function(_, knife, offse
     end
 end)
 
-BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
-    if eff.Parent == nil or eff.Child == nil then
-        if eff.Child then eff.Child:Remove() end
-        eff:Remove()
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
+    local player = GetBecky(knife.Parent)
+    if player == nil then return end
+    if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
+    if knife.FrameCount >1 then
+        knife.Charge = -1
         return
     end
-end, BECKY_B.MagicStaffDummyId)
 
+    local sp = knife:GetSprite()
+    sp:Load(taintedBeckysWandAnim, true)
+    sp:Play("Idle", true)
+end, KnifeSubType.DEFAULT)
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
+    local player = GetBecky(knife.Parent)
+    if player == nil then return end
+    if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
+    if knife.FrameCount >1 then 
+        knife.SpriteScale = knife:GetHitboxParentKnife().SpriteScale * 1.33
+        knife:GetSprite().Color.A = 0.0
+        return
+    end
+
+    local sp = knife:GetSprite()
+    local isPlaying = sp:GetAnimation()
+    sp:Load(taintedBeckysWandAnim, true)
+    sp:Play(isPlaying, true)
+    sp.Color.A = 0.0
+end, KnifeSubType.CLUB_HITBOX)
 
 
 ----------------------------------------------------------------------------
@@ -583,14 +395,6 @@ end)
 -----------------------------------------------------------------------------------
 
 
---- TODO:
---- * Recreate "Marked" item
----     * the mark movement
----     * the mark line
----     * overwrite the "GetMarkedTarget" function to return this mark entity
----     * the mark line
---- * Make Incubus, Gello, Twisted Pair, etc. use this knife variant and other stuff
-
 ---@param entShooting   - the entity that is shooting. can be the player or a familiar
 ---@param player        - entity player
 ---@param forceDir      - force a shooting direction
@@ -607,9 +411,14 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
     local scale = player.Size
     local mult = 1
     local weaponList = {}
+
+    if player:GetPlayerType() == BECKY_B.PLAYERTYPE then
+        mult = 3.25
+    end
+
     if entShooting.Type == 3 then
         local fam = entShooting:ToFamiliar()
-        mult = 0.75
+        mult = mult * 0.75
         if entShooting.Variant == FamiliarVariant.TWISTED_BABY then
             mult = mult /2
         end

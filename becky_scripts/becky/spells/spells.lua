@@ -175,13 +175,24 @@ local function renderPlayerSpellSelection(player)
             ::continue::
         end
     else
-        local spell = data.MagicStaff_SelectSpellDir.Type
+        local selectData = data.MagicStaff_SelectSpellDir
+        local spell = selectData.Type
         if SPELLS_FRAME[spell] == nil then spell = 0 end
         SPELLS_SPRITE:SetFrame("Spells", SPELLS_FRAME[spell])
         SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos))
-        for i=1, 4 do
-            SPELLS_SPRITE:SetFrame("Directions", i-1)
-            SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos + SELECTION_POS.OFFSETS[i]))
+        if selectData.Choices then
+            selectData.Choices.Anim = selectData.Choices.Anim or "Spells"
+            for i=0, 3 do
+                if selectData.Choices[i] then
+                    SPELLS_SPRITE:SetFrame("Spells", selectData.Choices[i])
+                    SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos + SELECTION_POS.OFFSETS[i+1]))
+                end
+            end
+        else
+            for i=1, 4 do
+                SPELLS_SPRITE:SetFrame("Directions", i-1)
+                SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos + SELECTION_POS.OFFSETS[i]))
+            end
         end
     end
 end
@@ -255,6 +266,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local spell
     if data.MagicStaff_SelectSpellDir then
         spell = data.MagicStaff_SelectSpellDir.Type
+        if data.MagicStaff_SelectSpellDir.Choices and data.MagicStaff_SelectSpellDir.Choices[dir] == nil then return end
         data.MagicStaff_SelectSpellDir.Dir = dir
     else
         spell = SPELLS:GetSpells(player)[dir +1]
@@ -269,6 +281,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
             if player:GetItemState() == BeckyMod.Item.MAGIC_STAFF.ID then
                 player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.ID, "HideItem")
+                player:ResetItemState()
+                
+            elseif player:GetItemState() == BeckyMod.Item.MAGIC_STAFF.TAINTED_BECKY_ID then
+                player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.TAINTED_BECKY_ID, "HideItem")
                 player:ResetItemState()
             end
             data.MagicStaff_SelectingSpell = false
