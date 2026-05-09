@@ -227,7 +227,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, BECKY.onBossDeath)
 function BECKY:checkAngelRoomGen()
     local player = PlayerManager.FirstPlayerByType(BECKY.PLAYERTYPE)
     if not player then return end
-
+    
     local runSave = BeckyMod:RunSave(player)
     local floorSave = BeckyMod:FloorSave(player)
 
@@ -241,7 +241,14 @@ function BECKY:checkAngelRoomGen()
 end
 -- end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, BECKY.checkAngelRoomGen)
+---@param player EntityPlayer
+function BECKY:PostPlayerUpdate(player) -- "clog" kidney stone to prevent it firing from becky
+    if player:GetPlayerType() == BECKY.PLAYERTYPE then
+        player:SetUrethraBlock(false)
+    end
+end
 
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, BECKY.PostPlayerUpdate)
 ---@param player EntityPlayer
 ---@param flag CacheFlag
 function BECKY:BeckyStats(player, flag)
@@ -264,7 +271,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, BeckyMod.SetItemPrice, Pi
 --Auri Compat
 function BECKY:Onupdate(player)
 	if (player:GetName() == "Becky") then
-	
+        
 	uniqueprogressbar = true
 	end
 end

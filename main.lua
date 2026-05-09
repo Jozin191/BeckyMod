@@ -123,14 +123,14 @@ for i, name in pairs({
     "EvilEye",
     "Neptunus",
     "LargeZit",
+    "MonstrosLungLeadPencil",
+    "KidneyStone",
     -- Wip
     "EyeOfBelial",
     "LumpOfCoalAndProptosis",
-    "MonstrosLungLeadPencil",
     "RubberCement",
-    "KidneyStone",
     "Trisagion",
-    "Worms"
+    "Worms" -- dunno
 }) do
     include("becky_scripts.becky.items.passives.GhostAmuletSynergies." .. name)
 end

@@ -374,6 +374,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         if not ghost then goto continue end
 
         local ghostData = ghost:GetData()
+        uc = ghostData.URETHRACHARGE or 0
+        if not ghostData.URETHRABLAST then
+            uc = 1
+        else
+            uc = 1-(uc*.7)
+        end
         local ghostTrail = ghostData.GhostTrail 
 
         if not ghostTrail or not ghostTrail:Exists() then
@@ -446,10 +452,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 return
             end
             local resizer = 1.5 * shotSpeed
-            ghost.Velocity = ghost.Velocity + (ghost.Target.Position - ghost.Position):Normalized():Resized(resizer)
+            ghost.Velocity = ghost.Velocity + (ghost.Target.Position - ghost.Position):Normalized():Resized(resizer)*uc
 
             if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
-                ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) 
+                ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) *uc
             end
         elseif marked or isShooting then
             if marked or not player:AreOpposingShootDirectionsPressed() then
@@ -552,11 +558,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                     local angle = 45*(((ghostData.GHOST_IDX or 1) % 2)*2+-1)
                     final = final:Rotated(angle)
                 end
-                ghost.Velocity = ghost.Velocity + final
+                ghost.Velocity = ghost.Velocity + final*uc
 
                 if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
-                    ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove))
+                    ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove))*uc
                 end
+
 
                 if not marked then
                     local dir = (famPos - playerPos):Normalized()
@@ -571,7 +578,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
             ghost.State = 0    
             if posDifLenght > maxDistIdle then
-                ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) 
+                ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) *uc
             end
         end
 
