@@ -269,7 +269,7 @@ end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(player, ID)
     if ID ~= GHOST_AMULET.ID then return end
-    if id == CollectibleType.COLLECTIBLE_CONTINUUM then
+    if ID == CollectibleType.COLLECTIBLE_CONTINUUM then
         local playerData = player:GetData()
         local ghosts = playerData.GhostBalls
 
@@ -651,14 +651,30 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
             gridFromPos:Destroy()
         end
     end
-
+    ghostData.ANGELICCD = math.max((ghostData.ANGELICCD or 0)-1, 0)
     for _, gh in ipairs(Isaac.FindInCapsule(familiar:GetCollisionCapsule())) do
-        if gh.Type == familiar.Type then
+        if gh.Type == EntityType.ENTITY_FAMILIAR then
             local vel = (familiar.Position - gh.Position):Resized(1)
             if vel:Length() < 1 then vel = Vector(1,0):Rotated(vel:GetAngleDegrees()) end
 
             familiar.Velocity = familiar.Velocity + vel
-            gh.Velocity = gh.Velocity - vel
+            if gh.Variant == familiar.Variant  then
+                gh.Velocity = gh.Velocity - vel
+            elseif gh.Variant == FamiliarVariant.ANGELIC_PRISM and (ghostData.ANGELICCD == 0) then
+                ghostData.ANGELICCD = (player.MaxFireDelay+1)*.67
+                local colors = {
+                    {0.541176, 0.607843, -0.392157},
+                    {-0.392157, 0.607843, -0.262745},
+                    {-0.392157, 0.403922, 0.607843},
+                    {0.607843, -0.392157, -0.392157}
+                }
+                for i = 1, 4 do
+                    local tear = player:FireTear(gh.Position, Vector(1, 0):Rotated((i/4)*360) * (player.ShotSpeed * 10))
+                    tear:SetPrismTouched(true)
+                    tear.Color = tear.Color*Color(1,1,1,1,colors[i][1], colors[i][2], colors[i][3])
+                end
+            end
+            
         end
     end
 

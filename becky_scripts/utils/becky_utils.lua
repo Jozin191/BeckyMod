@@ -1,3 +1,4 @@
+---@class ModReference
 local mod = BeckyMod
 
 --- No idea how to explain this lol.

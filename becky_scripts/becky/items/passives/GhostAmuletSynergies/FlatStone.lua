@@ -1,9 +1,6 @@
-local function toTearsPerSecond(maxFireDelay)
-  return 30 / (maxFireDelay + 1)
-end
 
 local function getBounce(player)
-    return math.min(toTearsPerSecond(player.MaxFireDelay)*.5, 10)
+    return math.min(BeckyMod:toTearsPerSecond(player.MaxFireDelay)*.3+.2, 30)
 end
 ---@param fam EntityFamiliar
 ---@param tearParams TearParams
@@ -18,16 +15,17 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function (_, fam, t
         data.GTH = 0
         data.GTVeloH = bounce*3
         local splash = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.RIPPLE_POOF, 0,  fam.Position, Vector.Zero, fam):ToEffect()
-        splash.SpriteScale = fam.SpriteScale
+        splash.SpriteScale = fam.SpriteScale*1.25
         splash.Color = tearParams.TearColor
+        splash:GetSprite():ReplaceSpritesheet(0, "gfx/effect_ripplepoof_ghost.png", true)
         SFXManager():Play(SoundEffect.SOUND_TEARIMPACTS, .3, 0, false, 1.2)
-        local enemies = Isaac.FindInRadius(fam.Position, fam.Size*2.5, EntityPartition.ENEMY)
+        local enemies = Isaac.FindInRadius(fam.Position, fam.SizeMulti:Length()*37.5, EntityPartition.ENEMY)
         for i, v in pairs(enemies) do
             local npc = v:ToNPC()
             if npc then
-                npc:ApplyTearflagEffects(fam.Position, tearParams.TearFlags, fam, tearParams.TearDamage*.25)
-                npc:TakeDamage(tearParams.TearDamage*.25, 0, EntityRef(fam), 0)
-                npc:AddVelocity((npc.Position-fam.Position):Normalized())
+                npc:ApplyTearflagEffects(fam.Position, tearParams.TearFlags, fam, tearParams.TearDamage*.5)
+                npc:TakeDamage(tearParams.TearDamage, 0, EntityRef(fam), 0)
+                --npc:AddVelocity((npc.Position-fam.Position):Normalized()*5) i just found out that the puddle doesnt knock enemies back in vanilla 
             end
         end
     end

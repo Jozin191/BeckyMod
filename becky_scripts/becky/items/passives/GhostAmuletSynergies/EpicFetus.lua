@@ -56,6 +56,6 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, fam, of
     if cd <= 0 then
         local anim = ghostsprite:GetLayerFrameData(0)
         target.Scale = anim:GetScale()*.5
-        target:Render(Isaac.WorldToRenderPosition(fam.Position+Vector(0,-15*anim:GetScale().Y)+anim:GetPos())+offset)
+        target:Render(Isaac.WorldToRenderPosition(fam.Position+Vector(0,-15*anim:GetScale().Y)+anim:GetPos()+fam.PositionOffset)+offset)
     end
 end)
