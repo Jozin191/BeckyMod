@@ -127,7 +127,6 @@ for i, name in pairs({
     "KidneyStone",
     -- Wip
     "EyeOfBelial",
-    "LumpOfCoalAndProptosis",
     "RubberCement",
     "Trisagion",
     "Worms" -- dunno

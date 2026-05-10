@@ -14,7 +14,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function (_, fam)
         urethracharge = math.min(urethracharge+(1/(30*25)), 1) -- 25 secs I think
         if urethracharge >= 1 then
             fam:SetColor(Color(1,.55+(.15*math.cos(fam.FrameCount)),.55+(.15*math.cos(fam.FrameCount)),1,0,0,0), 2, 1000, false, false)
-            fam.Velocity = fam.Velocity*.75
+            fam.Velocity = fam.Velocity*.9
         end
     else
         urethracharge = math.max((urethracharge*.99)-.0013, 0)
@@ -65,6 +65,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, np
         ukiddin.CollisionDamage = tearParams.TearDamage*10
         urethradir = (npc.Position-fam.Position):GetAngleDegrees()
         blasting = true
+        npc:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
         Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.BLOOD_SPLAT, 0, fam.Position, Vector.Zero, fam)
     end
     data.URETHRADIR = urethradir

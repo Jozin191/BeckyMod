@@ -25,10 +25,12 @@ end
 ---@param pos? Vector
 ---@param velocity Vector
 ---@param amount? integer
-local function FireMonstroBurst(player, rng, pos, velocity, amount)
+---@param spread? number
+local function FireMonstroBurst(player, rng, pos, velocity, amount, spread)
     local amount = amount or 14
+    local spread = spread or 20
     for i =  1, amount do
-        local velo = (velocity*((rng:RandomFloat()*7)+7)):Rotated((rng:RandomFloat()*40)-20)
+        local velo = (velocity*((rng:RandomFloat()*7)+7)):Rotated((rng:RandomFloat()*spread*2)-spread)
         local tear = player:FireTear(pos or player.Position, velo, true, false, false, player, 1)
         tryChangeTearToBloodVariant(tear)
 
@@ -66,11 +68,11 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, np
     local data = fam:GetData()
     if player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) then 
         if data.LUNGCHARGE >= 1 then
-            FireMonstroBurst(player, player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG), fam.Position, (npc.Position-fam.Position):Normalized(), 14)
+            FireMonstroBurst(player, player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG), fam.Position, (npc.Position-fam.Position):Normalized(), 14, 35)
             SFXManager():Play(SoundEffect.SOUND_MONSTROS_LUNG_BARF, 1.5)
             data.LUNGCHARGE = 0
         else
-            data.LUNGCHARGE = math.max(data.LUNGCHARGE-.2, 0)
+            data.LUNGCHARGE = math.max(data.LUNGCHARGE-.1, 0)
         end
     end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LEAD_PENCIL) then return end

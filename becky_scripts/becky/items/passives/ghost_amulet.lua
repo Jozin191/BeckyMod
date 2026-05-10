@@ -374,7 +374,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         if not ghost then goto continue end
 
         local ghostData = ghost:GetData()
-        uc = ghostData.URETHRACHARGE or 0
+        local uc = ghostData.URETHRACHARGE or 0
         if not ghostData.URETHRABLAST then
             uc = 1
         else
@@ -619,9 +619,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local currentAnim = GhostSprite:GetAnimation()
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
     local GhostSize = Vector.One * exp((player.Damage / 5) * ghostData.ChocolateMilkMult, 1, 1.2)
-    local gridFromPos = room:GetGridEntityFromPos(familiar.Position)
+    local gridFromPos = room:GetGridEntityFromPos(familiar.Position+familiar.Velocity/2)
     local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
-
+    
     local wide = (player:GetTrinketMultiplier(TrinketType.TRINKET_FLAT_WORM)+player:GetCollectibleNum(CollectibleType.COLLECTIBLE_PUPULA_DUPLEX))*.5
     familiar.SizeMulti = GhostSize*Vector(1+wide, 1+wide) -- making it an oval would probably mess some other stuff up
     familiar.SpriteScale = GhostSize*Vector(1+wide, 1)
@@ -646,7 +646,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         GhostSprite:Play("RegularTear1")
     end
 
-    if gridFromPos and familiar.FrameCount % 5 == 0 then
+    if gridFromPos and (familiar.FrameCount % 5 == 0 or (tearParams.TearFlags & TearFlags.TEAR_ROCK == TearFlags.TEAR_ROCK)) then
         local hurtVal = 1
 
         if gridFromPos:ToPoop() and gridFromPos:GetVariant() == 3 then
@@ -654,7 +654,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         end
 
         gridFromPos:Hurt(hurtVal)
-        if math.random()<=.45 and ((tearParams.TearFlags & TearFlags.TEAR_ACID == TearFlags.TEAR_ACID) or (tearParams.TearFlags & TearFlags.TEAR_ROCK == TearFlags.TEAR_ROCK)) then
+        if (math.random()<=.45 and (tearParams.TearFlags & TearFlags.TEAR_ACID == TearFlags.TEAR_ACID)) or (tearParams.TearFlags & TearFlags.TEAR_ROCK == TearFlags.TEAR_ROCK) then
             gridFromPos:Destroy()
         end
     end
@@ -684,6 +684,26 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
             
         end
     end
+    --- Lump of coal and prop
+        local distance = (player.Position-familiar.Position):Length()
+        local grow = Vector.Zero
+        if (tearParams.TearFlags & TearFlags.TEAR_GROW == TearFlags.TEAR_GROW) then
+            grow = Vector.One*distance/550
+            ghostData.CoalBonus = distance/35
+        else
+            ghostData.CoalBonus = 0
+        end
+        local shrink = Vector.One
+        if (tearParams.TearFlags & TearFlags.TEAR_SHRINK == TearFlags.TEAR_SHRINK) then
+            local distance = math.max(distance-60,0)
+            shrink = (Vector.One*1.5)*(250/(distance+250))
+            ghostData.ProptosisMulti = (5/((distance/5)+5))
+
+        else
+            ghostData.ProptosisMulti = 1
+        end
+        familiar.SpriteScale = (familiar.SpriteScale+grow)*shrink
+        familiar.SizeMulti = (familiar.SizeMulti+grow)*shrink
 
     Isaac.RunCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, familiar, tearParams)
 end, GHOST_BALL_VAR)
@@ -714,7 +734,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     local player = familiar.Player
     local ghostData = familiar:GetData()
     local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
-    local baseDamage = GHOST_AMULET:GetGhostDamage(player, tearParams.TearDamage) * ghostData.ChocolateMilkMult
+    local baseDamage = (GHOST_AMULET:GetGhostDamage(player, tearParams.TearDamage) + (ghostData.CoalBonus or 0)) * ghostData.ChocolateMilkMult * (ghostData.ProptosisMulti or 1)
 
     local multi = 1
     if tearParams.TearFlags & TearFlags.TEAR_KNOCKBACK == TearFlags.TEAR_KNOCKBACK then
