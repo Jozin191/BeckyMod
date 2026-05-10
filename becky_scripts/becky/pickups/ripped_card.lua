@@ -11,7 +11,7 @@ RIPPED_CARD.NULL_Items = {
     Strength = Isaac.GetNullItemIdByName("RIPPED_CARD_Strength"),
     The_Hanged_Man = Isaac.GetNullItemIdByName("RIPPED_CARD_The_Hanged_Man"),
 }
-RIPPED_CARD.Achievement = Isaac.GetEntityVariantByName("Ripped Card")
+RIPPED_CARD.Achievement = Isaac.GetAchievementIdByName("Ripped Card")
 local game = BeckyMod.Game
 
 
@@ -139,8 +139,11 @@ local CARDS_EFFECTS = {
 
     end,
     [Card.CARD_STARS] = function(player, rng)
-        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_TREASURE, rng)
-
+        if game:GetLevel():QueryRoomTypeIndex(RoomType.ROOM_PLANETARIUM, true, rng) >= 0 then
+            RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_PLANETARIUM, rng)
+        else
+            RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_TREASURE, rng)
+        end
     end,
     [Card.CARD_MOON] = function(player, rng)
         RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_SECRET, rng)
@@ -172,6 +175,72 @@ local CARDS_EFFECTS = {
     end,
     [Card.CARD_JUDGEMENT] = function(player, rng)
         --- TO DO
+        if rng:RandomInt(3) == 0 and player:GetHearts() + player:GetSoulHearts() + player:GetBoneHearts()*2 > 2 then
+            player:TakeDamage(1, DamageFlag.DAMAGE_RED_HEARTS | DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 30)
+
+            local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
+            local drop = rng:RandomInt(8)
+            if drop <= 1 then
+                Isaac.Spawn(5, 70, 0, spawnPos, Vector.Zero, player)
+            elseif drop <= 3 then
+                Isaac.Spawn(5, 300, 0, spawnPos, Vector.Zero, player)
+            elseif drop == 4 then
+                Isaac.Spawn(5, 350, 0, spawnPos, Vector.Zero, player)
+            else
+                local item = game:GetItemPool():GetCollectible(ItemPoolType.POOL_DEMON_BEGGAR, true, rng:Next(), CollectibleType.COLLECTIBLE_BREAKFAST, ItemPoolType.POOL_DEMON_BEGGAR)
+                Isaac.Spawn(5, 100, item, spawnPos, Vector.Zero, player)
+                Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, spawnPos, Vector.Zero, nil)
+            end
+            return
+        end
+
+        if player:GetNumCoins() > 0 then
+            player:AddCoins(-1)
+            local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
+            
+            local drop = rng:RandomInt(4)
+            if drop <= 1 then
+                if player:HasTrinket(TrinketType.TRINKET_DAEMONS_TAIL) then
+                    drop = rng:RandomInt(15)
+                    if drop == 0 then
+                        Isaac.Spawn(5, 10, 0, spawnPos, Vector.Zero, player)
+                    elseif drop <= 7 then
+                        Isaac.Spawn(5, 30, 0, spawnPos, Vector.Zero, player)
+                    else
+                        Isaac.Spawn(5, 40, 0, spawnPos, Vector.Zero, player)
+                    end
+                else
+                    drop = rng:RandomInt(3)
+                    if drop == 0 then
+                        Isaac.Spawn(5, 10, 0, spawnPos, Vector.Zero, player)
+                    elseif drop == 1 then
+                        Isaac.Spawn(5, 30, 0, spawnPos, Vector.Zero, player)
+                    else
+                        Isaac.Spawn(5, 40, 0, spawnPos, Vector.Zero, player)
+                    end
+                end
+            elseif drop == 3 then
+                Isaac.Spawn(5, 300, 0, spawnPos, Vector.Zero, player)
+            else
+                local item = CollectibleType.COLLECTIBLE_BREAKFAST
+                if rng:RandomInt(2) == 0 then
+                    drop = rng:RandomInt(5)
+                    if drop == 0 then
+                        item = CollectibleType.COLLECTIBLE_LUNCH
+                    elseif drop == 1 then
+                        item = CollectibleType.COLLECTIBLE_DINNER
+                    elseif drop == 2 then
+                        item = CollectibleType.COLLECTIBLE_DESSERT
+                    elseif drop == 3 then
+                        item = CollectibleType.COLLECTIBLE_ROTTEN_MEAT
+                    end
+                else
+                    item = game:GetItemPool():GetCollectible(ItemPoolType.POOL_BEGGAR, true, rng:Next(), CollectibleType.COLLECTIBLE_BREAKFAST, ItemPoolType.POOL_BEGGAR)
+                end
+                Isaac.Spawn(5, 100, item, spawnPos, Vector.Zero, player)
+                Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF01, 0, spawnPos, Vector.Zero, nil)
+            end
+        end
     end,
     [Card.CARD_WORLD] = function(player, rng)
         game:GetLevel():ApplyCompassEffect()
@@ -237,21 +306,9 @@ end
 
 function RIPPED_CARD.TeleportOutsideOf(roomType, rng)
     local level = game:GetLevel()
-    local returnList = {}
-	local checkedSafeGrids = {}
+    local roomIdx = level:QueryRoomTypeIndex(RoomType.ROOM_PLANETARIUM, true, rng)
 
-	local levelRooms = level:GetRooms()
-	for i = 0, levelRooms.Size -1 do
-		local gridIdx = levelRooms:Get(i).SafeGridIndex
-		local rType = levelRooms:Get(i).Data.Type
-
-		if rType == roomType and not checkedSafeGrids[gridIdx] then
-			checkedSafeGrids[gridIdx] = true
-			table.insert(returnList, levelRooms:Get(i))
-		end
-	end
-
-    if #returnList == 0 then
+    if roomIdx < 0 then
         level.LeaveDoor = -1
         game:StartRoomTransition(
             level:GetRandomRoomIndex(false, rng:Next()),
@@ -263,12 +320,12 @@ function RIPPED_CARD.TeleportOutsideOf(roomType, rng)
         return
     end
 
-    local roomDesc = returnList[ rng:RandomInt(1, #returnList) ]
+    local roomDesc = level:GetRoomByIdx(roomIdx, 0)
     local neighbors = {}
 
     for doorSlot, neighDesc in pairs(roomDesc:GetNeighboringRooms()) do
-        if neighDesc.Data and neighDesc.Data.Type ~= RoomType.ROOM_SECRET then
-            table.insert(neighbors, neighDesc)
+        if neighDesc.Data and neighDesc.Data.Type == RoomType.ROOM_DEFAULT then
+            table.insert(neighbors, {neighDesc, doorSlot})
         end
     end
 
@@ -285,14 +342,14 @@ function RIPPED_CARD.TeleportOutsideOf(roomType, rng)
     end
 
     local targetRoom = neighbors[ rng:RandomInt(1, #neighbors) ]
-    level.LeaveDoor = -1
+    level.LeaveDoor = targetRoom[2]
 
     game:StartRoomTransition(
-        targetRoom.SafeGridIndex,
+        targetRoom[1].SafeGridIndex,
         -1,
         RoomTransitionAnim.TELEPORT,
         player,
-        targetRoom:GetDimension()
+        targetRoom[1]:GetDimension()
     )
 end
 
@@ -354,6 +411,20 @@ function RIPPED_CARD:OnNewRoom()
     DO_ON_NEW_ROOM = {}
 end
 
+function RIPPED_CARD:PlayerAddEffect(player, itemConfig, addCostume, count)
+    if not itemConfig:IsNull() and itemConfig.ID ~= RIPPED_CARD.NULL_Items.The_Hanged_Man then return end
+    if player:GetInnateCollectibleCount(CollectibleType.COLLECTIBLE_LADDER, "Ripped Card - Innate Ladder") == 0 then
+        player:AddInnateCollectible(CollectibleType.COLLECTIBLE_LADDER, 1, "Ripped Card - Innate Ladder", -1, true)
+    end
+end
+
+
+function RIPPED_CARD:PlayerRemoveEffect(player, itemConfig, count)
+    if not itemConfig:IsNull() and itemConfig.ID ~= RIPPED_CARD.NULL_Items.The_Hanged_Man then return end
+    if player:GetEffects():HasNullEffect(RIPPED_CARD.NULL_Items.The_Hanged_Man) then return end
+    player:ClearInnateItemGroup("Ripped Card - Innate Ladder")
+end
+
 
 function RIPPED_CARD:TearHitParams(player, tearParams, weaponType, damageScale, tearDisplacement, src)
     local effects = player:GetEffects()
@@ -397,9 +468,6 @@ function RIPPED_CARD:Cache(player, cacheFlags)
         if effects:HasNullEffect(RIPPED_CARD.NULL_Items.Strength) then
             player.MoveSpeed = player.MoveSpeed + 0.12 * effects:GetNullEffectNum(RIPPED_CARD.NULL_Items.Strength)
         end
-        if effects:HasNullEffect(RIPPED_CARD.NULL_Items.The_Hanged_Man) then
-            player.MoveSpeed = player.MoveSpeed + 0.06 * effects:GetNullEffectNum(RIPPED_CARD.NULL_Items.The_Hanged_Man)
-        end
     elseif cacheFlags & CacheFlag.CACHE_TEARFLAG == CacheFlag.CACHE_TEARFLAG then
         if effects:HasNullEffect(RIPPED_CARD.NULL_Items.The_Hanged_Man) then
             player.TearFlags = player.TearFlags | TearFlags.TEAR_SPECTRAL
@@ -435,7 +503,7 @@ end
 
 
 function RIPPED_CARD:GetCard(rng, cardId, includePlay, includeRunes, runesOnly)
-    --if not Isaac.GetPersistentGameData():Unlocked(RIPPED_CARD.Achievement) then return end
+    if not Isaac.GetPersistentGameData():Unlocked(RIPPED_CARD.Achievement) then return end
     if runesOnly then return end
     for _, player in ipairs(PlayerManager.GetPlayers()) do
         for slot=0, PillCardSlot.QUATERNARY do
@@ -456,3 +524,5 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, RIPPED_CARD.Cache)
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLECT_CARD, RIPPED_CARD.PreCollectCard, RIPPED_CARD.ID)
 BeckyMod:AddCallback(ModCallbacks.MC_GET_CARD, RIPPED_CARD.GetCard)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM , RIPPED_CARD.OnNewRoom)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_ADD_EFFECT, RIPPED_CARD.PlayerAddEffect)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_TRIGGER_EFFECT_REMOVED, RIPPED_CARD.PlayerRemoveEffect)

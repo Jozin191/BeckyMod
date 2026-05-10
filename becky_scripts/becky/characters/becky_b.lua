@@ -17,7 +17,7 @@ local sfx = BeckyMod.SFX
 
 BeckyMod.Character.BECKY_B = BECKY_B
 
-local BASE_TEAR_DPS = 30 /11
+local BASE_TEAR_DPS = 30 /11 /2
 local MAX_TEARS_DPS_C_SECTION = 30 / (149.66666667*3+1)
 local DirToVector = {
     [Direction.NO_DIRECTION] = Vector(0,-1),
@@ -97,7 +97,12 @@ local function ProcessStaffSwing(entShooting, player)
     --local save = BeckyMod:RunSave(player)
     if not player:IsExtraAnimationFinished() then
         if data.MagicStaff_ChargeBar then
-            if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
+            if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
+                if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /5 then
+                    data.MagicStaff_CursedEyeTears = math.ceil(data.MagicStaff_ChargeBar.MaxCharge / data.MagicStaff_ChargeBar.Charge)
+                    BECKY_B:FireWeapon(entShooting, player)
+                end
+            elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
                 --save.ManaCharge = save.ManaCharge -BECKY_B.ManaTearCost
                 --ShootManaTear(player, entShooting)
                 BECKY_B:FireWeapon(entShooting, player)
@@ -137,13 +142,22 @@ local function ProcessStaffSwing(entShooting, player)
         else
             addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(player.MaxFireDelay) /BASE_TEAR_DPS * 1.25)
         end
+        if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
+            addToCharge = addToCharge /5
+        end
         if entShooting.Type == 3 and player:HasTrinket(TrinketType.TRINKET_FORGOTTEN_LULLABY) then
             addToCharge = addToCharge * 2
         end
         data.MagicStaff_ChargeBar.Charge = math.min(data.MagicStaff_ChargeBar.Charge +addToCharge, data.MagicStaff_ChargeBar.MaxCharge)
         
         if player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) or SoyMilkMod then
-            if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
+            
+            if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
+                if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /5 then
+                    data.MagicStaff_CursedEyeTears = math.ceil(data.MagicStaff_ChargeBar.MaxCharge / data.MagicStaff_ChargeBar.Charge)
+                    BECKY_B:FireWeapon(entShooting, player)
+                end
+            elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
                 --save.ManaCharge = save.ManaCharge -BECKY_B.ManaTearCost
                 --ShootManaTear(player, entShooting)
                 BECKY_B:FireWeapon(entShooting, player)
@@ -156,7 +170,13 @@ local function ProcessStaffSwing(entShooting, player)
             weapon:SetFireDelay(fireDelay)
         end
     else
-        if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
+        
+        if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
+            if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /5 then
+                data.MagicStaff_CursedEyeTears = math.ceil(data.MagicStaff_ChargeBar.MaxCharge / data.MagicStaff_ChargeBar.Charge)
+                BECKY_B:FireWeapon(entShooting, player)
+            end
+        elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
             --save.ManaCharge = save.ManaCharge -BECKY_B.ManaTearCost
             --ShootManaTear(player, entShooting)
             BECKY_B:FireWeapon(entShooting, player)
@@ -245,6 +265,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
     local data = player:GetData()
     local manaCap = 100 - (data.MaxManaOffset or 0)
 
+    if BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.MANA_REGEN) and (data.NoChargeMana == nil or data.NoChargeMana <= 0) then
+        if not game:GetRoom():IsClear() then
+            local midCap = 50 - (data.MaxManaOffset or 0)
+            if save.ManaCharge < midCap then
+                save.ManaCharge = save.ManaCharge + 0.025
+            end
+        end
+    end
+
     if save.ManaCharge > 0 and data.ManaDischarge and data.ManaDischarge > 0 then
         save.ManaCharge = math.max(save.ManaCharge -data.ManaDischarge, 0)
     end
@@ -259,15 +288,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, function(_, ent, dmg,
     local player = src.Entity
     if player == nil then return
     else player = BeckyMod:TryGetPlayer(player, false) end
-    if player then
-        player = player:ToPlayer()
-    else return end
 
-    if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
+    if player == nil or player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     local data = player:GetData()
     if not (data.NoChargeMana and data.NoChargeMana > 0) then
         local save = BeckyMod:RunSave(player)
-        save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *1.36
+        save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *1.12
     end
 end)
 
@@ -312,7 +338,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     if player == nil then return end
     if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
     if knife.FrameCount >1 then 
-        knife.SpriteScale = knife:GetHitboxParentKnife().SpriteScale * 1.33
+        local parent = knife:GetHitboxParentKnife()
+        if parent ~= nil and parent.SpriteScale then
+            knife.SpriteScale = parent.SpriteScale * 1.33
+        end
         knife:GetSprite().Color.A = 0.0
         return
     end
@@ -324,6 +353,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     sp.Color.A = 0.0
 end, KnifeSubType.CLUB_HITBOX)
 
+
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_MULTI_SHOT_PARAMS, 3000, function(_, player, multishotParam, weaponType)
+    if player:GetPlayerType() == BECKY_B.PLAYERTYPE and weaponType == WeaponType.WEAPON_BONE then
+        multishotParam:SetNumTears(1)
+        multishotParam:SetNumLanesPerEye(1)
+        multishotParam:SetSpreadAngle(WeaponType.WEAPON_BONE, 0)
+        return multishotParam
+    end
+end)
 
 ----------------------------------------------------------------------------
 ---------------------------------BECKY HUD----------------------------------
@@ -418,11 +456,17 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
 
     if entShooting.Type == 3 then
         local fam = entShooting:ToFamiliar()
-        mult = mult * 0.75
         if entShooting.Variant == FamiliarVariant.TWISTED_BABY then
-            mult = mult /2
+            mult = mult * 0.375
+        elseif entShooting.Variant == FamiliarVariant.BLOOD_BABY then
+            mult = mult * 0.35
+        else
+            mult = mult * 0.75
         end
         mult = mult * fam:GetMultiplier()
+    end
+    if BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.SPELL_DMG_UP) then
+        mult = mult * 1.25
     end
 
     if forceMult then mult = forceMult end

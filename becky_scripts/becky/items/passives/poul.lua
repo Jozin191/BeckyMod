@@ -122,6 +122,7 @@ local function ShootGrid(fam, vel)
         local rng = fam:GetDropRNG()
         for i, grid in ipairs(grids) do
             local rangeOffset = 20 * (i-1)
+            if rangeOffset > 30 then rangeOffset = 30 end
             local gridTypeVar= grid:GetData().GridTypeVar
             local tear = Isaac.Spawn(2, TearVariant.GRIDENT, (gridTypeVar or 0), famPos, vel:Rotated( rng:RandomInt(rangeOffset *2) - rangeOffset ), grid):ToTear()
             
@@ -449,11 +450,24 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, fam, offs
     local nullFrame = sp:GetNullFrame("Item")
     
     if not (nullFrame and nullFrame:IsVisible()) then return end
-
     local room = game:GetRoom()
+    local invertPos = room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT
+    local famPos = fam.Position
+    local nullOffset = fam:GetNullOffset("Item")
+    if invertPos then
+        nullOffset.Y = nullOffset.Y *-1
+        nullOffset.X = nullOffset.X -40
+    end
+    famPos = famPos + nullOffset
     for i, eff in ipairs(grids) do
         eff.Visible = true
-        eff:GetSprite():Render(room:WorldToScreenPosition( fam.Position + fam:GetNullOffset("Item") + (RenderOffset * (i -1)) ))
+        local renderPos = RenderOffset * (i -1)
+        if invertPos then
+            renderPos.Y = renderPos.Y *-1
+            renderPos.X = renderPos.X -40
+        end
+
+        eff:GetSprite():Render( room:WorldToScreenPosition(famPos + renderPos) )
         eff.Visible = false
     end
 

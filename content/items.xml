@@ -215,28 +215,45 @@
         cache="familiars" 
         />
 
-        <null id="18"
-        name="RIPPED_CARD_The_Magician"
-        />
-        <null id="19"
+        <null 
+        name="RIPPED_CARD_The_Magician" />
+        <null
         name="RIPPED_CARD_The_Devil"
-        cache="damage"
-        />
-        <null id="20"
+        cache="damage" />
+        <null
         name="RIPPED_CARD_The_Empress"
-        cache="damage speed"
-        />
-        <null id="21"
+        cache="damage speed" />
+        <null
         name="RIPPED_CARD_Strength"
-        cache="damage speed range"
-        />
-        <null id="22"
+        cache="damage speed range" />
+        <null
         name="RIPPED_CARD_The_Hanged_Man"
-        cache="speed tearflag"
-        />
+        cache="tearflag" />
 
         <null
         name="SPELL_Summon_BroberBobby"
-        cache="familiars"
-        />
+        cache="familiars" />
+        <null
+        name="SPELL_Shield"
+        cache="" />
+        <null
+        name="SPELL_SacrificialBuff"
+        cache="damage range firedelay" />
+        <null
+        name="SPELL_FirePower"
+        cache="" />
+        <null
+        name="SPELL_Devil"
+        cache="" />
+        <null
+        name="SPELL_WeakEnemies"
+        cooldown="300"
+        cache="" />
+        <null
+        name="SPELL_Multishot"
+        cache="firedelay" />
+        <null
+        name="SPELL_FlyHoming"
+        cooldown="360"
+        cache="speed flying tearflag tearcolor" />
 </items>

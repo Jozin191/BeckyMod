@@ -1,16 +1,20 @@
 
 local SPELL_COST = 0
+local nullItem = Isaac.GetNullItemIdByName("SPELL_SacrificialBuff")
+BeckyMod.Spells.NULL_ITEMS.SACRIFICIAL_BUFF = nullItem
 local DAMAGE_FLAGS = DamageFlag.DAMAGE_RED_HEARTS | DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_PENALTIES | DamageFlag.DAMAGE_NO_MODIFIERS
 
 local function fun(player)
-    local data = player:GetData()
-    data.Spell_Sacrificial_Buff = (data.Spell_Sacrificial_Buff or 0) +1
-
     player:ResetDamageCooldown()
     player:TakeDamage(2, DAMAGE_FLAGS, EntityRef(player), 30)
     player:SetMinDamageCooldown(30)
 
-    player:AddCacheFlags(CacheFlag.CACHE_ALL, true)
+    local effects = player:GetEffects()
+    if effects:HasNullEffect(nullItem) then
+        effects:RemoveNullEffect(nullItem, -1)
+    else
+        effects:AddNullEffect(nullItem)
+    end
 end
 
 local function canSelectFun(player, manaLeft)
@@ -18,7 +22,7 @@ local function canSelectFun(player, manaLeft)
 end
 
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, 200, function(_, player, cacheFlags)
-    local buff = player:GetData().Spell_Sacrificial_Buff or 0
+    local buff = player:GetEffects():GetNullEffectNum(nullItem)
 
     if buff <= 0 then return end
     if cacheFlags & CacheFlag.CACHE_DAMAGE == CacheFlag.CACHE_DAMAGE then

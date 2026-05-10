@@ -266,7 +266,7 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_SAVESLOT_LOAD, unlocks.PostLoadSaveslot)
 
 
-function unlocks:PreSpawnSlot(_, t, v, s, pos, vel, spawner, seed)
+function unlocks:PreSpawnSlot(t, v, s, pos, vel, spawner, seed)
     if t ~= 6 or v ~= SlotVariant.SHELL_GAME or Isaac.GetPersistentGameData():Unlocked(achievements.ACHIEVEMENT_SKETCHY_BEGGAR) then return end
     if game:GetRoom():GetType() ~= RoomType.ROOM_ARCADE then return end
 
@@ -285,7 +285,7 @@ function unlocks:SlotUpdate(slot)
 end
 mod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, unlocks.SlotUpdate, SlotVariant.HOME_CLOSET_PLAYER)
 
-function unlocks:SpawnClosetSlot(_, t, v, s)
+function unlocks:SpawnClosetSlot(t, v, s)
     if game:AchievementUnlocksDisallowed() then return end
     if t ~= 6 or v ~= SlotVariant.HOME_CLOSET_PLAYER then return end
     local level = mod.Level()

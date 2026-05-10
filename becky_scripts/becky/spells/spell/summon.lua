@@ -9,7 +9,7 @@ local ATTACKING_COOLDOWN = 7
 local PROJ_SPEED = Vector(15,0)
 
 local NULL_ITEM_ID = Isaac.GetNullItemIdByName("SPELL_Summon_BroberBobby")
-
+BeckyMod.Spells.NULL_ITEMS.SUMMON = NULL_ITEM_ID
 
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player)
     player:CheckFamiliar(
