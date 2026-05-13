@@ -90,7 +90,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_USE_ITEM, NOTS.UseItem, NOTS.ID)
 
 
 function NOTS:PreAddCostume(itemConfig, player, itemStateOnly)
-    print(itemConfig:IsNull(), itemConfig.ID == NOTS.NULL_ITEM_ID, itemConfig.ID, NOTS.NULL_ITEM_ID)
+    --print(((itemConfig:IsNull() and "Null") or (itemConfig:IsCollectible() and "Collectable") or (itemConfig:IsTrinket() and "Trinket") ), itemConfig.ID, itemConfig.Costume.Anm2Path, itemConfig.Costume.ID)
     if itemConfig:IsNull() and itemConfig.ID == NOTS.NULL_ITEM_ID then return end
     if not player:GetEffects():HasNullEffect(NOTS.NULL_ITEM_ID) then return end
 
@@ -105,15 +105,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, NOTS.PreAddCostume)
 
 
 function NOTS:AddCollectible(itemID, charge, firstTime, slot, varData, player)
-    player:AddNullItemEffect(NOTS.NULL_ITEM_ID)
-    player:AddNullCostume(NOTS.NULL_ITEM_ID)
+    player:AddNullItemEffect(NOTS.NULL_ITEM_ID, true)
+    --player:AddNullCostume(NOTS.NULL_ITEM_ID)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, NOTS.AddCollectible, NOTS.ID)
 
 
 function NOTS:RemoveCollectible(player, itemID, removePlayerForm, wispOrInnate)
     player:GetEffects():RemoveNullEffect(NOTS.NULL_ITEM_ID, 1)
-    player:RemoveCostume(NullItemConfig)
+    --player:RemoveCostume(NullItemConfig)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, NOTS.RemoveCollectible, NOTS.ID)
 --[[
