@@ -139,11 +139,14 @@ local CARDS_EFFECTS = {
 
     end,
     [Card.CARD_STARS] = function(player, rng)
-        if game:GetLevel():QueryRoomTypeIndex(RoomType.ROOM_PLANETARIUM, true, rng) >= 0 then
-            RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_PLANETARIUM, rng)
-        else
-            RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_TREASURE, rng)
+        local levelRooms = game:GetLevel():GetRooms()
+        for i = 0, levelRooms.Size -1 do
+            if levelRooms:Get(i).Data.Type == RoomType.ROOM_PLANETARIUM then
+                RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_PLANETARIUM, rng)
+                return
+            end
         end
+        RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_TREASURE, rng)
     end,
     [Card.CARD_MOON] = function(player, rng)
         RIPPED_CARD.TeleportOutsideOf(RoomType.ROOM_SECRET, rng)
@@ -174,7 +177,6 @@ local CARDS_EFFECTS = {
 
     end,
     [Card.CARD_JUDGEMENT] = function(player, rng)
-        --- TO DO
         if rng:RandomInt(3) == 0 and player:GetHearts() + player:GetSoulHearts() + player:GetBoneHearts()*2 > 2 then
             player:TakeDamage(1, DamageFlag.DAMAGE_RED_HEARTS | DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 30)
 
@@ -306,7 +308,7 @@ end
 
 function RIPPED_CARD.TeleportOutsideOf(roomType, rng)
     local level = game:GetLevel()
-    local roomIdx = level:QueryRoomTypeIndex(RoomType.ROOM_PLANETARIUM, true, rng)
+    local roomIdx = level:QueryRoomTypeIndex(roomType, true, rng)
 
     if roomIdx < 0 then
         level.LeaveDoor = -1
@@ -362,7 +364,7 @@ function RIPPED_CARD:UseCard(CardId, player, useFlags)
         player:UseCard(copyCard, UseFlag.USE_MIMIC | UseFlag.USE_NOANNOUNCER)
         return
     end
-    --print(copyCard)
+    --print(copyCard, ({"CARD_FOOL","CARD_MAGICIAN","CARD_HIGH_PRIESTESS","CARD_EMPRESS","CARD_EMPEROR","CARD_HIEROPHANT","CARD_LOVERS","CARD_CHARIOT","CARD_JUSTICE","CARD_HERMIT","CARD_WHEEL_OF_FORTUNE","CARD_STRENGTH","CARD_HANGED_MAN","CARD_DEATH","CARD_TEMPERANCE","CARD_DEVIL","CARD_TOWER","CARD_STARS","CARD_MOON","CARD_SUN","CARD_JUDGEMENT","CARD_WORLD"})[copyCard])
     --Isaac.DebugString("Ripped Card copy "..copyCard)
 
     CARDS_EFFECTS[copyCard](player, rng)

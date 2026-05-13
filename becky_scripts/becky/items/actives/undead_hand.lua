@@ -20,6 +20,7 @@ UNDEAD_HAND.ID = Isaac.GetItemIdByName("Undead Hand")
 UNDEAD_HAND.FAMILIAR = Isaac.GetEntityVariantByName("Becky Zombie")
 UNDEAD_HAND.SPEED_MULT = 0.85
 UNDEAD_HAND.DEAD_COOLDOWN = 300
+UNDEAD_HAND.SPAWN_UNDEAD_CHANCE = 6
 
 local game = BeckyMod.Game
 local spawnPos
@@ -60,6 +61,10 @@ function UNDEAD_HAND:FamiliarUpdate(fam)
             sprite:SetFrame("WalkVert", 0)
             if state == State.SPAWNING then
                 sprite:PlayOverlay("Head", true)
+                local room = game:GetRoom()
+                if room:GetGridEntityFromPos(fam.Position) ~= nil then
+                    fam.Position = room:FindFreeTilePosition(fam.Position, 40)
+                end
             else
                 sprite:SetOverlayFrame("Head", 19)
             end
@@ -81,27 +86,29 @@ function UNDEAD_HAND:FamiliarUpdate(fam)
         if target then
             if not sprite:IsPlaying(anim) then sprite:Play(anim, true) end
             local targetPos = target.Position
-            pathfinder:FindGridPath(targetPos, UNDEAD_HAND.SPEED_MULT, 0, true)
-            if targetPos:Distance(fam.Position) < 4 then
-                sprite.PlaybackSpeed = 0
-            else
-                sprite.PlaybackSpeed = UNDEAD_HAND.SPEED_MULT
-            end
-        else
-            if Isaac.CountEnemies() == 0 then return end
-
-            local famPos = fam.Position
-            local prevDis
-            local target
-            for _, ent in ipairs(Isaac.FindInRadius(game:GetRoom():GetCenterPos(), 50000, EntityPartition.ENEMY)) do
-                local entPos = ent.Position
-                if ent:CanShutDoors() and pathfinder:HasPathToPos(entPos, false) and (target == nil or entPos:Distance(famPos) < prevDis) then
-                    prevDis = entPos:Distance(famPos)
-                    target = ent
+            if pathfinder:HasPathToPos(targetPos, false) then
+                pathfinder:FindGridPath(targetPos, UNDEAD_HAND.SPEED_MULT, 0, true)
+                if targetPos:Distance(fam.Position) < 4 then
+                    sprite.PlaybackSpeed = 0
+                else
+                    sprite.PlaybackSpeed = UNDEAD_HAND.SPEED_MULT
                 end
+                return
             end
-            fam.Target = target
         end
+        if Isaac.CountEnemies() == 0 then return end
+
+        local famPos = fam.Position
+        local prevDis
+        local target
+        for _, ent in ipairs(Isaac.FindInRadius(game:GetRoom():GetCenterPos(), 50000, EntityPartition.ENEMY)) do
+            local entPos = ent.Position
+            if ent:CanShutDoors() and pathfinder:HasPathToPos(entPos, false) and (target == nil or entPos:Distance(famPos) < prevDis) then
+                prevDis = entPos:Distance(famPos)
+                target = ent
+            end
+        end
+        fam.Target = target
     elseif state == State.DEAD then
         fam.Velocity = Vector.Zero
 
@@ -123,7 +130,7 @@ function UNDEAD_HAND:PostKillEntity(ent, killerRef)
     local killer = killerRef.Entity
     if killer and killer.Type == 3 and killer.Variant == UNDEAD_HAND.FAMILIAR then
         local player = killer:ToFamiliar().Player
-        if player and killer:GetDropRNG():RandomInt(8) == 0 then
+        if player and killer:GetDropRNG():RandomInt(UNDEAD_HAND.SPAWN_UNDEAD_CHANCE) == 0 then
             spawnPos = ent.Position
             player:AddCollectibleEffect(UNDEAD_HAND.ID, false, nil, false)
             --player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)

@@ -1,20 +1,20 @@
 <costumes anm2root="gfx/characters/">
 
-    <costume id="1" anm2path="becky_hair.anm2" type="none" priority="99" />
+    <costume anm2path="becky_hair.anm2" type="none" priority="99" />
     <costume anm2path="becky_body.anm2" type="none" priority="0" />
-    <costume id="2" anm2path="ghostheadstuff.anm2" type="none" priority="100"/>
+    <costume anm2path="ghostheadstuff.anm2" type="none" priority="100"/>
     <costume anm2path="sofia_hair.anm2" type="none" priority="99" />
     <costume anm2path="sofia_belt.anm2" type="none" priority="0" />
-    <costume id="7" anm2path="becky_b_hair.anm2" type="none" priority="99" />
-    <costume id="8" anm2path="becky_b_scarf.anm2" type="none" priority="0" />
+    <costume anm2path="becky_b_hair.anm2" type="none" priority="99" />
+    <costume anm2path="becky_b_scarf.anm2" type="none" priority="0" />
 
-    <costume anm2path="night_of_the_slasher.anm2" type="none" priority="100" />
-    <costume anm2path="scarecrow.anm2" type="passive" id="5" />
-    <costume anm2path="dead_socket.anm2" type="passive" id="6" />
+    <costume anm2path="night_of_the_slasher.anm2" type="none" id="1" priority="100" />
 
-    <costume anm2path="coxinha.anm2" type="passive" id="3"/>
+    <costume anm2path="coxinha.anm2" type="passive" id="1"/>
+    <costume anm2path="costume_chalice.anm2" type="passive" id="2" hasOverlay="true" hasSkinAlt="true" />
+    <costume anm2path="scarecrow.anm2" type="passive" id="3" />
+    <costume anm2path="dead_socket.anm2" type="passive" id="4" />
 
-    <costume anm2path="costume_chalice.anm2" type="passive" id="4" hasOverlay="true" hasSkinAlt="true" />
 
     <costume anm2path="costumes/pog/becky_pog.anm2" isFlying="true" priority="969" type="none"/>
     <costume anm2path="costumes/pog/sofia_pog.anm2" isFlying="true" priority="969" type="none"/>

@@ -87,6 +87,7 @@ include("becky_scripts.becky.characters.becky_b")
 --pickups
 include("becky_scripts.becky.pickups.dead_battery")
 include("becky_scripts.becky.pickups.ripped_card")
+include("becky_scripts.becky.pickups.soul_of_becky")
 
 --slots
 include("becky_scripts.becky.slots.sketchy_beggar")

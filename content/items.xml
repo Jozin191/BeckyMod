@@ -1,7 +1,7 @@
 <items gfxroot="gfx/items/" version="1" deathanm2="gfx/death items.anm2">
         <!--ACTIVE ITEMS-->
 
-        <active id="2"
+        <active id="0"
         name="Night of the Slasher"
         gfx="night_of_the_slasher.png"
         description="Bloody shower"
@@ -13,7 +13,7 @@
         achievement="Night of the Slasher"
         />
 
-        <active id="11"
+        <active id="9"
         name="Butcher's Cookbook"
         gfx="butchers_cookbook.png"
         description="I'm the butcher and this is my cookbook!"
@@ -23,19 +23,19 @@
         achievement="Butcher's Cookbook"
         />
 
-        <active id="14"
+        <active id="10"
         name="Magic Staff"
         gfx="magic staff.png"
         description="Power Soul"
         quality="2"
-        maxcharges="150"
-        chargetype="timed"
+        maxcharges="2"
+        chargetype="normal"
 
         tags="nocantrip"
         achievement="Magic Staff"
         />
         <!-- v T. Becky's unique magic staff -->
-        <active id="14"
+        <active id="10"
         name="​Magic Staff"
         gfx="magic staff.png"
         description="Power Soul"
@@ -48,7 +48,7 @@
         achievement="Magic Staff"
         />
 
-        <active id="17"
+        <active id="11"
         name="Undead Hand"
         gfx="undead_hand.png"
         description="Unkillable servant"
@@ -63,7 +63,7 @@
 
         <!--PASSIVE ITEMS-->
 
-        <passive id="3"
+        <passive id="1"
         name="Coxinha"
         gfx="coxinha.png"
         description="HP up + speed up"
@@ -77,7 +77,7 @@
         achievement="Coxinha"
         />
 
-        <passive id="4"
+        <passive id="2"
         name="Defiled Chalice"
         gfx="chalice.png"
         description="Spill their blood"
@@ -88,7 +88,7 @@
         achievement="Defiled Chalice"
         />
 
-        <passive id="5"
+        <passive id="3"
         name="Scarecrow"
         gfx="scarecrow.png"
         description="Bonus murder"
@@ -98,7 +98,7 @@
         achievement="Scarecrow"
         />
 
-        <passive id="6"
+        <passive id="4"
         name="Dead Socket"
         gfx="dead_socket.png"
         description="Soul-sucking charge"
@@ -109,7 +109,7 @@
         achievement="Dead Socket"
         />
 
-        <passive id="7"
+        <passive id="5"
         name="Null Bombs"
         gfx="null_bombs.png"
         description="Abyssal blast +5 bombs"
@@ -119,7 +119,7 @@
         achievement="Null Bombs"
         />
 
-        <passive id="8"
+        <passive id="6"
         name="Dream Banisher"
         gfx="dream_banisher.png"
         description="Curse the cursed"
@@ -127,7 +127,7 @@
         achievement="Dream Banisher"
         />
 
-        <familiar id="9"
+        <familiar id="7"
         name="Sinner"
         gfx="sinner.png"
         description="Sinful buddy"
@@ -137,7 +137,7 @@
         achievement="Sinner"
         />
 
-        <familiar id="10"
+        <familiar id="8"
         name="Ghost Amulet"
         gfx="ghost_amulet.png"
         description="Bouncy buddy!!!"
@@ -147,7 +147,7 @@
         achievement="Ghost Amulet"
         />
 
-        <familiar id="23"
+        <familiar id="12"
         name="Poul"
         gfx="poul.png"
         description="It hunts you!"
@@ -159,7 +159,7 @@
 
         <!--TRINKETS-->
 
-        <trinket id="2"
+        <trinket id="0"
         name="Holy Bookmark"
         description="With lightness comes luck"
         gfx="holy_bookmark.png"
@@ -168,7 +168,7 @@
         achievement="Holy Bookmark"
         />
 
-        <trinket id="3"
+        <trinket id="1"
         name="Devilzon Prime"
         description="Premium subscription… at a price"
         gfx="devilzon_prime.png"
@@ -176,7 +176,7 @@
         achievement="Devilzon Prime"
         />
 
-        <trinket id="4"
+        <trinket id="2"
         name="Corpse Tag"
         description="A bone to pick"
         gfx="corpse_tag.png"
@@ -184,7 +184,7 @@
         achievement="Corpse Tag"
         />
 
-        <trinket id="12"
+        <trinket id="3"
         name="Sanguine Feather"
         description="Find solace in pain"
         gfx="sanguine_feather.png"
@@ -192,7 +192,7 @@
         achievement="Sanguine Feather"
         />
 
-        <trinket id="15"
+        <trinket id="4"
         name="Alarm Clock"
         description="Time is ticking"
         gfx="alarm_clock.png"
@@ -200,7 +200,7 @@
         achievement="Alarm Clock"
         />
 
-        <trinket id="16"
+        <trinket id="5"
         name="Bug Spray"
         description="Super effective on flies and spider"
         gfx="bug_spray.png"
@@ -209,11 +209,15 @@
 
         <!-- Null Items -->
 
-        <null id="1" 
+        <null
         name="NULL_BECKY_GHOST" 
         persistent="true" 
         cache="familiars" 
         />
+        <null id="1"
+        name="Night of the Slasher_Costume handler"
+        persistent="true" 
+        cache="" />
 
         <null 
         name="RIPPED_CARD_The_Magician" />
@@ -256,4 +260,8 @@
         name="SPELL_FlyHoming"
         cooldown="360"
         cache="speed flying tearflag tearcolor" />
+
+        <null
+        name="SOUL_OF_BECKY_SELECT_STATE"
+        cache="" />
 </items>

@@ -27,12 +27,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, function(_, laser)
         
         local hitPos = laser.EndPoint - (JOHN_ANGLE * 20):Rotated(laser:GetData().OpenSesamo_LaserInfo.Angle)
 
-        print(hitPos)
+        --print(hitPos)
         local room = BeckyMod.Game:GetRoom()
         local gridEnt = room:GetGridEntityFromPos(hitPos)
         if gridEnt and gridEnt:ToDoor() then
             local doorEnt = gridEnt:ToDoor()
-            print((doorEnt and doorEnt:GetType()) or -1)
+            --print((doorEnt and doorEnt:GetType()) or -1)
             if doorEnt:IsLocked() or not doorEnt:IsOpen() then
                 doorEnt:SetLocked(false)
                 doorEnt:Open()
