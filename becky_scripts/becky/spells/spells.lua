@@ -34,6 +34,7 @@ local SPELLS_NAMES = {
 for i, name in ipairs(SPELLS_NAMES) do
     SPELLS.SpellType[name] = i
 end
+SPELLS.SpellType.SPELLS_NUM = SPELLS.SpellType.SPELLS_NUM -1
 
 local DevilSpellsPool = {
     SPELLS.SpellType.SPREAD,
@@ -391,43 +392,116 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ROOM_RENDER_ENTITIES, -300, fu
     BeckyMod:ForEachPlayer(renderPlayerSpellSelection)
 end)
 
+---- TAINTED BECKY BIRTHRIGHT HERE BECAUSE IM LAZYYYY
+BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, itemID, charge, firstTime, slot, varData, player)
+    if player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then
+        local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+
+        local isInDevilPool = BeckyMod:Set(DevilSpellsPool)
+        local isInAngelPool = BeckyMod:Set(AngelSpellsPool)
+        local playerSpells = BeckyMod:CopyTable(SPELLS:GetSpells(player))
+        
+        for slot=0, 3 do SPELLS:SetSpellType(player, slot, SPELLS.SpellType.NULL) end--- clears t. becky spell slots
+
+        for slot=0, 3 do
+            local spell = playerSpells[slot +1]
+            if spell == SPELLS.SpellType.SPREAD then -- spread spell is in both devil and angel pools
+                local shuffleSpells = BeckyMod:ShuffleTable( BeckyMod:CombineTables(DevilSpellsPool, AngelSpellsPool) , rng)
+                for idx=1, #shuffleSpells do
+                    local newSpell = shuffleSpells[idx]
+                    if not SPELLS:HasSpell(player, newSpell) then
+                        SPELLS:SetSpellType(player, slot, newSpell)
+                    end
+                end
+
+            elseif isInDevilPool[spell] then
+                local shuffleSpells = BeckyMod:ShuffleTable(DevilSpellsPool, rng)
+                for idx=1, #shuffleSpells do
+                    local newSpell = shuffleSpells[idx]
+                    if not SPELLS:HasSpell(player, newSpell) then
+                        SPELLS:SetSpellType(player, slot, newSpell)
+                    end
+                end
+
+            elseif isInAngelPool[spell] then
+                local shuffleSpells = BeckyMod:ShuffleTable(AngelSpellsPool, rng)
+                for idx=1, #shuffleSpells do
+                    local newSpell = shuffleSpells[idx]
+                    if not SPELLS:HasSpell(player, newSpell) then
+                        SPELLS:SetSpellType(player, slot, newSpell)
+                    end
+                end
+
+            else
+                SPELLS:SetSpellType(player, slot, SPELLS.SpellType.NULL)
+            end
+        end
+    end
+end, CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear, offset)
-    --[[
-    if tear.Variant == SPELLS.ENTITIES.MANA_TEAR.Variant or tear.Variant == SPELLS.ENTITIES.BIG_MANA_TEAR.Variant then
+    
+    if tear.Variant == SPELLS.ENTITIES.MANA_TEAR.Variant then
+    --or tear.Variant == SPELLS.ENTITIES.BIG_MANA_TEAR.Variant then
         local sp = tear:GetSprite()
         local angle = tear.Velocity:GetAngleDegrees()
 
         local anim 
-        local inverAngles = false
-        if angle > 45 and angle < 135 then
-            anim = "MoveVert"
-            sp.FlipX = false
-            sp.FlipY = false
-        elseif angle >= 135 or angle <= -135 then
-            anim = "MoveHori"
-            sp.FlipX = true
-            sp.FlipY = false
-            inverAngles = true
-        elseif angle > -135 and angle < -45 then
-            anim = "MoveVert"
-            sp.FlipX = false
-            sp.FlipY = true
-            inverAngles = true
+        
+        local scale = tear.Scale
+        local sizeMulti = tear.SizeMulti
+        local flags = tear.TearFlags
+        local anim
+        if scale <= 0.3 then
+            anim = "RegularTear1"
+        elseif scale <= 0.55 then
+            anim = "RegularTear2"
+        elseif scale <= 0.675 then
+            anim = "RegularTear3"
+        elseif scale <= 0.8 then
+            anim = "RegularTear4"
+        elseif scale <= 0.925 then
+            anim = "RegularTear5"
+        elseif scale <= 1.05 then
+            anim = "RegularTear6"
+        elseif scale <= 1.175 then
+            anim = "RegularTear7"
+        elseif scale <= 1.425 then
+            anim = "RegularTear8"
+        elseif scale <= 1.675 then
+            anim = "RegularTear9"
+        elseif scale <= 1.925 then
+            anim = "RegularTear10"
+        elseif scale <= 2.175 then
+            anim = "RegularTear11"
+        elseif scale <= 2.55 then
+            anim = "RegularTear12"
         else
-            anim = "MoveHori"
-            sp.FlipX = false
-            sp.FlipY = false
+            anim = "RegularTear13"
         end
-        sp:SetFrame(anim, tear.FrameCount % 10)
-        if inverAngles then
-            sp.Rotation = (-angle +720 +45) % 90 -45
+        sp:SetFrame(anim, 0)
+        if scale > 2.55 then
+            tear.SpriteScale = Vector((scale * sizeMulti.X) / 2.55, (scale * sizeMulti.Y) / 2.55)
+        elseif flags & TearFlags.TEAR_GROW == TearFlags.TEAR_GROW or flags & TearFlags.TEAR_LUDOVICO == TearFlags.TEAR_LUDOVICO then
+            if scale <= 0.3 then
+                tear.SpriteScale = Vector((scale * sizeMulti.X) / 0.25, (scale * sizeMulti.Y) / 0.25)
+            elseif scale <= 0.55 then
+                local adjustedBase = math.ceil((scale - 0.175) / 0.25) * 0.25 + 0.175
+                tear.SpriteScale = Vector((scale * sizeMulti.X) / adjustedBase, (scale * sizeMulti.Y) / adjustedBase)
+            elseif scale <= 1.175 then
+                local adjustedBase = math.ceil((scale - 0.175) / 0.125) * 0.125 + 0.175
+                tear.SpriteScale = Vector((scale * sizeMulti.X) / adjustedBase, (scale * sizeMulti.Y) / adjustedBase)
+            elseif scale <= 2.175 then
+                local adjustedBase = math.ceil((scale - 0.175) / 0.25) * 0.25 + 0.175
+                tear.SpriteScale = Vector((scale * sizeMulti.X) / adjustedBase, (scale * sizeMulti.Y) / adjustedBase)
+            else
+                tear.SpriteScale = Vector((scale * sizeMulti.X) / 2.55, (scale * sizeMulti.Y) / 2.55)
+            end
         else
-            sp.Rotation = (angle +720 +45) % 90 -45
+            tear.SpriteScale = sizeMulti
         end
-        tear.SpriteScale = Vector(0.66, 0.66)
-    end]]
+    end
 end)
 
 
@@ -660,7 +734,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, args)
                 if beckySpells[slot] >0 then
                     SELECTING_Spells[slot] = beckySpells[slot]
                 else 
-                    SELECTING_Spells[slot] = SPELLS.SpellType.SPELLS_NUM
+                    SELECTING_Spells[slot] = SPELLS.SpellType.SPELLS_NUM +1
                 end
             end
             CURRENT_Spell_Slot = 1
@@ -679,12 +753,12 @@ end)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
     if not Debug_Active then return end
 
-    for i=1, SPELLS.SpellType.SPELLS_NUM -1 do
+    for i=1, SPELLS.SpellType.SPELLS_NUM do
         DEBUG_SPELLS_SPRITE:SetFrame("Spells", SPELLS_FRAME[i])
         DEBUG_SPELLS_SPRITE:Render(RENDERPOS + Vector(X_OFFSET * ((i-1) % SPELLS_ROWS), Y_OFFSET* ((i-1) // SPELLS_ROWS)))
     end
     DEBUG_SELECTION_SPRITE:SetFrame("trash", 0)
-    DEBUG_SELECTION_SPRITE:Render(RENDERPOS + Vector(X_OFFSET * ((SPELLS.SpellType.SPELLS_NUM-1) % SPELLS_ROWS), Y_OFFSET* ((SPELLS.SpellType.SPELLS_NUM-1) // SPELLS_ROWS)))
+    DEBUG_SELECTION_SPRITE:Render(RENDERPOS + Vector(X_OFFSET * (SPELLS.SpellType.SPELLS_NUM % SPELLS_ROWS), Y_OFFSET* (SPELLS.SpellType.SPELLS_NUM // SPELLS_ROWS)))
     for slot =1, 4 do
         if slot ~= CURRENT_Spell_Slot then
             DEBUG_SELECTION_SPRITE:SetFrame("select", slot-1)
@@ -703,7 +777,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local frameCount = game:GetFrameCount()
     if Debug_InputCooldown >= frameCount then return end
     if Input.IsActionPressed(ButtonAction.ACTION_DROP, 0) then
-        SELECTING_Spells[CURRENT_Spell_Slot] = SPELLS.SpellType.SPELLS_NUM
+        SELECTING_Spells[CURRENT_Spell_Slot] = SPELLS.SpellType.SPELLS_NUM +1
         Debug_InputCooldown = frameCount + DEBUG_INPUTCOOLDOWN
         return 
     elseif Input.IsActionPressed(ButtonAction.ACTION_ITEM, 0) then
@@ -712,7 +786,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         local player = PlayerManager.FirstPlayerByType(BeckyMod.Character.BECKY_B.PLAYERTYPE)
         local beckySpells = SPELLS:GetSpells(player)
         for slot=1, 4 do
-            if SELECTING_Spells[slot] < SPELLS.SpellType.SPELLS_NUM then
+            if SELECTING_Spells[slot] <= SPELLS.SpellType.SPELLS_NUM then
                 SPELLS:SetSpellType(player, slot-1, SELECTING_Spells[slot])
             else 
                 SPELLS:SetSpellType(player, slot-1, SPELLS.SpellType.NULL)
@@ -749,7 +823,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         Debug_InputCooldown = frameCount + DEBUG_INPUTCOOLDOWN
     end
     
-    SELECTING_Spells[CURRENT_Spell_Slot] = (SELECTING_Spells[CURRENT_Spell_Slot]+ add -1) % SPELLS.SpellType.SPELLS_NUM +1
+    SELECTING_Spells[CURRENT_Spell_Slot] = (SELECTING_Spells[CURRENT_Spell_Slot]+ add -1) % (SPELLS.SpellType.SPELLS_NUM +1) +1
 end)
 
 

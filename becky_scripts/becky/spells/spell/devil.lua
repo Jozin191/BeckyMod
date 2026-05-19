@@ -1,10 +1,12 @@
 local SPELL_COST = 50
+local laserVar = Isaac.GetEntityVariantByName("Spell Devil Laser")
 local nullItem = Isaac.GetNullItemIdByName("SPELL_Devil")
 BeckyMod.Spells.NULL_ITEMS.DEVIL = nullItem
+BeckyMod.Spells.ENTITIES.DEVIL_LASER = { Type = 1000, Variant = laserVar }
 local FireCooldown = -1
 local ShootingAmount = 0
-local LaserSubType = 100
-
+local SPEED = 3.17715
+local ONE_TILE = Vector(40, 0)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
     if BeckyMod.Game:IsPaused() then return end
@@ -23,9 +25,23 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
     
     local seed = Random()
     if seed == 0 then seed =1 end
-    local spawnPos = room:GetGridPosition(room:GetRandomTileIndex(seed))
-    
-    local laser = Isaac.Spawn(1000, EffectVariant.HUSH_LASER, LaserSubType, room:FindFreeTilePosition(spawnPos, 40), Vector.Zero, Isaac.GetPlayer()):ToEffect()
+    local spawnPos
+    local findAPlayer = false
+    local players = PlayerManager.GetPlayers()
+
+    repeat
+        findAPlayer = false
+        spawnPos = room:GetGridPosition(room:GetRandomTileIndex(seed))
+        for _, player in ipairs(players) do
+            if player.Position:Distance(spawnPos) <= 100 then
+                findAPlayer = true
+                break
+            end
+        end
+    until not findAPlayer
+
+
+    local laser = Isaac.Spawn(1000, laserVar, 0, spawnPos, Vector.Zero, players[ (seed % #players) +1 ]):ToEffect()
     laser.CollisionDamage = 23
     laser:SetTimeout(150)
     laser.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
@@ -46,14 +62,21 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ROOM_ADD_EFFECT, function(_, itemConfi
 end)
 
 
-BeckyMod:AddCallback(ModCallbacks.MC_PRE_EFFECT_UPDATE, function(_, eff)
-    if eff.SubType ~= LaserSubType then return end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, eff)
+    eff:GetSprite():Play("Start", true)
+    eff.Velocity = eff:GetDropRNG():RandomVector() * SPEED
+end, laserVar)
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     local sp = eff:GetSprite()
 
-    if sp:IsPlaying("End") then return
+    if sp:IsFinished("End") then
+        eff:Remove()
+        return
+    elseif sp:IsPlaying("End") then
+        return
     elseif eff.Timeout == 0 then
         sp:Play("End", true)
-        eff:Die()
         return
     elseif sp:IsFinished("Start") then
         sp:Play("Loop", true)
@@ -62,30 +85,89 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_EFFECT_UPDATE, function(_, eff)
     local player = eff.SpawnerEntity and eff.SpawnerEntity:ToPlayer()
     local tearParam
     local ref
+    local dmg = 5
 
     if player then
-        tearParam = player:GetTearHitParams(WeaponType.WEAPON_BRIMSTONE, 3.25, 1, player)
+        local mult = 3.25
+        if player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then mult = mult *3 end
+
+        tearParam = player:GetTearHitParams(WeaponType.WEAPON_BRIMSTONE, mult, 1, player)
         sp.Color = tearParam.TearColor
+        dmg = math.max(tearParam.TearDamage, 5)
         ref = EntityRef(player)
     else
         ref = EntityRef(eff)
     end
 
-    for _, ent in ipairs(Isaac.FindInRadius(eff.Position, eff.Size, EntityPartition.PLAYER | EntityPartition.ENEMY)) do
+    local pos = eff.Position
+
+    local searchFor = EntityPartition.PLAYER
+    if Isaac.CountEnemies() > 0 then searchFor = searchFor | EntityPartition.ENEMY end
+
+
+    if eff.FrameCount % 5 == 0 then
+        local dis
+        local target
+        if eff.Target ~= nil then
+            target = eff.Target
+            if not target:IsDead() and target:Exists() then
+                dis = target.Position:Distance(pos)
+            else
+                target = nil
+                eff.Target = nil
+            end
+        end
+        
+        for _, ent in ipairs(Isaac.FindInRadius(pos, 100, searchFor)) do
+            if target == nil or ent.Position:Distance(pos) < dis then
+                target = ent
+                dis = ent.Position:Distance(pos)
+            end
+        end
+        if target ~= nil then
+            eff.Target = target
+        end
+    end
+
+    if eff.Target and not eff.Target:IsDead() and eff.Target:Exists() then
+        local moveAngle = eff.Velocity:GetAngleDegrees()
+        local angle = (eff.Target.Position - pos):GetAngleDegrees() - moveAngle
+        
+        --print(moveAngle, angle, moveAngle - angle)
+        if angle < -50 then angle = -50
+        elseif angle > 50 then angle = 50 end
+        eff.Velocity = eff.Velocity:Lerp(eff.Velocity:Rotated(angle), 0.15)
+    else eff.Target = nil end
+
+    if eff.Velocity:Length() < SPEED then
+        local moveAngle = eff.Velocity:GetAngleDegrees()
+        local room = BeckyMod.Game:GetRoom()
+        
+        local smallestAngle = 180
+        for angle = -90, 90, 15 do
+            if room:CheckLine(pos, ONE_TILE:Rotated(angle) +pos, 3, 4000, false, true) then
+                local targetAngle = ((ONE_TILE:Rotated(angle) +pos) - pos):GetAngleDegrees() - moveAngle
+                if math.abs(targetAngle) < math.abs(smallestAngle) then
+                    smallestAngle = targetAngle
+                end
+            end
+        end
+        eff.Velocity = (eff.Velocity:Normalized() *SPEED):Rotated(smallestAngle)
+    end
+
+    for _, ent in ipairs(Isaac.FindInRadius(pos, eff.Size, searchFor)) do
         if ent.Type == 1 then
             ent:TakeDamage(1, DamageFlag.DAMAGE_LASER, ref, 30)
         else
             local npc = ent:ToNPC()
             if npc and tearParam then
-                npc:ApplyTearflagEffects(npc.Position, tearParam.TearFlags, player, math.max(tearParam.TearDamage, 5))
-            else
-                ent:TakeDamage(5, DamageFlag.DAMAGE_LASER, ref, 0)
+                npc:ApplyTearflagEffects(npc.Position, tearParam.TearFlags, player, dmg)
             end
+            ent:TakeDamage(dmg, DamageFlag.DAMAGE_LASER, ref, 2)
         end
     end
 
-    return false
-end, EffectVariant.HUSH_LASER)
+end, laserVar)
 
 
 

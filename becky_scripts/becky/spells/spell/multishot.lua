@@ -6,8 +6,8 @@ local SPREAD_ANGLE = 4.34
 
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_MULTI_SHOT_PARAMS, function(_, player, multishotParam, weaponType)
     if player:GetEffects():HasNullEffect(nullItem) then
-        multishotParam:SetNumTears(multishotParam:GetNumTears() + 4 * multishotParam:GetNumEyesActive())
-        multishotParam:SetNumLanesPerEye(4 + multishotParam:GetNumEyesActive())
+        multishotParam:SetNumTears(multishotParam:GetNumTears() + 3 * multishotParam:GetNumEyesActive())
+        multishotParam:SetNumLanesPerEye(3 + multishotParam:GetNumEyesActive())
         local spread = multishotParam:GetSpreadAngle(weaponType)
         if player:HasCollectible(CollectibleType.COLLECTIBLE_20_20) then
             if spread < SPREAD_ANGLE *0.666666 then

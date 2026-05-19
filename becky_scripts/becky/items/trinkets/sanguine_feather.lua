@@ -10,7 +10,6 @@ function SANGUINE_FEATHER:postDamage(ent)
     if player == nil or not player:HasTrinket(SANGUINE_FEATHER.ID) then return end
     local rng = player:GetTrinketRNG(SANGUINE_FEATHER.ID)
 
-    if player:GetDamageCooldown() > 0 then return end
     if rng:RandomInt(3) > 0 then return end
     local effects = player:GetEffects()
     effects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_FATE)

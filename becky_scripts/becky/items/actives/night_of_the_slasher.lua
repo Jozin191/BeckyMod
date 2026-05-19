@@ -89,21 +89,6 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_USE_ITEM, NOTS.UseItem, NOTS.ID)
 
 
-function NOTS:PreAddCostume(itemConfig, player, itemStateOnly)
-    --print(((itemConfig:IsNull() and "Null") or (itemConfig:IsCollectible() and "Collectable") or (itemConfig:IsTrinket() and "Trinket") ), itemConfig.ID, itemConfig.Costume.Anm2Path, itemConfig.Costume.ID)
-    if itemConfig:IsNull() and itemConfig.ID == NOTS.NULL_ITEM_ID then return end
-    if not player:GetEffects():HasNullEffect(NOTS.NULL_ITEM_ID) then return end
-
-    local costumeConfig = itemConfig.Costume
-    if costumeConfig.ID < 0 or costumeConfig.Anm2Path == "" then return end
-    local sprite = Sprite(costumeConfig.Anm2Path, true)
-    for _, layer in ipairs(sprite:GetAllLayers()) do
-        if layer:GetName() == "head1" then return true end
-    end
-end
-BeckyMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, NOTS.PreAddCostume)
-
-
 function NOTS:AddCollectible(itemID, charge, firstTime, slot, varData, player)
     player:AddNullItemEffect(NOTS.NULL_ITEM_ID, true)
     --player:AddNullCostume(NOTS.NULL_ITEM_ID)

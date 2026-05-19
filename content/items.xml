@@ -207,6 +207,18 @@
         achievement="Bug Spray"
         />
 
+        <!-- T. Becky Fake Items -->
+        <passive id="12"
+        name="Monstro's Lung"
+        gfx="collectibles_229_monstroslung.png"
+        description="Charged burst attack"
+        quality="2"
+        cache="firedelay"
+
+        tags="noeden"
+        hidden="true"
+        />
+
         <!-- Null Items -->
 
         <null
@@ -214,7 +226,7 @@
         persistent="true" 
         cache="familiars" 
         />
-        <null id="1"
+        <null id="10"
         name="Night of the Slasher_Costume handler"
         persistent="true" 
         cache="" />

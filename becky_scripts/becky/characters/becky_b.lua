@@ -5,12 +5,13 @@ BECKY_B.PLAYERTYPE = Isaac.GetPlayerTypeByName("Becky", true)
 BECKY_B.HAIR_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_b_hair.anm2")
 BECKY_B.BODY_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/becky_b_scarf.anm2")
 
+
 local taintedBeckysWandAnim = "gfx/becky_magic_staff.anm2"
 BECKY_B.StaffFireSprite = Sprite(taintedBeckysWandAnim, true)
 BECKY_B.ManaBarSprite = Sprite("gfx/ui/taintedBecky/mana_bar.anm2", true)
 
 BECKY_B.ManaTearCost = 10
-BECKY_B.ManaRegenBuffZone = 15   -- (og thing ->) 1/16 * 100 
+BECKY_B.ManaRegenBuffZone = 15
 
 local game = BeckyMod.Game
 local sfx = BeckyMod.SFX
@@ -18,7 +19,8 @@ local sfx = BeckyMod.SFX
 BeckyMod.Character.BECKY_B = BECKY_B
 
 local BASE_TEAR_DPS = 30 /11 /2
-local MAX_TEARS_DPS_C_SECTION = 30 / (149.66666667*3+1)
+local MAX_TEARS_DPS_C_SECTION = 30 / (0.1*3+1)
+local CURSE_EYE_COOLDOWN = 0
 local DirToVector = {
     [Direction.NO_DIRECTION] = Vector(0,-1),
     [Direction.LEFT] = Vector(-1,0),
@@ -41,11 +43,39 @@ BECKY_B.ValidBoneClubs = {
 }
 
 
+BECKY_B.FakeItems = {
+    Monstros_Lung = Isaac.GetItemIdByName("Monstro's Lung")
+}
+
+local ITEMS_TO = {
+    Fake = {
+        [CollectibleType.COLLECTIBLE_MONSTROS_LUNG] = BECKY_B.FakeItems.Monstros_Lung,
+    },
+    Normal = {
+        [BECKY_B.FakeItems.Monstros_Lung] = CollectibleType.COLLECTIBLE_MONSTROS_LUNG,
+    }
+}
+
+
+
 local function GetBecky(entity)
     local player = BeckyMod:TryGetPlayer(entity, false)
-    if player then player = player:ToPlayer() else return end
     if player == nil or player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     return player
+end
+
+
+local function HasShouldDoCursedEye(player)
+    if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) or
+    player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) or
+    player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS) or
+    player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) or
+    player:HasCollectible(BECKY_B.FakeItems.Monstros_Lung) or
+    player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) or
+    player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) then
+        return false
+    end
+    return player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE)
 end
 
 
@@ -92,25 +122,32 @@ local function GetAimAngle(owner, player)
 end
 
 
+local function BeckyFire(entShooting, player, data)
+    if HasShouldDoCursedEye(player) then
+        if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /5 then
+            local shots = 5 -math.ceil(data.MagicStaff_ChargeBar.MaxCharge / data.MagicStaff_ChargeBar.Charge)
+            
+            if shots > 0 then
+                data.MagicStaff_CursedEyeTears = {
+                    Shots = shots,
+                    Cooldown = CURSE_EYE_COOLDOWN,
+                    ShootDir = GetAimVector(entShooting, player),
+                }
+            end
+            BECKY_B:FireWeapon(entShooting, player)
+        end
+    elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
+        BECKY_B:FireWeapon(entShooting, player)
+    end
+    data.MagicStaff_ChargeBar.Charge = 0
+end
+
+
+
 local function ProcessStaffSwing(entShooting, player)
     local data = entShooting:GetData()
     --local save = BeckyMod:RunSave(player)
-    if not player:IsExtraAnimationFinished() then
-        if data.MagicStaff_ChargeBar then
-            if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
-                if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /5 then
-                    data.MagicStaff_CursedEyeTears = math.ceil(data.MagicStaff_ChargeBar.MaxCharge / data.MagicStaff_ChargeBar.Charge)
-                    BECKY_B:FireWeapon(entShooting, player)
-                end
-            elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
-                --save.ManaCharge = save.ManaCharge -BECKY_B.ManaTearCost
-                --ShootManaTear(player, entShooting)
-                BECKY_B:FireWeapon(entShooting, player)
-            end
-            data.MagicStaff_ChargeBar.Charge = 0
-        end
-        return 
-    end
+    if not player:IsExtraAnimationFinished() then return end
     local weapon
     if entShooting.Type == 1 then weapon = entShooting:GetWeapon(1)
     elseif entShooting.Type == 3 then weapon = entShooting:GetWeapon()
@@ -133,7 +170,10 @@ local function ProcessStaffSwing(entShooting, player)
         local sprite = knife:GetSprite()
         local SoyMilkMod = weapon:GetModifiers() & (WeaponModifier.CHOCOLATE_MILK | WeaponModifier.SOY_MILK) > 0
         if not SoyMilkMod and sprite:GetAnimation():match("Swing") and sprite:GetFrame() < sprite:GetCurrentAnimationData():GetLength() - 3 then return end
+        
+        data.MagicStaff_CursedEyeTears = nil
         --if entShooting.Type == 1 and save.ManaCharge < BECKY_B.ManaTearCost then return end
+        
         local addToCharge = 1
         if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) then
             local c_sectionCharge = 30 /(player.MaxFireDelay *3 +1)
@@ -141,29 +181,19 @@ local function ProcessStaffSwing(entShooting, player)
             addToCharge = addToCharge * (c_sectionCharge /BASE_TEAR_DPS * 1.25)
         else
             addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(player.MaxFireDelay) /BASE_TEAR_DPS * 1.25)
-        end
-        if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
-            addToCharge = addToCharge /5
+            if HasShouldDoCursedEye(player) then
+                addToCharge = addToCharge /5
+            end
         end
         if entShooting.Type == 3 and player:HasTrinket(TrinketType.TRINKET_FORGOTTEN_LULLABY) then
             addToCharge = addToCharge * 2
         end
         data.MagicStaff_ChargeBar.Charge = math.min(data.MagicStaff_ChargeBar.Charge +addToCharge, data.MagicStaff_ChargeBar.MaxCharge)
         
+
         if player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) or SoyMilkMod then
             
-            if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
-                if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /5 then
-                    data.MagicStaff_CursedEyeTears = math.ceil(data.MagicStaff_ChargeBar.MaxCharge / data.MagicStaff_ChargeBar.Charge)
-                    BECKY_B:FireWeapon(entShooting, player)
-                end
-            elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
-                --save.ManaCharge = save.ManaCharge -BECKY_B.ManaTearCost
-                --ShootManaTear(player, entShooting)
-                BECKY_B:FireWeapon(entShooting, player)
-            end
-
-            data.MagicStaff_ChargeBar.Charge = 0
+            BeckyFire(entShooting, player, data)
         else
             local fireDelay = weapon:GetFireDelay()
             if fireDelay < 0.5 then fireDelay = 0.5 end
@@ -171,29 +201,19 @@ local function ProcessStaffSwing(entShooting, player)
         end
     else
         
-        if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
-            if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /5 then
-                data.MagicStaff_CursedEyeTears = math.ceil(data.MagicStaff_ChargeBar.MaxCharge / data.MagicStaff_ChargeBar.Charge)
-                BECKY_B:FireWeapon(entShooting, player)
-            end
-        elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
-            --save.ManaCharge = save.ManaCharge -BECKY_B.ManaTearCost
-            --ShootManaTear(player, entShooting)
-            BECKY_B:FireWeapon(entShooting, player)
-        end
-        data.MagicStaff_ChargeBar.Charge = 0
+        BeckyFire(entShooting, player, data)
     end
 end
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function(_, player)
+    
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     PlayerAnimLib:SetDefaultAnm2(player, "gfx/player_becky_b.anm2")
     player:AddNullCostume(BECKY_B.BODY_COSTUME)
     local save = BeckyMod:RunSave(player)
     save.ManaCharge = save.ManaCharge or 0
 end)
-
 
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, 200, function(_, player, cacheFlags)
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
@@ -232,7 +252,45 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE or player:IsDead() then return end
     local data = player:GetData()
     
+    if data.MagicStaff_CursedEyeTears then
+        if data.MagicStaff_CursedEyeTears.Cooldown > 0 then
+            data.MagicStaff_CursedEyeTears.Cooldown = data.MagicStaff_CursedEyeTears.Cooldown -1
+        else
+            BECKY_B:FireWeapon(player, player, data.MagicStaff_CursedEyeTears.ShootDir)
+            data.MagicStaff_CursedEyeTears.Shots = data.MagicStaff_CursedEyeTears.Shots -1
+            if data.MagicStaff_CursedEyeTears.Shots <= 0 then data.MagicStaff_CursedEyeTears = nil
+            else data.MagicStaff_CursedEyeTears.Cooldown = CURSE_EYE_COOLDOWN end
+        end
+    end
     ProcessStaffSwing(player, player)
+end)
+
+BeckyMod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, ent)
+    local player = ent:ToPlayer()
+    if player and player:GetPlayerType() == BECKY_B.PLAYERTYPE then
+        player:BlockCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE)
+    end
+end)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, function(_, ent)
+    local player = ent:ToPlayer()
+    if player and player:GetPlayerType() == BECKY_B.PLAYERTYPE then
+        player:UnblockCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE)
+        if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
+            local data = player:GetData()
+            if data.MagicStaff_ChargeBar == nil then return end
+            if data.MagicStaff_ChargeBar.Charge > 0 and data.MagicStaff_ChargeBar.Charge < data.MagicStaff_ChargeBar.MaxCharge then
+                local level = game:GetLevel()
+                level.LeaveDoor = -1
+                game:StartRoomTransition(
+                    level:GetRandomRoomIndex(false, player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_CURSED_EYE):Next()),
+                    -1,
+                    RoomTransitionAnim.TELEPORT,
+                    player,
+                    level:GetDimension()
+                )
+            end
+        end
+    end
 end)
 
 
@@ -251,6 +309,16 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
         weapon:SetCharge(1.0)
     else
         weapon:SetCharge(0.0)
+    end
+    if data.MagicStaff_CursedEyeTears then
+        if data.MagicStaff_CursedEyeTears.Cooldown > 0 then
+            data.MagicStaff_CursedEyeTears.Cooldown = data.MagicStaff_CursedEyeTears.Cooldown -1
+        else
+            BECKY_B:FireWeapon(fam, player, data.MagicStaff_CursedEyeTears.ShootDir)
+            data.MagicStaff_CursedEyeTears.Shots = data.MagicStaff_CursedEyeTears.Shots -1
+            if data.MagicStaff_CursedEyeTears.Shots <= 0 then data.MagicStaff_CursedEyeTears = nil
+            else data.MagicStaff_CursedEyeTears.Cooldown = CURSE_EYE_COOLDOWN end
+        end
     end
     ProcessStaffSwing(fam, player)
 end)
@@ -427,6 +495,87 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ROOM_RENDER_ENTITIES, -300, fu
     BeckyMod:ForEachPlayer(renderPlayerChargebar)
 end)
 
+-----------------------------------------------------------------------------------
+--------------------------------SOME SYNERGIES-------------------------------------
+-----------------------------------------------------------------------------------
+
+BeckyMod:AddCallback(ModCallbacks.MC_PRE_ADD_COLLECTIBLE, function(_,itemID, charge, firstTime, slot, varData, player)
+    if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
+    if ITEMS_TO.Fake[itemID] then return ITEMS_TO.Fake[itemID] end
+end)
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, function(_, pickup)
+    if not PlayerManager.AnyoneIsPlayerType(BeckyMod.Character.BECKY_B.PLAYERTYPE) then return end
+
+    local itemId = pickup.SubType
+    if itemId > 0 and ITEMS_TO.Normal[itemId] then
+        pickup.SubType = ITEMS_TO.Normal[itemId]
+    end
+end, 100)
+
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, -400000, function(_, player, cacheFlag)
+    if cacheFlag & CacheFlag.CACHE_FIREDELAY then
+        if player:HasCollectible(BECKY_B.FakeItems.Monstros_Lung) then
+            local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
+            if player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then
+                tps = tps /3.1
+            else
+                tps = tps /4.3
+            end
+            player.MaxFireDelay = BeckyMod:toMaxFireDelay(tps) 
+        end
+    end
+end)
+
+local itemConfig = Isaac.GetItemConfig()
+local MonstrosLungSprite = Sprite("gfx/characters/229_monstros lung.anm2", true)
+local SkinColorToString = {
+    [SkinColor.SKIN_PINK] = ".png",
+    [SkinColor.SKIN_WHITE] = "_white.png",
+    [SkinColor.SKIN_BLACK] = "_black.png",
+    [SkinColor.SKIN_BLUE] = "_blue.png",
+    [SkinColor.SKIN_RED] = "_red.png",
+    [SkinColor.SKIN_GREEN] = "_green.png",
+    [SkinColor.SKIN_GREY] = "_grey.png",
+}
+local DirToHeadAnim = {
+    [Direction.UP] = "HeadUp",
+    [Direction.DOWN] = "HeadDown",
+    [Direction.LEFT] = "HeadLeft",
+    [Direction.RIGHT] = "HeadRight",
+}
+BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player, renderPos)
+    if player:HasCollectible(BECKY_B.FakeItems.Monstros_Lung) and player:IsItemCostumeVisible(itemConfig:GetCollectible(BECKY_B.FakeItems.Monstros_Lung), PlayerSpriteLayer.SPRITE_HEAD) then
+        local dir = player:GetHeadDirection()
+        
+        local data = player:GetData()
+        if not data.MagicStaff_ChargeBar then return end
+        local charge = data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge
+        MonstrosLungSprite:ReplaceSpritesheet(0, "gfx/characters/costumes/costume_monstros lung"..SkinColorToString[player:GetHeadColor()], true)
+
+        if charge == 1 then
+            data.MonstrosLung_T_Becky_Costume_Frame = data.MonstrosLung_T_Becky_Costume_Frame or 0
+            MonstrosLungSprite:SetFrame( DirToHeadAnim[dir].."ChargeFull", data.MonstrosLung_T_Becky_Costume_Frame)
+            data.MonstrosLung_T_Becky_Costume_Frame = (data.MonstrosLung_T_Becky_Costume_Frame +1) % MonstrosLungSprite:GetCurrentAnimationData():GetLength()
+        else
+            MonstrosLungSprite:SetFrame( DirToHeadAnim[dir].."Charge", math.floor(18 * data.charge))
+        end
+        MonstrosLungSprite:Render(renderPos)
+        return false
+    end
+end)
+
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_MULTI_SHOT_PARAMS, -40000, function(_, player, multishotParam, weaponType)
+    local num = player:GetCollectibleNum(BECKY_B.FakeItems.Monstros_Lung) -1
+    if num > 0 then
+        multishotParam:SetNumTears(4 + multishotParam:GetNumTears() )
+        multishotParam:SetNumLanesPerEye( 4 +  multishotParam:GetNumLanesPerEye() )
+        if multishotParam:GetSpreadAngle(weaponType) == 0 then
+            multishotParam:SetSpreadAngle(weaponType, 4.34)
+        end
+    end
+    return multishotParam
+end)
 
 -----------------------------------------------------------------------------------
 ---------------------------FIRING WEAPONS AND STUFF--------------------------------
@@ -477,23 +626,17 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
         for i=0, multishotParams:GetNumTears()-1 do
             local bomb = player:FireBomb(shotPos + posVel.Position *scale, posVel.Velocity, entShooting)
             table.insert(weaponList, bomb)
-
-            Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
         end
 
         if extraTears then
             if multishotParams:IsShootingBackwards() then
                 local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180) , entShooting)
                 table.insert(weaponList, bomb)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
                     local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
                     table.insert(weaponList, bomb)
-
-                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
                 end
             end
 
@@ -501,8 +644,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 local angle = Random() % 360
                 local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
                 table.insert(weaponList, bomb)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
             end
         end
 
@@ -527,7 +668,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
             tear:AddTearFlags(tearFlags)
             
             table.insert(weaponList, tear)
-            Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
         end
 
         if extraTears then
@@ -541,7 +681,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 tear:AddTearFlags(tearFlags)
 
                 table.insert(weaponList, tear)
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
@@ -554,7 +693,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                     tear:AddTearFlags(tearFlags)
                 
                     table.insert(weaponList, tear)
-                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
                 end
             end
 
@@ -569,7 +707,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 tear:AddTearFlags(tearFlags)
                 
                 table.insert(weaponList, tear)
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
             end
         end
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS) then
@@ -579,23 +716,17 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
             local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_BOMBS, shotDir, shotSpeed, multishotParams)
             local bomb = player:FireBomb(shotPos + posVel.Position *scale, posVel.Velocity, entShooting)
             table.insert(weaponList, bomb)
-
-            Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
         end
 
         if extraTears then
             if multishotParams:IsShootingBackwards() then
                 local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180) , entShooting)
                 table.insert(weaponList, bomb)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
                     local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
                     table.insert(weaponList, bomb)
-
-                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
                 end
             end
 
@@ -603,8 +734,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 local angle = Random() % 360
                 local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
                 table.insert(weaponList, bomb)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BOMB, bomb)
             end
         end
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then
@@ -614,23 +743,17 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
             local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_TECH_X, shotDir, shotSpeed, multishotParams)
             local tech_x = player:FireTechXLaser(shotPos + posVel.Position *scale, posVel.Velocity, 40, entShooting, mult)
             table.insert(weaponList, tech_x)
-            
-            Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_X_LASER, tech_x)
         end
 
         if extraTears then
             if multishotParams:IsShootingBackwards() then
                 local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180), 40 *mult, entShooting, mult)
                 table.insert(weaponList, tech_x)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_X_LASER, tech_x)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
                     local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle), 40 *mult, entShooting, mult)
                     table.insert(weaponList, tech_x)
-
-                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_X_LASER, tech_x)
                 end
             end
 
@@ -638,8 +761,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 local angle = Random() % 360
                 local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle), 40 *mult, entShooting, mult)
                 table.insert(weaponList, tech_x)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_X_LASER, tech_x)
             end
         end
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
@@ -649,23 +770,17 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
             local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_BRIMSTONE, shotDir, shotSpeed, multishotParams)
             local brim = player:FireBrimstone(posVel.Velocity, entShooting, mult)
             table.insert(weaponList, brim)
-
-            Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BRIMSTONE, brim)
         end
         
         if extraTears then
             if multishotParams:IsShootingBackwards() then
                 local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180), entShooting, mult)
                 table.insert(weaponList, brim)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BRIMSTONE, brim)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
                     local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle), entShooting, mult)
                     table.insert(weaponList, brim)
-
-                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BRIMSTONE, brim)
                 end
             end
 
@@ -673,8 +788,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 local angle = Random() % 360
                 local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle), entShooting, mult)
                 table.insert(weaponList, brim)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_BRIMSTONE, brim)
             end
         end
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY) then
@@ -689,8 +802,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 false, false, entShooting, mult
             )
             table.insert(weaponList, tech)
-
-            Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_LASER, tech)
         end
 
         if extraTears then
@@ -703,8 +814,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                     false, false, entShooting, mult
                 )
                 table.insert(weaponList, tech)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_LASER, tech)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
@@ -715,8 +824,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                         false, false, entShooting, mult
                     )
                     table.insert(weaponList, tech)
-
-                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_LASER, tech)
                 end
             end
 
@@ -729,8 +836,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                     false, false, entShooting, mult
                 )
                 table.insert(weaponList, tech)
-
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TECH_LASER, tech)
             end
         end
     --elseif player:HasCollectible(CollectibleType.COLLECTIBLE_) then
@@ -747,8 +852,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 false, true, true, entShooting, mult
             )
             table.insert(weaponList, tear)
-
-            Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
         end
 
         if extraTears then
@@ -760,7 +863,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 )
 
                 table.insert(weaponList, tear)
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
@@ -771,7 +873,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                     )
                 
                     table.insert(weaponList, tear)
-                    Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
                 end
             end
 
@@ -784,7 +885,6 @@ function BECKY_B:FireWeapon(entShooting, player, forceDir, forceMult, canBeEye, 
                 )
                 
                 table.insert(weaponList, tear)
-                Isaac.RunCallback(ModCallbacks.MC_POST_FIRE_TEAR, tear)
             end
         end
     end

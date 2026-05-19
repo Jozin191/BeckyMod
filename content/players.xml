@@ -8,7 +8,7 @@
         hp="2"
         canShoot="false"
         costumeSuffix="becky"
-        modcostume="1"
+        modcostume="0"
 		birthright="Freedom!!!"
     />
     <player name="Becky" bSkinParent="Becky"
@@ -35,7 +35,7 @@
         hp="8"
         canShoot="true"
         costumeSuffix="sofia"
-        modcostume="1"
+        modcostume="5"
 		birthright="None"
         hidden="true"
     />

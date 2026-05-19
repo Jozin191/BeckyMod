@@ -23,6 +23,9 @@ local game = BeckyMod.Game
 local function IsBeckyPresent()
     return PlayerManager.AnyoneIsPlayerType(BeckyMod.Character.BECKY.PLAYERTYPE) or PlayerManager.AnyoneIsPlayerType(BeckyMod.Character.BECKY_B.PLAYERTYPE)
 end
+local function IsKeeperPresent()
+    return PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_KEEPER) or PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_KEEPER_B)
+end
 
 local function CollectiblesInRoom()
     return Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE)
@@ -57,19 +60,19 @@ local function SetRoomSaveData()
 
     roomSave.BeckyPrices = {
         IsBeckyPresent = IsBeckyPresent(),
-        IsKeeperPresent = PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_KEEPER) or PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_KEEPER_B),
+        IsKeeperPresent = IsKeeperPresent(),
         BlueBabyPrices = PlayerManager.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY),
         PoundOfFlesh = PlayerManager.AnyoneHasCollectible(CollectibleType.COLLECTIBLE_POUND_OF_FLESH),
         JudasTongue = judasTongue,
         HealthCointainers = healthCointainers,
-        KeepersBargain = keepersBargain,
-        SteamSale = PlayerManager.GetNumCollectibles(CollectibleType.COLLECTIBLE_STEAM_SALE),
         YourSoul = PlayerManager.AnyoneHasTrinket(TrinketType.TRINKET_YOUR_SOUL),
+        KeepersBargain = keepersBargain,
+        KeepersBargainSeedTable = {}
     }
 end
 
 local itemConfig = Isaac.GetItemConfig()
-local function getPriceOf(var, sub, devilPrice, roomSave)
+local function GetPriceOf(var, sub, devilPrice, roomSave)
     if var ~= 100 then
         if devilPrice then
             return PickupPrice.PRICE_SPIKES
@@ -113,40 +116,42 @@ local function getPriceOf(var, sub, devilPrice, roomSave)
         return price
     end
     
-    local price = config.ShopPrice or 15
-    if price == 15 then
-        price = config.DevilPrice >= 2 and 30 or 15
+    local price = config.ShopPrice
+    if price == 15 and config.DevilPrice >= 2 then
+        price = 30
     end
-    --if roomSave.SteamSale > 0 then
-    --    price = price//(roomSave.SteamSale +1)
-    --end
-    --if price <= 0 then price = 1 end
+    
 
     return price
 end
 
-local function isKeepersBargain(var, sub, roomSave, roomDesc)
+local function IsKeepersBargain(var, sub, roomSave, roomDesc)
     if roomSave.KeepersBargain == 0 then return false end
-    local seed = roomDesc.DecorationSeed & 0xfffff800 | var + sub
-    local rng = RNG(seed, 77)
-    return roomSave.KeepersBargain == 2 or rng:RandomInt(2) == 0
+    if roomSave.KeepersBargain == 2 then return true end
+    
+    local seed = roomSave.KeepersBargainSeedTable[var + sub]
+    if seed == nil then
+        roomSave.KeepersBargainSeedTable[var + sub] = roomDesc.DecorationSeed & 0xfffff800 | var + sub
+    end
+
+    return seed % 2 == 0
 end
 
-local function devilPrices(roomDesc)
+local function ShouldBeDevilPrice(roomDesc)
     local roomData = roomDesc.Data
-    if roomData == nil then return true end
+    if roomData == nil then return false end
     if roomData.Type == RoomType.ROOM_DEVIL or roomDesc.Flags & RoomDescriptor.FLAG_DEVIL_TREASURE > 0 then return false end
-    if roomData.Type == RoomType.ROOM_BOSS and Becky.Level():GetStateFlag(LevelStateFlag.STATE_SATANIC_BIBLE_USED) then return true end
-    return true
+    if roomData.Type == RoomType.ROOM_ANGEL then return true end
+    return false
 end
 
 
-function DEVIL_DEAL:postNewRoom()
+function DEVIL_DEAL:PostNewRoom()
     if not IsBeckyPresent() then return end
     local room = game:GetRoom()
+    
+    if not room:IsFirstVisit() or IsKeeperPresent() then return end
     local roomType = room:GetType()
-
-    if not room:IsFirstVisit() then return end
 
     if roomType == RoomType.ROOM_TREASURE then
         SetRoomSaveData()
@@ -195,10 +200,10 @@ function DEVIL_DEAL:postNewRoom()
         end
     end
 end
-BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, DEVIL_DEAL.postNewRoom)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, DEVIL_DEAL.PostNewRoom)
 
 
-function DEVIL_DEAL:shopPrice(var, sub, shopId)
+function DEVIL_DEAL:ShopPrice(var, sub, shopId)
     local roomSave = BeckyMod:RoomSave()
     if roomSave.BeckyPrices == nil then return end
     local priceSave = roomSave.BeckyPrices
@@ -210,13 +215,13 @@ function DEVIL_DEAL:shopPrice(var, sub, shopId)
     local devilPrice
     if shopId < 0 then
         devilPrice = shopId == -1
-    else devilPrice = devilPrices(roomDesc) end
+    else devilPrice = ShouldBeDevilPrice(roomDesc) end
 
     if priceSave.PoundOfFlesh then devilPrice = not devilPrice end
-    if isKeepersBargain(var, sub, priceSave, roomDesc) then devilPrice = false end
-    return getPriceOf(var, sub, devilPrice, priceSave)
+    if IsKeepersBargain(var, sub, priceSave, roomDesc) then devilPrice = false end
+    return GetPriceOf(var, sub, devilPrice, priceSave)
 end
-BeckyMod:AddCallback(ModCallbacks.MC_GET_SHOP_ITEM_PRICE, DEVIL_DEAL.shopPrice)
+BeckyMod:AddCallback(ModCallbacks.MC_GET_SHOP_ITEM_PRICE, DEVIL_DEAL.ShopPrice)
 
 
 local function UpdateRoomSaveData()
@@ -224,10 +229,15 @@ local function UpdateRoomSaveData()
     SetRoomSaveData()
 end
 
-BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_PICKUP_COLLISION, 200, function(_, pickup)
-    if pickup.Price ~= 0 and BeckyMod:RoomSave().BeckyPrices then SetRoomSaveData() end
-end, 100)
+local function SetUpSatanicBible()
+    local room = game:GetRoom()
+    if room:GetType() == RoomType.ROOM_BOSS and game:GetLevel():GetStateFlag(LevelStateFlag.STATE_SATANIC_BIBLE_USED) then
+        SetRoomSaveData()
+    end
+end
 
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_USE_ITEM, 200, SetUpSatanicBible, CollectibleType.COLLECTIBLE_SATANIC_BIBLE)
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_PICKUP_SHOP_PURCHASE, 200, UpdateRoomSaveData, 100)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, 200, UpdateRoomSaveData)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, 200, UpdateRoomSaveData)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_TRIGGER_TRINKET_ADDED, 200, UpdateRoomSaveData)
