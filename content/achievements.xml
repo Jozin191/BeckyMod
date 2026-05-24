@@ -30,6 +30,6 @@
 	<achievement name="Sketchy Beggar" text='???' gfx="achievement_sketchy_beggar.png" />
 	
 	<!-- Poltergeist Challenge -->
-	<achievement name="Poltergeist Challenge" text='Poltergeist Challenge' gfx="achievement_poltergeist_challenge.png" />
-	<achievement name="Poul" text='Poltergeist Challenge' gfx="achievement_poul.png" />
+	<achievement name="Poltergeist Challenge" text='You unlocked Becky Challenge #2 Poltergeist' gfx="achievement_poltergeist_challenge.png" />
+	<achievement name="Poul" text='Beat the Challenge Poltergeist' gfx="achievement_poul_item.png" />
 </achievements>

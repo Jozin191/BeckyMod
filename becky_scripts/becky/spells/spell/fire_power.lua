@@ -42,7 +42,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function() FireCooldown =-1 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_ADD_EFFECT, function(_, player, itemConfig, addCostume, count)
     if itemConfig:IsNull() and itemConfig.ID == nullItem then
-        local data = player:GetData()
+        local data = BeckyMod.GetEntData(player)
         data.ManaDischarge = (data.ManaDischarge or 0) + MANA_DISCHARGE *count
         BeckyMod.Game:GetRoom():GetEffects():AddNullEffect(nullItem, count)
     end
@@ -51,7 +51,7 @@ end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_TRIGGER_EFFECT_REMOVED, function(_, player, itemConfig, count)
     if itemConfig:IsNull() and itemConfig.ID == nullItem then
-        local data = player:GetData()
+        local data = BeckyMod.GetEntData(player)
         data.ManaDischarge = data.ManaDischarge -MANA_DISCHARGE *count
         BeckyMod.Game:GetRoom():GetEffects():RemoveNullEffect(nullItem, count)
     end

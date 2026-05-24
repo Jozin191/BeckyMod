@@ -3,7 +3,7 @@ local SPELL_COST = 30
 local TEAR_VEL = Vector(2.5 *10, 0)
 
 local function fun(player)
-    local data = player:GetData()
+    local data = BeckyMod.GetEntData(player)
     if data.MagicStaff_SelectSpellDir == nil then
         data.MagicStaff_SelectSpellDir = { Type = BeckyMod.Spells.SpellType.BIG }
         return
@@ -16,7 +16,7 @@ local function fun(player)
     --tear.Scale = 2
     --tear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
 
-    for _, weap in ipairs(BeckyMod.Character.BECKY_B:FireWeapon(player, player, Vector(1,0):Rotated(angle), 2.25, false, false)) do
+    for _, weap in ipairs(BeckyMod.Character.BECKY_B:FireWeapon(player, player, {ForceDir = Vector(1,0):Rotated(angle), ForceMult = 2.25, CanBeEye = false, ExtraTears = false, TractorBeam = false} )) do
         weap:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
         if weap.Velocity:Length() >0 then
             weap.Velocity = TEAR_VEL:Rotated( weap.Velocity:GetAngleDegrees() )

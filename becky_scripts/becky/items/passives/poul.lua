@@ -100,14 +100,14 @@ local function SetGridSprite(target, grid, t, v)
 end
 
 local function ShootGrid(fam, vel)
-    local grids = fam:GetData().Grids or {}
+    local grids = BeckyMod.GetEntData(fam).Grids or {}
     local famPos = fam.Position
     local distace = fam.TargetPosition:Distance(famPos)
     if vel:Length() == 0 then distance = 0 end
 
     if #grids == 1 then
         local grid = grids[1]
-        local gridTypeVar= grid:GetData().GridTypeVar
+        local gridTypeVar= BeckyMod.GetEntData(grid).GridTypeVar
         local tear = Isaac.Spawn(2, TearVariant.GRIDENT, (gridTypeVar or 0), famPos, vel, grid):ToTear()
         
         local t = gridTypeVar >> 16
@@ -116,14 +116,14 @@ local function ShootGrid(fam, vel)
         tear.TearFlags = TearFlags.TEAR_SPECTRAL
         tear.CollisionDamage = POUL.PROJ_DAMAGE
         tear.Height = -25
-        tear:GetData().TargetDistance = {Dis = distace, Start = famPos}
+        BeckyMod.GetEntData(tear).TargetDistance = {Dis = distace, Start = famPos}
         grid:Remove()
     else
         local rng = fam:GetDropRNG()
         for i, grid in ipairs(grids) do
             local rangeOffset = 20 * (i-1)
             if rangeOffset > 30 then rangeOffset = 30 end
-            local gridTypeVar= grid:GetData().GridTypeVar
+            local gridTypeVar= BeckyMod.GetEntData(grid).GridTypeVar
             local tear = Isaac.Spawn(2, TearVariant.GRIDENT, (gridTypeVar or 0), famPos, vel:Rotated( rng:RandomInt(rangeOffset *2) - rangeOffset ), grid):ToTear()
             
             local t = gridTypeVar >> 16
@@ -132,11 +132,11 @@ local function ShootGrid(fam, vel)
             tear.TearFlags = TearFlags.TEAR_SPECTRAL
             tear.CollisionDamage = POUL.PROJ_DAMAGE
             tear.Height = -25 - (40 * (i-1))
-            tear:GetData().TargetDistance = {Dis = distace, Start = famPos}
+            BeckyMod.GetEntData(tear).TargetDistance = {Dis = distace, Start = famPos}
             grid:Remove()
         end
     end
-    fam:GetData().Grids = {}
+    BeckyMod.GetEntData(fam).Grids = {}
 end
 
 local function AddTaintedRock(gridIdx)
@@ -224,7 +224,7 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function(_, fam)
     fam.FireCooldown = 75 -- 2.5 seconds
     fam.State = FAM_STATES.IDLE
-    local famData = fam:GetData()
+    local famData = BeckyMod.GetEntData(fam)
     famData.Grids = {}
     famData.GridTarget = -1
     fam:GetSprite():Play("Idle", true)
@@ -234,7 +234,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
     local state = fam.State
     local player = fam.Player
     local rng = fam:GetDropRNG()
-    local famData = fam:GetData()
+    local famData = BeckyMod.GetEntData(fam)
 
     if state == FAM_STATES.SELECT_GRID then
         local room = game:GetRoom()
@@ -355,7 +355,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
                 eff.Parent = fam
                 local sp = eff:GetSprite()
 
-                eff:GetData().GridTypeVar = subType
+                BeckyMod.GetEntData(eff).GridTypeVar = subType
                 eff:ToEffect():FollowParent(fam)
                 eff.DepthOffset = 1
                 -- using this to update grids around it without doing to much work    
@@ -443,7 +443,7 @@ end, POUL.FAMILIAR)
 
 local RenderOffset = Vector(0, -20)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, fam, offset)
-    local grids = fam:GetData().Grids or {}
+    local grids = BeckyMod.GetEntData(fam).Grids or {}
     if #grids == 0 then return end
 
     local sp = fam:GetSprite()
@@ -509,7 +509,7 @@ local function LoadRoom()
             fam.Velocity = Vector.Zero
             fam.Target = nil
             fam:GetSprite():Play("Idle", true)
-            local famData = fam:GetData()
+            local famData = BeckyMod.GetEntData(fam)
             famData.Grids = {}
             famData.GridTarget = -1
         end
@@ -543,11 +543,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFl
 end, CacheFlag.CACHE_FAMILIARS)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
-    local target = tear:GetData().TargetDistance
+    local target = BeckyMod.GetEntData(tear).TargetDistance
     if not target then return end
     if target.Start:Distance(tear.Position) >= target.Dis -9 then
         tear.FallingAcceleration = 2.33
-        tear:GetData().TargetDistance = nil
+        BeckyMod.GetEntData(tear).TargetDistance = nil
     end
 end)
 

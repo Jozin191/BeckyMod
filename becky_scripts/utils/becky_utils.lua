@@ -68,6 +68,10 @@ function BeckyMod:Lerp(first, second, percent, smoothIn, smoothOut) --woah siiic
 	return (first + (second - first)*percent)
 end
 
+function BeckyMod:InverseLerp(first, second, percent)
+	return (percent - first) / (second - first)
+end
+
 --Checks if something is in a table
 ---@param table Table
 ---@param element any
@@ -243,3 +247,14 @@ end
 function BeckyMod.IsEnemy(ent)
 	return ent:IsActiveEnemy() and ent:IsVulnerableEnemy()
 end
+
+
+local cache_GetData = {} --- this is a lua version of GetData
+function BeckyMod.GetEntData(ent)
+	if not ent then return end
+	local ptr = GetPtrHash(ent)
+	if not cache_GetData[ptr] then cache_GetData[ptr] = {} end
+	return cache_GetData[ptr]
+end
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, 10000, function(_, ent) cache_GetData[ GetPtrHash(ent) ] = nil end) -- clears the table of an entity when is remove
+BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function() cache_GetData = {} end) -- the table get clear when the game starts (this is just in case as "entity remove" should be called when exiting a run)

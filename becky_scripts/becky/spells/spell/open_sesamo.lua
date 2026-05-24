@@ -3,7 +3,7 @@ local JOHN_ANGLE= Vector(1,0)
 
 
 local function fun(player)
-    local data = player:GetData()
+    local data = BeckyMod.GetEntData(player)
     if data.MagicStaff_SelectSpellDir == nil then
         data.MagicStaff_SelectSpellDir = { Type = BeckyMod.Spells.SpellType.OPEN_SESAMO }
         return

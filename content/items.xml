@@ -208,15 +208,20 @@
         />
 
         <!-- T. Becky Fake Items -->
-        <passive id="12"
-        name="Monstro's Lung"
-        gfx="collectibles_229_monstroslung.png"
-        description="Charged burst attack"
-        quality="2"
-        cache="firedelay"
-
-        tags="noeden"
-        hidden="true"
+        <null id="11"
+        name="Monstro's Lung Blocker" 
+        persistent="true" 
+        cache="firedelay" 
+        />
+        <null id="12"
+        name="Chocolate Milk Blocker" 
+        persistent="true" 
+        cache="tearcolor" 
+        />
+        <null id="13"
+        name="Neptunus Blocker" 
+        persistent="true" 
+        cache="" 
         />
 
         <!-- Null Items -->

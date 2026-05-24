@@ -45,7 +45,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     local save = BeckyMod:RunSave(player)
     if player:IsDead() or not save.ManaCharge or save.ManaCharge <= 0 then
         eff:Remove()
-        local data = player:GetData()
+        local data = BeckyMod.GetEntData(player)
         data.SpellsData = data.SpellsData or {}
 
         data.NoChargeMana = data.NoChargeMana -1*count
@@ -56,7 +56,7 @@ end, shieldEntVar)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_ADD_EFFECT, function(_, player, itemConfig, addCostume, count)
     if itemConfig:IsNull() and itemConfig.ID == nullItem then
-        local data = player:GetData()
+        local data = BeckyMod.GetEntData(player)
         data.NoChargeMana = (data.NoChargeMana or 0) +1*count
     
         local ent = Isaac.Spawn(
@@ -75,7 +75,7 @@ end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_TRIGGER_EFFECT_REMOVED, function(_, player, itemConfig, count)
     if itemConfig:IsNull() and itemConfig.ID == nullItem then
-        local data = player:GetData()
+        local data = BeckyMod.GetEntData(player)
         data.NoChargeMana = (data.NoChargeMana or 0) -1*count
         local ptr = GetPtrHash(player)
         for _, ent in ipairs(Isaac.FindByType(1000, shieldEntVar)) do

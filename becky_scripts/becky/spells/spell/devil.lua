@@ -1,3 +1,7 @@
+
+----------------------------------------------
+-- As far i tested, this freezes the game for what ever reason
+----------------------------------------------
 local SPELL_COST = 50
 local laserVar = Isaac.GetEntityVariantByName("Spell Devil Laser")
 local nullItem = Isaac.GetNullItemIdByName("SPELL_Devil")
@@ -7,6 +11,12 @@ local FireCooldown = -1
 local ShootingAmount = 0
 local SPEED = 3.17715
 local ONE_TILE = Vector(40, 0)
+local NONO_FLAGS = (EntityFlag.FLAG_NO_QUERY | EntityFlag.FLAG_NO_STATUS_EFFECTS | EntityFlag.FLAG_NO_TARGET | EntityFlag.FLAG_FRIENDLY | EntityFlag.FLAG_ICE_FROZEN)
+
+local function TableFilter(ent)
+    if ent:ToNPC() ~= nil and ent:GetEntityFlags() & NONO_FLAGS == 0 and ent:CanShutDoors() and ent:IsActiveEnemy() then return true end
+    return false
+end
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
     if BeckyMod.Game:IsPaused() then return end
@@ -38,6 +48,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
                 break
             end
         end
+        seed = Random()
+        if seed == 0 then seed =1 end
     until not findAPlayer
 
 
@@ -101,8 +113,19 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
 
     local pos = eff.Position
 
-    local searchFor = EntityPartition.PLAYER
-    if Isaac.CountEnemies() > 0 then searchFor = searchFor | EntityPartition.ENEMY end
+    -- making this mess because some times the game freezes for what ever reason (it may be just a me thing tho)
+    local entityList = BeckyMod:FilterList(Isaac.GetRoomEntities(), TableFilter)
+    entityList = BeckyMod:AppendTable(entityList, PlayerManager.GetPlayers() )
+
+    if eff.Target and not eff.Target:IsDead() and eff.Target:Exists() then
+        local moveAngle = eff.Velocity:GetAngleDegrees()
+        local angle =  ((eff.Target.Position - pos):GetAngleDegrees() - moveAngle)
+        
+        --print(moveAngle, angle, moveAngle - angle)
+        if angle > 310 then angle = -50
+        elseif angle > 50 then angle = 50 end
+        eff.Velocity = eff.Velocity:Lerp(eff.Velocity:Rotated(angle), 0.15)
+    else eff.Target = nil end
 
 
     if eff.FrameCount % 5 == 0 then
@@ -118,10 +141,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
             end
         end
         
-        for _, ent in ipairs(Isaac.FindInRadius(pos, 100, searchFor)) do
-            if target == nil or ent.Position:Distance(pos) < dis then
+        for _, ent in ipairs(entityList) do
+            local entDis = ent.Position:Distance(pos)
+            if entDis <= 100 and (target == nil or entDis < dis) then
                 target = ent
-                dis = ent.Position:Distance(pos)
+                dis = entDis
             end
         end
         if target ~= nil then
@@ -129,15 +153,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
         end
     end
 
-    if eff.Target and not eff.Target:IsDead() and eff.Target:Exists() then
-        local moveAngle = eff.Velocity:GetAngleDegrees()
-        local angle = (eff.Target.Position - pos):GetAngleDegrees() - moveAngle
-        
-        --print(moveAngle, angle, moveAngle - angle)
-        if angle < -50 then angle = -50
-        elseif angle > 50 then angle = 50 end
-        eff.Velocity = eff.Velocity:Lerp(eff.Velocity:Rotated(angle), 0.15)
-    else eff.Target = nil end
 
     if eff.Velocity:Length() < SPEED then
         local moveAngle = eff.Velocity:GetAngleDegrees()
@@ -155,7 +170,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
         eff.Velocity = (eff.Velocity:Normalized() *SPEED):Rotated(smallestAngle)
     end
 
-    for _, ent in ipairs(Isaac.FindInRadius(pos, eff.Size, searchFor)) do
+    local effSize = eff.Size
+    for _, ent in ipairs(entityList) do
+        if ent.Position:Distance(pos) - ent.Size > effSize then goto continued end
         if ent.Type == 1 then
             ent:TakeDamage(1, DamageFlag.DAMAGE_LASER, ref, 30)
         else
@@ -165,6 +182,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
             end
             ent:TakeDamage(dmg, DamageFlag.DAMAGE_LASER, ref, 2)
         end
+        ::continued::
     end
 
 end, laserVar)

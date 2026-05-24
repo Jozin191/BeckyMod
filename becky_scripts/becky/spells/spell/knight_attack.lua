@@ -2,6 +2,8 @@ local SPELL_COST = 45
 local knightVar = Isaac.GetEntityVariantByName("Spell Knight Attack")
 BeckyMod.Spells.ENTITIES.KNIGHT_ATTACK = { Type = 1000, Variant = knightVar }
 
+local LASER_DMG = 50
+local LASER_TIMEOUT = 4
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, eff)
     local sp = eff:GetSprite()
@@ -25,9 +27,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     local laser = Isaac.Spawn(EntityType.ENTITY_LASER, LaserVariant.THICK_RED, 0, eff.Position, Vector.Zero, eff.SpawnerEntity):ToLaser()
     laser.Angle = sp.Rotation
     laser.AngleDegrees = sp.Rotation
-    laser.CollisionDamage = 50
-    laser:SetTimeout(3)
-    laser:SetOneHit(true)
+    laser.CollisionDamage = LASER_DMG
+    laser:SetTimeout(LASER_TIMEOUT)
+    laser:SetOneHit(false)
     laser:AddTearFlags(TearFlags.TEAR_SPECTRAL)
     laser:SetInitSound(SoundEffect.SOUND_NULL)
     laser:SetDisableFollowParent(true)
@@ -36,9 +38,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     local laser2 = Isaac.Spawn(EntityType.ENTITY_LASER, LaserVariant.THICK_RED, 0, eff.Position, Vector.Zero, eff.SpawnerEntity):ToLaser()
     laser2.Angle = sp.Rotation + 180
     laser2.AngleDegrees = sp.Rotation + 180
-    laser2.CollisionDamage = 50
-    laser2:SetTimeout(3)
-    laser2:SetOneHit(true)
+    laser2.CollisionDamage = LASER_DMG
+    laser2:SetTimeout(LASER_TIMEOUT)
+    laser2:SetOneHit(false)
     laser2:AddTearFlags(TearFlags.TEAR_SPECTRAL)
     laser2:SetInitSound(SoundEffect.SOUND_NULL)
     laser2:SetDisableFollowParent(true)

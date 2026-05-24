@@ -127,7 +127,7 @@ end
 
 local function IsKeepersBargain(var, sub, roomSave, roomDesc)
     if roomSave.KeepersBargain == 0 then return false end
-    if roomSave.KeepersBargain == 2 then return true end
+    --if roomSave.KeepersBargain == 2 then return true end -- the golden effect was not on .12
     
     local seed = roomSave.KeepersBargainSeedTable[var + sub]
     if seed == nil then

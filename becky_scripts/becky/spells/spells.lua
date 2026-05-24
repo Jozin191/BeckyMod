@@ -42,7 +42,7 @@ local DevilSpellsPool = {
     SPELLS.SpellType.SACRIFICIAL_BUFF,
     SPELLS.SpellType.FIRE_POWER,
     SPELLS.SpellType.NUKE,
-    SPELLS.SpellType.DEVIL,
+    --SPELLS.SpellType.DEVIL,
     SPELLS.SpellType.SPELL_DMG_UP,
     SPELLS.SpellType.MULTISHOT,
     SPELLS.SpellType.KNIGHT_ATTACK,
@@ -52,7 +52,7 @@ local AngelSpellsPool = {
     SPELLS.SpellType.SUMMON,
     SPELLS.SpellType.SHIELD,
     SPELLS.SpellType.DASH,
-    SPELLS.SpellType.BOOMERANG,
+    --SPELLS.SpellType.BOOMERANG,
     SPELLS.SpellType.WEAKEN_ENEMIES,
     SPELLS.SpellType.MANA_REGEN,
     SPELLS.SpellType.FLY_N_HOMING,
@@ -131,27 +131,7 @@ local SPELLS_FRAME = {
     [SPELLS.SpellType.KNIGHT_ATTACK] = 14,
 }
 
-local SPELLS_COST = {
-    [SPELLS.SpellType.SPREAD] = 30,
-    [SPELLS.SpellType.BIG] = 50,
-    [SPELLS.SpellType.SUMMON] = 0,
-    [SPELLS.SpellType.SHIELD] = 0,
-
-    [SPELLS.SpellType.SACRIFICIAL_BUFF] = 0,
-    [SPELLS.SpellType.FIRE_POWER] = 10,
-    [SPELLS.SpellType.NUKE] = 100,
-    [SPELLS.SpellType.DEVIL] = 30,
-
-    [SPELLS.SpellType.DASH] = 99,
-    [SPELLS.SpellType.BOOMERANG] = 99,
-    [SPELLS.SpellType.WEAKEN_ENEMIES] = 99,
-
-    [SPELLS.SpellType.MULTISHOT] = 99,
-    [SPELLS.SpellType.FLY_N_HOMING] = 99,
-    [SPELLS.SpellType.OPEN_SESAMO] = 99,
-    [SPELLS.SpellType.KNIGHT_ATTACK] = 99,
-
-}
+local SPELLS_COST = {}
 
 local DEFAULT_SPELLS = {
     Spells = {
@@ -204,14 +184,14 @@ end
 
 
 function SPELLS:SetPlayerSelectSpell(player, set)
-    local data = player:GetData()
+    local data = BeckyMod.GetEntData(player)
     data.MagicStaff_SelectingSpell = set
     data.MagicStaff_SelectSpellDir = nil
     data.SpellNoSelect = false
 end
 
 function SPELLS:IsPlayerSelectingSpell(player, spellType)
-    local data = player:GetData()
+    local data = BeckyMod.GetEntData(player)
     if not data.MagicStaff_SelectingSpell then return false end
     if spellType ~= nil then
         return data.MagicStaff_SelectingSpell == spellType
@@ -237,7 +217,7 @@ for _, file in ipairs({
     "nuke",
     "open_sesamo",
     "spell_dmg_up",
-    "boomerang",
+    --"boomerang",
     "weaken_enemies",
 }) do
     local data = include(SPELLS_RUTE .. file)
@@ -253,7 +233,7 @@ end
 
 local DEAL_SPELL_RNG = RNG()
 local function renderPlayerSpellSelection(player)
-    local data = player:GetData()
+    local data = BeckyMod.GetEntData(player)
     local selectType = data.MagicStaff_SelectingSpell or SPELLS.SpellSelectType.NONE
     if selectType == SPELLS.SpellSelectType.NONE then
         local dealSpell = data.ReplaceSpell
@@ -507,7 +487,7 @@ end)
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-    local data = player:GetData()
+    local data = BeckyMod.GetEntData(player)
     local selectType = data.MagicStaff_SelectingSpell or SPELLS.SpellSelectType.NONE
     if selectType == SPELLS.SpellSelectType.NONE then return end
     
@@ -617,7 +597,7 @@ end)
 
 local function resetPlayerSelection(player)
     SPELLS:SetPlayerSelectSpell(player, SPELLS.SpellSelectType.NONE)
-    local data = player:GetData()
+    local data = BeckyMod.GetEntData(player)
     --if data.SpellsData then
     --    if data.SpellsData.SummonActive then
     --        SPELLS.SPELL_FUNC[SPELLS.SpellType.SUMMON](player)
@@ -660,7 +640,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, statue)
     for i, player in ipairs(PlayerManager.GetPlayers()) do
         local save = BeckyMod:FloorSave(player)
         if not save.DealSpell and player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then
-            local data = player:GetData()
+            local data = BeckyMod.GetEntData(player)
             if data.MagicStaff_SelectingSpell and data.MagicStaff_SelectingSpell > SPELLS.SpellSelectType.NONE then
                 if data.MagicStaff_SelectingSpell ~= SPELLS.SpellSelectType.NORMAL then
                     data.ReplaceSpell = -1

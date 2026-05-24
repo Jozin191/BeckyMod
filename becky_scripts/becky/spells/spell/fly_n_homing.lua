@@ -34,14 +34,14 @@ end
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_ADD_EFFECT, function(_, player, itemConfig, addCostume, count)
     if itemConfig:IsNull() and itemConfig.ID == nullItem then
-        local data = player:GetData()
+        local data = BeckyMod.GetEntData(player)
         data.NoChargeMana = (data.NoChargeMana or 0) +1*count
     end
 end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_TRIGGER_EFFECT_REMOVED, function(_, player, itemConfig, count)
     if itemConfig:IsNull() and itemConfig.ID == nullItem then
-        local data = player:GetData()
+        local data = BeckyMod.GetEntData(player)
         data.NoChargeMana = (data.NoChargeMana or 0) -1*count
     end
 end)
