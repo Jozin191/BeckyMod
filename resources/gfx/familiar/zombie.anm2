@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="Jozin191" CreatedOn="07/05/2026 19:07:16" Version="4" Fps="30"/>
+	<Info CreatedBy="Jozin191" CreatedOn="25/05/2026 02:31:19 p.m." Version="5" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="zombie.png" Id="0"/>
@@ -11,7 +11,9 @@
 			<Layer Name="extra" Id="3" SpritesheetId="0"/>
 		</Layers>
 		<Nulls/>
-		<Events/>
+		<Events>
+			<Event Name="sound" Id="0"/>
+		</Events>
 	</Content>
 	<Animations DefaultAnimation="WalkVert">
 		<Animation Name="WalkVert" FrameNum="21" Loop="true">
@@ -129,7 +131,9 @@
 				</LayerAnimation>
 			</LayerAnimations>
 			<NullAnimations/>
-			<Triggers/>
+			<Triggers>
+				<Trigger EventId="0" AtFrame="11"/>
+			</Triggers>
 		</Animation>
 		<Animation Name="Killed" FrameNum="20" Loop="false">
 			<RootAnimation>

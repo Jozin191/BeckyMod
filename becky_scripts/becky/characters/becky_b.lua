@@ -245,6 +245,7 @@ local function BeckyFire(entShooting, player, data)
 end
 
 
+
 local function ProcessStaffSwing(entShooting, player)
     local data = BeckyMod.GetEntData(entShooting)
     --local save = BeckyMod:RunSave(player)
@@ -549,11 +550,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_RENDER, function(_, knife, offse
     if GetBecky(knife.Parent) == nil then return end
 
     local sp = knife:GetSprite()
-    local nullFrame = sp:GetNullFrame("*flame")
+    local nullFrame = sp:GetNullFrame("flame")
 
     if nullFrame and nullFrame:IsVisible() then
         BECKY_B.StaffFireSprite.Scale = sp.Scale
-        local pos = knife:GetNullOffset("*flame")
+        local pos = knife:GetNullOffset("flame")
 
         local room = game:GetRoom()
         BECKY_B.StaffFireSprite:SetFrame("flame", knife.FrameCount %4)

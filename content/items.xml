@@ -250,6 +250,10 @@
         name="Night of the Slasher_Costume handler"
         persistent="true" 
         cache="" />
+        <null
+        name="Undead Hand_Zombie Counter"
+        persistent="false" 
+        cache="" />
 
         <null 
         name="RIPPED_CARD_The_Magician" />

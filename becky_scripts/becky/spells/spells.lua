@@ -150,17 +150,17 @@ for i=1, 4 do DEFAULT_SPELLS.HasSpells[ tostring(DEFAULT_SPELLS.Spells[i]) ] = t
 BeckyMod.Spells = SPELLS
 local game = BeckyMod.Game
 
---- BeckyMod.Spells:SetSpellType(Isaac.GetPlayer(), slot, spellType) <- this is for testing on the game
+
 function SPELLS:GetSpells(player)
     local save = BeckyMod:RunSave(player)
-    save.RunSpells = save.RunSpells or DEFAULT_SPELLS.Spells
-    save.RunHasSpells = save.RunHasSpells or DEFAULT_SPELLS.HasSpells
+    save.RunSpells = save.RunSpells or BeckyMod:ShallowCopy(DEFAULT_SPELLS.Spells)
+    save.RunHasSpells = save.RunHasSpells or BeckyMod:ShallowCopy(DEFAULT_SPELLS.HasSpells)
     return save.RunSpells
 end
 function SPELLS:HasSpell(player, spellType)
     local save = BeckyMod:RunSave(player)
-    save.RunSpells = save.RunSpells or DEFAULT_SPELLS.Spells
-    save.RunHasSpells = save.RunHasSpells or DEFAULT_SPELLS.HasSpells
+    save.RunSpells = save.RunSpells or BeckyMod:ShallowCopy(DEFAULT_SPELLS.Spells)
+    save.RunHasSpells = save.RunHasSpells or BeckyMod:ShallowCopy(DEFAULT_SPELLS.HasSpells)
     return save.RunHasSpells[tostring(spellType)] == true
 end
 
@@ -168,8 +168,8 @@ function SPELLS:SetSpellType(player, slot, spellType)
     slot = slot +1
     if slot <1 or slot > 4 then return end
     local save = BeckyMod:RunSave(player)
-    save.RunSpells = save.RunSpells or DEFAULT_SPELLS.Spells
-    save.RunHasSpells = save.RunHasSpells or DEFAULT_SPELLS.HasSpells
+    save.RunSpells = save.RunSpells or BeckyMod:ShallowCopy(DEFAULT_SPELLS.Spells)
+    save.RunHasSpells = save.RunHasSpells or BeckyMod:ShallowCopy(DEFAULT_SPELLS.HasSpells)
     if save.RunSpells[slot] ~= SPELLS.SpellType.NULL then
         save.RunHasSpells[tostring(save.RunSpells[slot])] = nil
     end
@@ -536,6 +536,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         BeckyMod:FloorSave(player).DealSpell = true
 
         data.ReplaceSpell = -1
+        return
     else data.ReplaceSpell  =-1 end
 
     local spell
@@ -560,12 +561,24 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     end
     if spell == nil or spell == 0 then return end
 
-    local manaLeft = BeckyMod:RunSave(player).ManaCharge or 0
+    local playerData = BeckyMod:RunSave(player)
+    local manaLeft = playerData.ManaCharge or 0
     if selectType ~= SPELLS.SpellSelectType.NORMAL or SPELLS.SPELL_FUNC_CAN_SELECT[spell](player, manaLeft) then
         if SPELLS.SPELL_FUNC[spell](player) then return end
 
         if data.MagicStaff_SelectSpellDir == nil then
-            if selectType == SPELLS.SpellSelectType.NORMAL then save.ManaCharge = save.ManaCharge - SPELLS_COST[spell] end
+            if selectType == SPELLS.SpellSelectType.NORMAL then playerData.ManaCharge = manaLeft - SPELLS_COST[spell] end
+
+            local soundType = Random() % 2 +1
+            --if soundType == 1 then
+                --BeckyMod.SFX:Play(SoundEffect.SOUND_YO_LISTEN, 1, 5)
+            --else
+                if soundType == 1 then
+                BeckyMod.SFX:Play(SoundEffect.SOUND_BATTERYCHARGE, 0.75, 1, false, 1.35 )
+            elseif soundType == 2 then
+                BeckyMod.SFX:Play(SoundEffect.SOUND_BATTERYDISCHARGE, 0.75, 1, false, 1.5 )
+            end
+            
 
             if player:GetEffects():HasNullEffect(BeckyMod.Pickup.SOUL_OF_BECKY.NULL_ITEM_ID) then
                 player:GetEffects():RemoveNullEffect(BeckyMod.Pickup.SOUL_OF_BECKY.NULL_ITEM_ID, -1)
@@ -684,6 +697,8 @@ local SELECTING_Spells = {}
 local CURRENT_Spell_Slot = 1
 local DEBUG_INPUTCOOLDOWN = 4
 
+
+
 local function LockAllPlayers(player) player.ControlsEnabled = false end
 local function UnlockAllPlayers(player) player.ControlsEnabled = true end
 BeckyMod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, args)
@@ -693,9 +708,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_EXECUTE_CMD, function(_, cmd, args)
             return
         end
         if Debug_Active then
-            --[[
             BeckyMod:ForEachPlayer(UnlockAllPlayers)
             Debug_Active = false
+            --[[
             local player = PlayerManager.FirstPlayerByType(BeckyMod.Character.BECKY_B.PLAYERTYPE)
             local beckySpells = SPELLS:GetSpells(player)
             for slot=1, 4 do

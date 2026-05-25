@@ -2,6 +2,7 @@ local UNDEAD_HAND = {}
 
 BeckyMod.Item.UNDEAD_HAND = UNDEAD_HAND
 UNDEAD_HAND.ID = Isaac.GetItemIdByName("Undead Hand")
+UNDEAD_HAND.NULL_ITEM_ID = Isaac.GetNullItemIdByName("Undead Hand_Zombie Counter")
 UNDEAD_HAND.FAMILIAR = Isaac.GetEntityVariantByName("Becky Zombie")
 UNDEAD_HAND.SPEED_MULT = 0.85
 UNDEAD_HAND.DEAD_COOLDOWN = 300
@@ -56,8 +57,15 @@ function UNDEAD_HAND:FamiliarUpdate(fam)
 
             fam.State = State.ATTACKING
             fam.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
+        elseif state == State.SPAWNING then
+            if sprite:IsEventTriggered("sound") then
+                BeckyMod.SFX:Play(SoundEffect.SOUND_MAGGOT_BURST_OUT, 0.75, 1, false, 0.85)
+            end
         end
     elseif state == State.ATTACKING then
+        if fam.FrameCount % 180 == 0 and fam:GetDropRNG():RandomInt(2) == 0 then
+            BeckyMod.SFX:Play(SoundEffect.SOUND_MONSTER_ROAR_1, 0.75, 5, false, 0.75)
+        end
 
         local anim, xflip = GetBodyAnim(fam.Velocity)
         if anim ~= sprite:GetAnimation() then sprite:SetAnimation(anim, false) end
@@ -143,7 +151,7 @@ end
 
 
 function UNDEAD_HAND:CacheFams(player, cacheFlags)
-    local num = player:GetEffects():GetCollectibleEffectNum(UNDEAD_HAND.ID)
+    local num = player:GetEffects():GetNullEffectNum(UNDEAD_HAND.NULL_ITEM_ID)
     local rng = player:GetCollectibleRNG(UNDEAD_HAND.ID)
 
     player:CheckFamiliar(UNDEAD_HAND.FAMILIAR, num, rng, nil)
@@ -152,6 +160,8 @@ end
 function UNDEAD_HAND:UseItem(itemID, rng, player, useFlags, slot)
     if Isaac.CountEnemies() == 0 then return { Discharge = false, ShowAnim = false } end
     --player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
+    player:AddNullItemEffect(UNDEAD_HAND.NULL_ITEM_ID)
+    
     return useFlags & UseFlag.USE_NOANIM == 0
 end
 
