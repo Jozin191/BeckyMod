@@ -10,6 +10,7 @@ BeckyMod.Spells.ENTITIES.DEVIL_LASER = { Type = 1000, Variant = laserVar }
 local FireCooldown = -1
 local ShootingAmount = 0
 local SPEED = 3.17715
+local SPEED_VECT = Vector(SPEED, 0)
 local ONE_TILE = Vector(40, 0)
 local NONO_FLAGS = (EntityFlag.FLAG_NO_QUERY | EntityFlag.FLAG_NO_STATUS_EFFECTS | EntityFlag.FLAG_NO_TARGET | EntityFlag.FLAG_FRIENDLY | EntityFlag.FLAG_ICE_FROZEN)
 
@@ -118,13 +119,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     entityList = BeckyMod:AppendTable(entityList, PlayerManager.GetPlayers() )
 
     if eff.Target and not eff.Target:IsDead() and eff.Target:Exists() then
-        local moveAngle = eff.Velocity:GetAngleDegrees()
-        local angle =  ((eff.Target.Position - pos):GetAngleDegrees() - moveAngle)
-        
-        --print(moveAngle, angle, moveAngle - angle)
-        if angle > 310 then angle = -50
-        elseif angle > 50 then angle = 50 end
-        eff.Velocity = eff.Velocity:Lerp(eff.Velocity:Rotated(angle), 0.15)
+        local angle = (eff.Target.Position - pos):GetAngleDegrees()
+        eff.Velocity = SPEED_VECT:Rotated( angle )
     else eff.Target = nil end
 
 

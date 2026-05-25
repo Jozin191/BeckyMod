@@ -18,7 +18,9 @@
     
     <costume anm2path="229_monstros lung.anm2" type="none" id="11" hasSkinAlt="true" priority="22" />
     <costume anm2path="069_Chocolate Milk.anm2" type="none" id="12" priority="21"  hasSkinAlt="true" />
-    <costume anm2path="044x_Neptunus.anm2" type="none" id="13" priority="22" skinColor="2" overwriteColor="true"  />
+    <costume anm2path="044x_Neptunus.anm2" type="none" id="13" priority="22" skinColor="2" overwriteColor="true" />
+    <costume anm2path="052_Dr Fetus.anm2"  type="none" id="14" />
+    <costume anm2path="168_Epic Fetus.anm2" type="none" id="15" />
 
 
     <costume anm2path="costumes/pog/becky_pog.anm2" isFlying="true" priority="969" type="none"/>

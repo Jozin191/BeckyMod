@@ -249,6 +249,20 @@ function BeckyMod.IsEnemy(ent)
 end
 
 
+function BeckyMod.RandomFloat(min, max, rng)
+	min = min or 0
+	max = max or 1
+
+	if min > max then
+		local v = max
+		max = min
+		min = v
+	end
+
+	return min + rng:RandomFloat() * (max - min)
+end
+
+
 local cache_GetData = {} --- this is a lua version of GetData
 function BeckyMod.GetEntData(ent)
 	if not ent then return end

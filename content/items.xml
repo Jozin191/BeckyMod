@@ -223,6 +223,21 @@
         persistent="true" 
         cache="" 
         />
+        <null id="14"
+        name="Epic Fetus Blocker" 
+        persistent="true" 
+        cache="firedelay" 
+        />
+        <null id="15"
+        name="Dr Fetus Blocker" 
+        persistent="true" 
+        cache="firedelay" 
+        />
+        <null
+        name="Spirit Sword Stat up" 
+        persistent="true" 
+        cache="damage firedelay" 
+        />
 
         <!-- Null Items -->
 
