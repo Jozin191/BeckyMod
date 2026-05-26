@@ -509,14 +509,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
     local data = BeckyMod.GetEntData(player)
     local manaCap = 100 - (data.MaxManaOffset or 0)
 
-    if BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.MANA_REGEN) and (data.NoChargeMana == nil or data.NoChargeMana <= 0) then
-        if not game:GetRoom():IsClear() then
-            local midCap = 50 - (data.MaxManaOffset or 0)
-            if save.ManaCharge < midCap then
-                save.ManaCharge = save.ManaCharge + 0.038
-            end
-        end
+    if BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.MANA_REGEN) then
+        manaCap = 150 - (data.MaxManaOffset or 0)
     end
+    --if BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.MANA_REGEN) and (data.NoChargeMana == nil or data.NoChargeMana <= 0) then
+    --    if not game:GetRoom():IsClear() then
+    --        local midCap = 50 - (data.MaxManaOffset or 0)
+    --        if save.ManaCharge < midCap then
+    --            save.ManaCharge = save.ManaCharge + 0.038
+    --        end
+    --    end
+    --end
 
     if save.ManaCharge > 0 and data.ManaDischarge and data.ManaDischarge > 0 then
         save.ManaCharge = math.max(save.ManaCharge -data.ManaDischarge, 0)
@@ -567,7 +570,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     local player = GetBecky(knife.Parent)
     if player == nil then return end
     if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
-    knife.SpriteScale = Vector.One * 0.85
+    --knife.SpriteScale = Vector.One * 0.85
     if knife.FrameCount >1 then
         knife.Charge = -1
         return
@@ -583,7 +586,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
     local parent = knife:GetHitboxParentKnife()
     if parent ~= nil and parent.SpriteScale then
-        knife.SpriteScale = parent.SpriteScale * 1.33
+        knife.SpriteScale = parent.SpriteScale * 1.2805
     end
     if knife.FrameCount >1 then
         return
@@ -620,11 +623,24 @@ HudHelper.RegisterHUDElement({
 	OnRender = function(player, playerHUDIndex, hudLayout, position)
         local save = BeckyMod:RunSave(player)
         local manaOffset = (BeckyMod.GetEntData(player).MaxManaOffset or 0)
+        
+        local a = math.min(math.floor(save.ManaCharge + manaOffset), 100)
+        local b = math.min(math.floor(manaOffset), 100)
 
-        BECKY_B.ManaBarSprite:SetFrame("ChargeBar", math.floor(save.ManaCharge + manaOffset) )
-        BECKY_B.ManaBarSprite:SetOverlayRenderPriority(false)
-        BECKY_B.ManaBarSprite:SetOverlayFrame("ChargeBarGray", math.floor(manaOffset))
+        BECKY_B.ManaBarSprite:SetFrame("ChargeBar", a )
         BECKY_B.ManaBarSprite:Render(position)
+        BECKY_B.ManaBarSprite:SetFrame("ChargeBarGray", b)
+        BECKY_B.ManaBarSprite:Render(position)
+
+        if BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.MANA_REGEN) then
+            local a2 = math.min(save.ManaCharge + manaOffset - a, 50) *2
+            local b2 = math.min(manaOffset - b, 50) *2
+    
+            BECKY_B.ManaBarSprite:SetFrame("ChargeBar2", math.floor(a2) )
+            BECKY_B.ManaBarSprite:Render(position)
+            BECKY_B.ManaBarSprite:SetFrame("ChargeBarGray2", math.floor(b2) )
+            BECKY_B.ManaBarSprite:Render(position)
+        end
 	end,
 	--BypassGhostBaby = true,
 }, HudHelper.HUDType.EXTRA)

@@ -367,14 +367,14 @@ function RIPPED_CARD:UseCard(CardId, player, useFlags)
     --print(copyCard, ({"CARD_FOOL","CARD_MAGICIAN","CARD_HIGH_PRIESTESS","CARD_EMPRESS","CARD_EMPEROR","CARD_HIEROPHANT","CARD_LOVERS","CARD_CHARIOT","CARD_JUSTICE","CARD_HERMIT","CARD_WHEEL_OF_FORTUNE","CARD_STRENGTH","CARD_HANGED_MAN","CARD_DEATH","CARD_TEMPERANCE","CARD_DEVIL","CARD_TOWER","CARD_STARS","CARD_MOON","CARD_SUN","CARD_JUDGEMENT","CARD_WORLD"})[copyCard])
     --Isaac.DebugString("Ripped Card copy "..copyCard)
 
-    CARDS_EFFECTS[copyCard](player, rng)
+    CARDS_EFFECTS[copyCard](player, player:GetCardRNG(copyCard))
 end
 
 
 local DO_ON_NEW_ROOM = {}
 function RIPPED_CARD:UseCard2(CardId, player, useFlags) --- patched stuff
     if useFlags & UseFlag.USE_CARBATTERY > 0 then return end
-    local rng = player:GetCardRNG(RIPPED_CARD.ID)
+    local rng = player:GetCardRNG(RIPPED_CARD.ID2)
     local card1 = CARD_GROUPS[1][rng:RandomInt(1, #CARD_GROUPS[1])]
     local card2 = CARD_GROUPS[2][rng:RandomInt(1, #CARD_GROUPS[2])]
 
@@ -388,11 +388,11 @@ function RIPPED_CARD:UseCard2(CardId, player, useFlags) --- patched stuff
         return
     end
     
-    CARDS_EFFECTS[card1](player, rng)
+    CARDS_EFFECTS[card1](player, player:GetCardRNG(card1))
     if CARD_GROUPS.TeleportCards[card1] then
         table.insert(DO_ON_NEW_ROOM, {Player = player, CardId = card2, TarotCloth = false})
     else
-        CARDS_EFFECTS[card2](player, rng)
+        CARDS_EFFECTS[card2](player, player:GetCardRNG(card2))
     end
 
     --local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(player.Position, 40, true, false)
@@ -406,7 +406,7 @@ function RIPPED_CARD:OnNewRoom()
         if data.TarotCloth then
             player:UseCard(data.CardId, UseFlag.USE_MIMIC | UseFlag.USE_NOANNOUNCER)
         else
-            CARDS_EFFECTS[data.CardId](player, player:GetCardRNG(RIPPED_CARD.ID))
+            CARDS_EFFECTS[data.CardId](player, player:GetCardRNG(data.CardId))
         end
     end
     
@@ -517,6 +517,76 @@ function RIPPED_CARD:GetCard(rng, cardId, includePlay, includeRunes, runesOnly)
         end
     end
 end
+
+
+local RenderCardSpr = Sprite("gfx/ui/parched_card_UI.anm2", true)
+local ID_TO_STRING = {
+    "TheFool",
+    "TheMagician",
+    "TheHighPriestess",
+    "TheEmpress",
+    "TheEmperor",
+    "TheHierophant",
+    "TheLovers",
+    "TheChariot",
+    "TheJustice",
+    "TheHermit",
+    "WheelOfFortune",
+    "Strength",
+    "TheHangedMan",
+    "Death",
+    "Temperance",
+    "TheDevil",
+    "TheTower",
+    "TheStars",
+    "TheMoon",
+    "TheSun",
+    "Judgement",
+    "TheWorld",
+}
+HudHelper.RegisterHUDElement({
+	--Name = "Ripped Card UI",
+	--Priority = HudHelper.Priority.HIGHEST,
+	ItemID = RIPPED_CARD.ID,
+	--Condition = function(player, playerHUDIndex, hudLayout)
+    --    local mainCard = player:GetCard(PillCardSlot.PRIMARY)
+	--	return mainCard == RIPPED_CARD.ID or mainCard == RIPPED_CARD.ID2
+	--end,
+	OnRender = function(player, playerHUDIndex, hudLayout, position, alpha, scale, itemID)
+        local rng = player:GetCardRNG(RIPPED_CARD.ID)
+        local copyCard = rng:PhantomInt(Card.CARD_FOOL, Card.CARD_WORLD)
+        RenderCardSpr:SetFrame(ID_TO_STRING[copyCard].."_Left", 0)
+        RenderCardSpr.Color.A = alpha
+        RenderCardSpr.Scale = Vector.One * scale
+        RenderCardSpr:Render(position)
+	end,
+}, HudHelper.HUDType.CARD_ID)
+HudHelper.RegisterHUDElement({
+	--Name = "Patched Card UI",
+	--Priority = HudHelper.Priority.HIGHEST,
+	ItemID = RIPPED_CARD.ID2,
+	--Condition = function(player, playerHUDIndex, hudLayout)
+    --    local mainCard = player:GetCard(PillCardSlot.PRIMARY)
+	--	return mainCard == RIPPED_CARD.ID or mainCard == RIPPED_CARD.ID2
+	--end,
+	OnRender = function(player, playerHUDIndex, hudLayout, position, alpha, scale, itemID)
+        local rng = player:GetCardRNG(RIPPED_CARD.ID2)
+
+        local card1 = CARD_GROUPS[1][rng:PhantomInt(1, #CARD_GROUPS[1])]
+        RenderCardSpr:SetFrame(ID_TO_STRING[card1].."_Left", 0)
+        RenderCardSpr.Color.A = alpha
+        RenderCardSpr.Scale = Vector.One * scale
+        RenderCardSpr:Render(position)
+        
+        local card2 = CARD_GROUPS[2][ ((rng:PhantomNext() % #CARD_GROUPS[2]) +1) ]
+        RenderCardSpr:SetFrame(ID_TO_STRING[card2].."_Right", 0)
+        RenderCardSpr.Color.A = alpha
+        RenderCardSpr.Scale = Vector.One * scale
+        RenderCardSpr:Render(position)
+	end,
+}, HudHelper.HUDType.CARD_ID)
+
+
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_TEAR_HIT_PARAMS, RIPPED_CARD.TearHitParams)
