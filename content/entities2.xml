@@ -59,6 +59,11 @@
         id="1000" friction="0"
         numGridCollisionPoints="0" shadowSize="0" collisionDamage="0" collisionMass="0" collisionRadius="0" baseHP="0"
     />
+    <entity name="Spell (The) Knight"
+        anm2path="beckyMagic/knight.anm2"
+        id="1000" friction="0"
+        numGridCollisionPoints="0" shadowSize="0" collisionDamage="0" collisionMass="0" collisionRadius="0" baseHP="0"
+    />
     <entity name="Spell Boomerang"
         anm2path="beckyMagic/boomerang.anm2"
         id="1000" friction="1"

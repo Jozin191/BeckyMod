@@ -1,6 +1,8 @@
 local SPELL_COST = 45
-local knightVar = Isaac.GetEntityVariantByName("Spell Knight Attack")
-BeckyMod.Spells.ENTITIES.KNIGHT_ATTACK = { Type = 1000, Variant = knightVar }
+local knightAttackVar = Isaac.GetEntityVariantByName("Spell Knight Attack")
+local knightVar = Isaac.GetEntityVariantByName("Spell (The) Knight")
+BeckyMod.Spells.ENTITIES.KNIGHT_ATTACK = { Type = 1000, Variant = knightAttackVar }
+BeckyMod.Spells.ENTITIES.THE_KNIGHT = { Type = 1000, Variant = knightVar }
 
 local LASER_DMG = 50
 local LASER_TIMEOUT = 4
@@ -10,7 +12,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, eff)
     sp:Play("Slash", true)
     sp.Rotation = eff:GetDropRNG():RandomFloat() * 360
 
-end, knightVar)
+end, knightAttackVar)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     local sp = eff:GetSprite()
@@ -46,6 +48,27 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     laser2:SetDisableFollowParent(true)
     laser2:GetSprite().Color.A = 0
     
+end, knightAttackVar)
+
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, eff)
+    local sp = eff:GetSprite()
+    sp:Play("Appear", true)
+
+end, knightVar)
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
+    local sp = eff:GetSprite()
+    if sp:IsFinished("Appear") then
+        Isaac.Spawn(1000, knightAttackVar, 0, eff.Position, Vector.Zero, eff.SpawnerEntity)
+        sp:Play("Idle", true)
+    elseif sp:IsFinished("Idle") then
+        sp:Play("Slice", true)
+    elseif sp:IsFinished("Slice") then
+        sp:Play("Away", true)
+    elseif sp:IsFinished("Away") then
+        eff:Remove()
+    end
 end, knightVar)
 
 

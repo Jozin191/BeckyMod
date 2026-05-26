@@ -11,7 +11,7 @@ local function fun(player)
     local angle = -180 + data.MagicStaff_SelectSpellDir.Dir * 90
 
     local laser = player:FireTechLaser(player.Position, LaserOffset.LASER_TECH1_OFFSET, JOHN_ANGLE:Rotated(angle), false, true, player, 1)
-    laser.CollisionDamage = 45
+    laser.CollisionDamage = 65
     laser.GridHit = false
     laser.TearFlags = BitSet128(0,0)
     laser.Timeout = 5
