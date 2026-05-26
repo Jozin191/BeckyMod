@@ -225,18 +225,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_GET_SHOP_ITEM_PRICE, DEVIL_DEAL.ShopPrice)
 
 
 local function UpdateRoomSaveData()
-    if BeckyMod:RoomSave().BeckyPrices == nil then return end
+    if BeckyMod:RoomSave().BeckyPrices == nil and
+    not (game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetLevel():GetStateFlag(LevelStateFlag.STATE_SATANIC_BIBLE_USED)) then
+        return
+    end
     SetRoomSaveData()
 end
 
-local function SetUpSatanicBible()
-    local room = game:GetRoom()
-    if room:GetType() == RoomType.ROOM_BOSS and game:GetLevel():GetStateFlag(LevelStateFlag.STATE_SATANIC_BIBLE_USED) then
-        SetRoomSaveData()
-    end
-end
 
-BeckyMod:AddPriorityCallback(ModCallbacks.MC_USE_ITEM, 200, SetUpSatanicBible, CollectibleType.COLLECTIBLE_SATANIC_BIBLE)
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_NEW_ROOM, 200, UpdateRoomSaveData)
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ROOM_TRIGGER_CLEAR, 200, UpdateRoomSaveData)
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_USE_ITEM, 200, UpdateRoomSaveData, CollectibleType.COLLECTIBLE_SATANIC_BIBLE)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_PICKUP_SHOP_PURCHASE, 200, UpdateRoomSaveData, 100)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, 200, UpdateRoomSaveData)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, 200, UpdateRoomSaveData)

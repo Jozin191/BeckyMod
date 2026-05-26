@@ -11,7 +11,7 @@ local FireCooldown = -1
 local ShootingAmount = 0
 local SPEED = 3.17715
 local SPEED_VECT = Vector(SPEED, 0)
-local ONE_TILE = Vector(40, 0)
+local ONE_TILE = Vector(20, 0) -- *Half A TILE
 local NONO_FLAGS = (EntityFlag.FLAG_NO_QUERY | EntityFlag.FLAG_NO_STATUS_EFFECTS | EntityFlag.FLAG_NO_TARGET | EntityFlag.FLAG_FRIENDLY | EntityFlag.FLAG_ICE_FROZEN)
 
 local function TableFilter(ent)
@@ -123,9 +123,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     entityList = BeckyMod:AppendTable(entityList, PlayerManager.GetPlayers() )
 
     if eff.Target and not eff.Target:IsDead() and eff.Target:Exists() then
+        local moveAngle = eff.Velocity:GetAngleDegrees()
         local angle = (eff.Target.Position - pos):Normalized():GetAngleDegrees()
-        local targetVel = SPEED_VECT:Rotated( angle )
-        eff.Velocity = Lerp(eff.Velocity, targetVel, 0.08)
+        
+        eff.Velocity = SPEED_VECT:Rotated( angle )
+        --local targetVel = SPEED_VECT:Rotated( angle )
+        --eff.Velocity = Lerp(eff.Velocity, targetVel, 0.08)
     else eff.Target = nil end
 
 

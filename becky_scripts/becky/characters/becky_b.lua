@@ -567,11 +567,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     local player = GetBecky(knife.Parent)
     if player == nil then return end
     if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
+    knife.SpriteScale = Vector.One * 0.85
     if knife.FrameCount >1 then
         knife.Charge = -1
         return
     end
-
     local sp = knife:GetSprite()
     sp:Load(taintedBeckysWandAnim, true)
     sp:Play("Idle", true)
@@ -581,12 +581,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     local player = GetBecky(knife.Parent)
     if player == nil then return end
     if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
-    if knife.FrameCount >1 then 
-        local parent = knife:GetHitboxParentKnife()
-        if parent ~= nil and parent.SpriteScale then
-            knife.SpriteScale = parent.SpriteScale * 1.33
-        end
-        knife:GetSprite().Color.A = 0.0
+    local parent = knife:GetHitboxParentKnife()
+    if parent ~= nil and parent.SpriteScale then
+        knife.SpriteScale = parent.SpriteScale * 1.33
+    end
+    if knife.FrameCount >1 then
         return
     end
 

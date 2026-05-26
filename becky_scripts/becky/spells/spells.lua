@@ -23,7 +23,7 @@ local SPELLS_NAMES = {
     "WEAKEN_ENEMIES",
     "MANA_REGEN",
     
-    
+
     "MULTISHOT",
     "FLY_N_HOMING",
     "OPEN_SESAMO",
@@ -567,7 +567,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         if SPELLS.SPELL_FUNC[spell](player) then return end
 
         if data.MagicStaff_SelectSpellDir == nil then
-            if selectType == SPELLS.SpellSelectType.NORMAL then playerData.ManaCharge = manaLeft - SPELLS_COST[spell] end
+            if selectType == SPELLS.SpellSelectType.NORMAL and SPELLS_COST[spell] > 0 then playerData.ManaCharge = manaLeft - SPELLS_COST[spell] end
 
             local soundType = Random() % 2 +1
             --if soundType == 1 then -- this wasn't added yet :(
