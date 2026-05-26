@@ -46,7 +46,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     if player:IsDead() or not save.ManaCharge or save.ManaCharge <= 0 then
         eff:Remove()
         local data = BeckyMod.GetEntData(player)
-        data.SpellsData = data.SpellsData or {}
 
         data.NoChargeMana = data.NoChargeMana -1*count
         data.ManaDischarge = data.ManaDischarge -MANA_DISCHARGE
