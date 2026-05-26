@@ -23,7 +23,7 @@ local SPELLS_NAMES = {
     "WEAKEN_ENEMIES",
     "MANA_REGEN",
     
-    -- unfinish ideas / to polish
+    
     "MULTISHOT",
     "FLY_N_HOMING",
     "OPEN_SESAMO",
@@ -42,7 +42,7 @@ local DevilSpellsPool = {
     SPELLS.SpellType.SACRIFICIAL_BUFF,
     SPELLS.SpellType.FIRE_POWER,
     SPELLS.SpellType.NUKE,
-    --SPELLS.SpellType.DEVIL,
+    SPELLS.SpellType.DEVIL,
     SPELLS.SpellType.SPELL_DMG_UP,
     SPELLS.SpellType.MULTISHOT,
     SPELLS.SpellType.KNIGHT_ATTACK,
@@ -52,7 +52,7 @@ local AngelSpellsPool = {
     SPELLS.SpellType.SUMMON,
     SPELLS.SpellType.SHIELD,
     SPELLS.SpellType.DASH,
-    --SPELLS.SpellType.BOOMERANG,
+    SPELLS.SpellType.BOOMERANG,
     SPELLS.SpellType.WEAKEN_ENEMIES,
     SPELLS.SpellType.MANA_REGEN,
     SPELLS.SpellType.FLY_N_HOMING,
@@ -217,7 +217,7 @@ for _, file in ipairs({
     "nuke",
     "open_sesamo",
     "spell_dmg_up",
-    --"boomerang",
+    "boomerang",
     "weaken_enemies",
 }) do
     local data = include(SPELLS_RUTE .. file)
@@ -570,8 +570,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             if selectType == SPELLS.SpellSelectType.NORMAL then playerData.ManaCharge = manaLeft - SPELLS_COST[spell] end
 
             local soundType = Random() % 2 +1
-            --if soundType == 1 then
-                --BeckyMod.SFX:Play(SoundEffect.SOUND_YO_LISTEN, 1, 5)
+            --if soundType == 1 then -- this wasn't added yet :(
+                --BeckyMod.SFX:Play(SoundEffect.SOUND_YO_LISTEN, 1, 5) 
             --else
                 if soundType == 1 then
                 BeckyMod.SFX:Play(SoundEffect.SOUND_BATTERYCHARGE, 0.75, 1, false, 1.35 )

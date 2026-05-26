@@ -2,7 +2,7 @@
 	<Info CreatedBy="Jozin191" CreatedOn="01.11.2025 23:40:55" Version="3" Fps="24"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="sawblade.png" Id="0"/>
+			<Spritesheet Path="ghost_sawblade.png" Id="0"/>
 		</Spritesheets>
 		<Layers>
 			<Layer Name="sawblade" Id="0" SpritesheetId="0"/>

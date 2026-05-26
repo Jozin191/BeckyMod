@@ -1166,7 +1166,7 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
     end
 
     if BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.SPELL_DMG_UP) then
-        mult = mult * 1.25
+        mult = mult * 1.35
     end
 
     if fireData.ForceMult then mult = fireData.ForceMult end

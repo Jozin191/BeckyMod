@@ -30,10 +30,6 @@
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0"/>
     </entity>
 
-    <!-- Magic Staff weapon stuff -->
-    <entity name="Magic Staff (Dummy)" id="1000" anm2path="becky_magic_staff.anm2" collisionDamage="0" collisionMass="0" collisionRadius="0" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />
-    <entity name="Magic Staff (Weapon)" id="8" anm2path="becky_magic_staff.anm2" collisionDamage="0" collisionMass="3" collisionRadius="16" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0" />
-
     <!-- Spells stuff -->
     <entity name="Mana Tear"
         anm2path="beckyMagic/mana_tear 1.anm2"
@@ -61,6 +57,16 @@
     <entity name="Spell Knight Attack"
         anm2path="beckyMagic/knight_slash.anm2"
         id="1000" friction="0"
+        numGridCollisionPoints="0" shadowSize="0" collisionDamage="0" collisionMass="0" collisionRadius="0" baseHP="0"
+    />
+    <entity name="Spell Boomerang"
+        anm2path="beckyMagic/boomerang.anm2"
+        id="1000" friction="1"
+        numGridCollisionPoints="0" shadowSize="0" collisionDamage="0" collisionMass="0" collisionRadius="0" baseHP="0"
+    />
+    <entity name="Spell Boomerang Alt"
+        anm2path="beckyMagic/sawblade.anm2"
+        id="1000" friction="1"
         numGridCollisionPoints="0" shadowSize="0" collisionDamage="0" collisionMass="0" collisionRadius="0" baseHP="0"
     />
 

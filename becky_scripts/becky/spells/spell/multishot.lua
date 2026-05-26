@@ -29,7 +29,7 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, 200, function(_, pl
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_MUTANT_SPIDER) then
         tps = tps * 0.85
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_INNER_EYE) then
-        tps = tps * 0.78
+        tps = tps * 0.66
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_POLYPHEMUS) then
         tps = tps * 0.85
     else

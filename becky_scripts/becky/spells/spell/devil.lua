@@ -19,6 +19,10 @@ local function TableFilter(ent)
     return false
 end
 
+local function Lerp(vec1, vec2, percent)
+    return vec1 * (1 - percent) + vec2 * percent
+end
+
 BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
     if BeckyMod.Game:IsPaused() then return end
     if ShootingAmount <= 0 then
@@ -119,8 +123,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     entityList = BeckyMod:AppendTable(entityList, PlayerManager.GetPlayers() )
 
     if eff.Target and not eff.Target:IsDead() and eff.Target:Exists() then
-        local angle = (eff.Target.Position - pos):GetAngleDegrees()
-        eff.Velocity = SPEED_VECT:Rotated( angle )
+        local angle = (eff.Target.Position - pos):Normalized():GetAngleDegrees()
+        local targetVel = SPEED_VECT:Rotated( angle )
+        eff.Velocity = Lerp(eff.Velocity, targetVel, 0.08)
     else eff.Target = nil end
 
 
