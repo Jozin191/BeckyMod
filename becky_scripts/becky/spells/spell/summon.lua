@@ -31,27 +31,25 @@ end, FamiliarVariant.BROTHER_BOBBY)
 
 
 local function fun(player)
-    local data = BeckyMod.GetEntData(player)
-    if data.MagicStaff_SelectSpellDir == nil then
-        data.MagicStaff_SelectSpellDir = { Type = BeckyMod.Spells.SpellType.SUMMON, Choices = {
-            [Direction.LEFT] = 2, --Shooting familiar
-            [Direction.RIGHT] = 3,--Mr Me
-        } }
-        return
-    end
+    --local data = BeckyMod.GetEntData(player)
+    --if data.MagicStaff_SelectSpellDir == nil then
+    --    data.MagicStaff_SelectSpellDir = { Type = BeckyMod.Spells.SpellType.SUMMON, Choices = {
+    --        [Direction.LEFT] = 2, --Shooting familiar
+    --        [Direction.RIGHT] = 3,--Mr Me
+    --    } }
+    --    return
+    --end
 
-    if data.MagicStaff_SelectSpellDir.Dir == Direction.RIGHT then
-        player:UseActiveItem(CollectibleType.COLLECTIBLE_MR_ME, UseFlag.USE_MIMIC)
-    else
+    --if data.MagicStaff_SelectSpellDir.Dir == Direction.RIGHT then
+    --    player:UseActiveItem(CollectibleType.COLLECTIBLE_MR_ME, UseFlag.USE_MIMIC)
+    --else
         player:AddNullItemEffect(NULL_ITEM_ID)
-    end
+    --end
 
-    data.MagicStaff_SelectSpellDir = nil
+    --data.MagicStaff_SelectSpellDir = nil
 end
 
 local function canSelectFun(player, manaLeft)
-    --local data = BeckyMod.GetEntData(player)
-    --return (data.SpellsData and data.SpellsData.SummonActive) or 100 - (data.MaxManaOffset or 0) > SPELL_COST
     return manaLeft >= SPELL_COST
 end
 
