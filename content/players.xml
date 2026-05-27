@@ -16,7 +16,7 @@
         skin="character_beckyb.png"
         skinColor = "1"
         nameimage="playername_becky.png"
-        portrait="playerportrait_becky.png"
+        portrait="playerportrait_becky_b.png"
         black="4"
         hp="2"
         costumeSuffix="becky"
