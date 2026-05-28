@@ -414,7 +414,7 @@ function RIPPED_CARD:OnNewRoom()
 end
 
 function RIPPED_CARD:PlayerAddEffect(player, itemConfig, addCostume, count)
-    if not itemConfig:IsNull() and itemConfig.ID ~= RIPPED_CARD.NULL_Items.The_Hanged_Man then return end
+    if not (itemConfig:IsNull() and itemConfig.ID == RIPPED_CARD.NULL_Items.The_Hanged_Man) then return end
     if player:GetInnateCollectibleCount(CollectibleType.COLLECTIBLE_LADDER, "Ripped Card - Innate Ladder") == 0 then
         player:AddInnateCollectible(CollectibleType.COLLECTIBLE_LADDER, 1, "Ripped Card - Innate Ladder", -1, true)
     end
@@ -422,7 +422,7 @@ end
 
 
 function RIPPED_CARD:PlayerRemoveEffect(player, itemConfig, count)
-    if not itemConfig:IsNull() and itemConfig.ID ~= RIPPED_CARD.NULL_Items.The_Hanged_Man then return end
+    if not (itemConfig:IsNull() and itemConfig.ID == RIPPED_CARD.NULL_Items.The_Hanged_Man) then return end
     if player:GetEffects():HasNullEffect(RIPPED_CARD.NULL_Items.The_Hanged_Man) then return end
     player:ClearInnateItemGroup("Ripped Card - Innate Ladder")
 end

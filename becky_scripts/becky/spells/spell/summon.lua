@@ -62,6 +62,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function(_, fam)
         color:SetColorize(1, 1, 1, 1)
         color.A = 0.85
         fam:GetSprite().Color = color
+        BeckyMod.GetEntData(fam).NoGrantMana = true
     end
 end)
 

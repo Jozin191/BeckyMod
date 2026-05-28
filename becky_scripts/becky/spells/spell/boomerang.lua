@@ -14,6 +14,7 @@ local State = {
     GO_FREE = 2,
 }
 local RETURN_TIME = 24
+local BOOMERANG_DMG = 14 /5
 
 local RoomLimits = {
     X1 = 0,
@@ -93,7 +94,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
     local ref = EntityRef(eff)
     for _, ent in ipairs(Isaac.FindInRadius(pos, 14, EntityPartition.ENEMY)) do
         if BeckyMod.IsEnemy(ent) then
-            ent:TakeDamage(14, 0, ref, 0)
+            ent:TakeDamage(BOOMERANG_DMG, 0, ref, 0)
         end
     end
 end, boomerangVar)
@@ -101,7 +102,8 @@ end, boomerangVar)
 local function fun(player)
     local pos = player.Position
 
-    Isaac.Spawn(1000, boomerangVar, 0, pos, BOOMERANG_VEL:Rotated(Random() % 360), player)
+    local eff = Isaac.Spawn(1000, boomerangVar, 0, pos, BOOMERANG_VEL:Rotated(Random() % 360), player)
+    BeckyMod.GetEntData(eff).NoGrantMana = true
 end
 
 local function canSelectFun(player, manaLeft)

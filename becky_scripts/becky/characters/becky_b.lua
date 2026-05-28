@@ -532,15 +532,22 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, function(_, ent, dmg,
     if ent.Type == 1 or dmg <= 0 then return end
     if not BeckyMod.IsEnemy(ent) or not ent:CanShutDoors() or ent:ToNPC() == nil then return end
     if not (ent:GetEntityFlags() & (EntityFlag.FLAG_FRIENDLY | EntityFlag.FLAG_ICE_FROZEN) > 0 or dmgFlags & (DamageFlag.DAMAGE_FAKE | DamageFlag.DAMAGE_CLONES) ) then return end
-    local player = src.Entity
-    if player == nil then return
+    local srcEnt = src.Entity
+    local player = srcEnt
+    if player == nil or BeckyMod.GetEntData(srcEnt).NoGrantMana or (srcEnt.SpawnerEntity and BeckyMod.GetEntData(srcEnt.SpawnerEntity).NoGrantMana) then return
     else player = BeckyMod:TryGetPlayer(player, false) end
 
     if player == nil or player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     local data = BeckyMod.GetEntData(player)
     if not (data.NoChargeMana and data.NoChargeMana > 0) then
         local save = BeckyMod:RunSave(player)
-        save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *1.12
+        if srcEnt.Type == 1 then
+            save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *1.14
+        elseif BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.SPELL_DMG_UP) then
+            save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) / 1.35 *0.85
+        else
+            save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *0.66
+        end
     end
 end)
 
@@ -1028,9 +1035,9 @@ end)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_MULTI_SHOT_PARAMS, -40000, function(_, player, multishotParam, weaponType)
     local num = player:GetEffects():GetNullEffectNum(BECKY_B.BlockItems.MonstrosLung) -1
     if num > 0 then
-        num = num *5 -1
-        multishotParam:SetNumTears(num + multishotParam:GetNumTears() )
-        multishotParam:SetNumLanesPerEye( num +  multishotParam:GetNumLanesPerEye() )
+        num = num *5 -1 + multishotParam:GetNumTears()
+        multishotParam:SetNumTears( num *multishotParam:GetNumEyesActive() )
+        multishotParam:SetNumLanesPerEye( num )
         if multishotParam:GetSpreadAngle(weaponType) == 0 then
             multishotParam:SetSpreadAngle(weaponType, 4.34)
         end
@@ -1080,7 +1087,7 @@ DoNeptunusCluster = function (entShooting, player, charge)
     end
 
     if BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.SPELL_DMG_UP) then
-        mult = mult * 1.25
+        mult = mult * 1.35
     end
 
     if TearsShoot > 48 then
@@ -1157,7 +1164,7 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
 
     local shotSpeed = player.ShotSpeed *10
     local shotPos = entShooting.Position
-    local scale = player.Size
+    local scale = entShooting.Size
     local mult = 1
     local weaponList = {}
 
@@ -1337,7 +1344,7 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
                 table.insert(weaponList, tech_x)
             end
             if multishotParams:IsShootingSideways() then
-                for angle=-90, 90, 180 do
+                for angle=0, 180, 180 do
                     local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle), 40 *mult, entShooting, mult)
                     table.insert(weaponList, tech_x)
                 end
@@ -1361,8 +1368,8 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
 
             mult = mult * chocoMult
 
-            widthMult = BeckyMod:Lerp(0, 0.79056942462921, charge)
-            if widthMult < 0.5 then widthMult = 0.5 end
+            --widthMult = BeckyMod:Lerp(0, 0.79056942462921, charge)
+            --if widthMult < 0.5 then widthMult = 0.5 end
         end
 
         for i=0, multishotParams:GetNumTears()-1 do

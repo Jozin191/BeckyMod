@@ -63,6 +63,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
     laser:SetTimeout(150)
     laser.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
     laser.GridCollisionClass =EntityGridCollisionClass.GRIDCOLL_WALLS
+    BeckyMod.GetEntData(laser).NoGrantMana = true
 
     FireCooldown = 90 + 15 * (Random() % 4)
     ShootingAmount = ShootingAmount -1
@@ -101,8 +102,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
 
     local player = eff.SpawnerEntity and eff.SpawnerEntity:ToPlayer()
     local tearParam
-    local ref
-    local dmg = 5
+    local ref = EntityRef(eff)
+    local dmg = 5 /4
 
     if player then
         local mult = 3.25
@@ -110,10 +111,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
 
         tearParam = player:GetTearHitParams(WeaponType.WEAPON_BRIMSTONE, mult, 1, player)
         sp.Color = tearParam.TearColor
-        dmg = math.max(tearParam.TearDamage, 5)
-        ref = EntityRef(player)
-    else
-        ref = EntityRef(eff)
+        dmg = math.max(tearParam.TearDamage, 5) /4
     end
 
     local pos = eff.Position
