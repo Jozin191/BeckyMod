@@ -133,8 +133,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
 end, knightVar)
 
 
+BeckyMod:AddPriorityCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, -300, function(_, player, dmg, dmgFlags, src)
+    local srcEnt = src.Entity
+    local spawner = srcEnt and srcEnt.SpawnerEntity
+    if (srcEnt and srcEnt.Type == 1000 and srcEnt.Variant == knightVar) or (spawner and spawner.Type == 1000 and spawner.Variant == knightVar) then
+        return false
+    end
+end)
+
 local function fun(player)
-    Isaac.Spawn(1000, knightVar, 0, player.Position, Vector.Zero, player)
+    local knight = Isaac.Spawn(1000, knightVar, 0, player.Position, Vector.Zero, player)
+    BeckyMod.GetEntData(knight).NoGrantMana = true
 end
 
 local function canSelectFun(player, manaLeft)

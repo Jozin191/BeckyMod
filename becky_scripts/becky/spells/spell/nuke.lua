@@ -50,7 +50,11 @@ local function fun(player)
     local room = BeckyMod.Game:GetRoom()
     for _, ent in ipairs(Isaac.GetRoomEntities()) do
         if ent:ToNPC() then
-            ent:Remove()
+            if ent:IsBoss() then
+                ent:TakeDamage(500, DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(ent), 0)
+            else
+                ent:Remove()
+            end
         end
     end
     local playerRef = EntityRef(player)
