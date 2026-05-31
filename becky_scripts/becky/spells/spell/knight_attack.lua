@@ -11,10 +11,8 @@ local NONO_FLAGS = (EntityFlag.FLAG_NO_QUERY | EntityFlag.FLAG_NO_STATUS_EFFECTS
 BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, eff)
     local sp = eff:GetSprite()
 
-    local angleOffset = 0
     if eff.SubType == 1 then
         sp:Play("Disappear", true)
-        angleOffset = BeckyMod.RandomFloat(-24, 24, eff:GetDropRNG())
     else
         sp:Play("Slash", true)
     end
@@ -24,7 +22,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, eff)
     if spawner == nil or spawner.TargetPosition == nil or spawner.TargetPosition:Length() <= 0.001 then
         sp.Rotation = eff:GetDropRNG():RandomFloat() * 360 - 180
     else
-        sp.Rotation = (spawner.TargetPosition - spawner.Position):GetAngleDegrees() + angleOffset
+        local angleOffset = 0
+        local targetPos = spawner.TargetPosition
+        angleOffset = BeckyMod.RandomFloat(-24, 24, eff:GetDropRNG()) / (1 + BeckyMod:InverseLerp(40, 300, targetPos:Length()))
+
+        sp.Rotation = (targetPos - spawner.Position):GetAngleDegrees() + angleOffset
     end
 
 end, knightAttackVar)

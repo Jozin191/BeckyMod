@@ -1,3 +1,6 @@
+
+-- wish you luck if you are looking how the hell this is working
+
 local BECKY_B = {}
 
 BECKY_B.PLAYERTYPE = Isaac.GetPlayerTypeByName("Becky", true)
@@ -122,8 +125,7 @@ local function ShouldDoChocolateMilk(player)
     local effects = player:GetEffects()
     if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) or
     effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) or
-    effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) or
-    effects:HasNullEffect(BECKY_B.BlockItems.MonstrosLung) then
+    effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
         return false
     end
     return effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk)
@@ -136,6 +138,25 @@ local function ShouldShowBrimstone(player)
         return false
     end
     return player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)
+end
+
+local function ShouldDoTechX(player)
+    local effects = player:GetEffects()
+    if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) or
+    effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) or
+    effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
+        return false
+    end
+    return player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X)
+end
+
+local function ShouldDoMonstrosLung(player)
+    local effects = player:GetEffects()
+    if (not effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION)) or
+    player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
+        return false
+    end
+    return effects:HasNullEffect(BECKY_B.BlockItems.MonstrosLung)
 end
 
 
@@ -185,7 +206,11 @@ local EPIPHORA_TIME_MULT = (30 *6)
 local EPIPHORA_FRAME_MULT = 1/EPIPHORA_TIME_MULT
 local function BeckyFire(entShooting, player, data)
     
-    if ShouldDoChocolateMilk(player) then
+    if ShouldDoMonstrosLung(player) then
+        if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
+            BECKY_B:FireWeapon(entShooting, player, {MonstroLung = true})
+        end
+    elseif ShouldDoChocolateMilk(player) then
         if data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge > BeckyMod:InverseLerp(0.01, 30, BeckyMod:toTearsPerSecond(player.MaxFireDelay)) then
             local chocoMult = BeckyMod:Lerp(0, 4, data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge)
             if chocoMult < 0.1 then chocoMult = 0.1 end
@@ -331,7 +356,7 @@ local function ProcessStaffSwing(entShooting, player)
             --end
         else
             local fireDelay = weapon:GetFireDelay()
-            if fireDelay < 0.5 then fireDelay = 0.5 end
+            if fireDelay < 0.05 then fireDelay = 0.05 end
             weapon:SetFireDelay(fireDelay)
         end
     else
@@ -787,21 +812,21 @@ end)
 
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, -400000, function(_, player, cacheFlag)
     local effects = player:GetEffects()
-    if cacheFlag & CacheFlag.CACHE_FIREDELAY then
+    if cacheFlag & CacheFlag.CACHE_FIREDELAY > 0 then
+        local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
         if effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) or effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
-            local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
             tps = tps /2.5
-            player.MaxFireDelay = BeckyMod:toMaxFireDelay(tps)
         end
-        if effects:HasNullEffect(BECKY_B.BlockItems.MonstrosLung) then
-            local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
-            if player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then
+        if ShouldDoMonstrosLung(player) then
+            if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) and ShouldDoTechX(player) then
                 tps = tps /3.1
+            elseif not (effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) or effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) or player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)) and
+                player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY) then
             else
                 tps = tps /4.3
             end
-            player.MaxFireDelay = BeckyMod:toMaxFireDelay(tps)
         end
+        player.MaxFireDelay = BeckyMod:toMaxFireDelay(tps)
     elseif cacheFlag & CacheFlag.CACHE_TEARCOLOR > 0 then
         if effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
             local tearColor = player.TearColor
@@ -1041,6 +1066,10 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_MULTI_SHOT_PARAMS, -40000,
         if multishotParam:GetSpreadAngle(weaponType) == 0 then
             multishotParam:SetSpreadAngle(weaponType, 4.34)
         end
+        
+    end
+    if num == 0 and weaponType == WeaponType.WEAPON_BRIMSTONE and not player:HasCollectible(CollectibleType.COLLECTIBLE_EYE_SORE) then
+        multishotParam:SetNumRandomDirTears( player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG):RandomInt(3,5) + multishotParam:GetNumRandomDirTears() )
     end
     return multishotParam
 end)
@@ -1099,7 +1128,7 @@ DoNeptunusCluster = function (entShooting, player, charge)
 
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_NEPTUNUS)
     --player.TearRange * (1.1 - 0.9 * rng:RandomFloat())
-    local fallingAcc = 0.75 * ((player.TearRange /40) / 6.5)
+    local fallingAcc = 0.75 * (6.5 / (player.TearRange /40))
     
 
     for i=1, TearsShoot do
@@ -1108,7 +1137,7 @@ DoNeptunusCluster = function (entShooting, player, charge)
             shotSpeed:Rotated(BeckyMod.RandomFloat(-SPREAD_RANGE, SPREAD_RANGE, rng)),
             true, true, true, entShooting, mult
         )
-        tear.FallingSpeed = BeckyMod.RandomFloat(-4, 6, rng)
+        tear.FallingSpeed = BeckyMod.RandomFloat(-8, 4, rng)
         tear.FallingAcceleration = fallingAcc
     end
         
@@ -1120,7 +1149,7 @@ DoNeptunusCluster = function (entShooting, player, charge)
                 shotSpeed:Rotated(BeckyMod.RandomFloat(-SPREAD_RANGE, SPREAD_RANGE, rng) +180),
                 true, false, false, entShooting, mult
             )
-            tear.FallingSpeed = BeckyMod.RandomFloat(-4, 6, rng)
+            tear.FallingSpeed = BeckyMod.RandomFloat(-8, 4, rng)
             tear.FallingAcceleration = fallingAcc
         end
     end
@@ -1133,12 +1162,108 @@ DoNeptunusCluster = function (entShooting, player, charge)
                     shotSpeed:Rotated(BeckyMod.RandomFloat(-SPREAD_RANGE, SPREAD_RANGE, rng) +angle),
                     true, false, false, entShooting, mult
                 )
-                tear.FallingSpeed = BeckyMod.RandomFloat(-4, 6, rng)
+                tear.FallingSpeed = BeckyMod.RandomFloat(-8, 4, rng)
                 tear.FallingAcceleration = fallingAcc
             end
         end
     end
 end
+
+local MONSTROS_LUNG_SPREAD = 30
+local function MonstrosLung_Tears(entShooting, player, shotDir, shotPos, shotSpeed, moveInhe, fireData, multishotParams, mult)
+    local weapTab = {}
+    local TearsShoot= 14 + math.floor((multishotParams:GetNumTears() -1) *2.4)
+    local fallingAcc = 0.75 * ((player.TearRange /40) / 6.5)
+    local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
+    
+
+    for i=1, TearsShoot do
+        local tear = player:FireTear(
+            shotPos,
+            shotDir:Resized(shotSpeed):Rotated(BeckyMod.RandomFloat(-MONSTROS_LUNG_SPREAD, MONSTROS_LUNG_SPREAD, rng)) + moveInhe,
+            fireData.CanBeEye, fireData.TractorBeam, true, entShooting, mult
+        )
+        tear.FallingSpeed = BeckyMod.RandomFloat(-8, 4, rng)
+        tear.FallingAcceleration = fallingAcc
+        tear.Scale = tear.Scale * BeckyMod.RandomFloat(0.9, 1.33, rng)
+
+        table.insert(weapTab, tear)
+    end
+
+    return weapTab
+end
+
+
+local function MonstrosLung_Laser(entShooting, player, shotDir, shotPos, shotSpeed, moveInhe, fireData, multishotParams, mult)
+    local weapTab = {}
+    local TearsShoot= math.min(multishotParams:GetNumTears() *12, 128)
+    local fallingAcc = 0.75 * ((player.TearRange /40) / 6.5)
+    local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
+    
+
+    for i=1, TearsShoot do
+        local laser = player:FireTechLaser(
+            shotPos,
+            LaserOffset.LASER_TECH1_OFFSET,
+            shotDir:Rotated(BeckyMod.RandomFloat(-MONSTROS_LUNG_SPREAD, MONSTROS_LUNG_SPREAD, rng)) + moveInhe,
+            false, false, entShooting, mult
+        )
+        laser.MaxDistance = player.TearRange * BeckyMod.RandomFloat(0.25, 0.4, rng)
+        laser:SetNumChainedLasers(rng:RandomInt(3,4) + laser:GetNumChainedLasers())
+
+        table.insert(weapTab, laser)
+    end
+
+    return weapTab
+end
+
+
+local function MonstrosLung_TechX(entShooting, player, shotDir, shotPos, shotSpeed, moveInhe, fireData, multishotParams, mult)
+    local weapTab = {}
+    local TearsShoot= multishotParams:GetNumTears() *3
+    local fallingAcc = 0.75 * ((player.TearRange /40) / 6.5)
+    local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
+    
+    for i=1, rng:RandomInt(TearsShoot, TearsShoot * (1 + 2/3)) do
+        local laserMult = BeckyMod.RandomFloat(0.5, 1, rng)
+        local laser = player:FireTechXLaser(
+            shotPos,
+            shotDir:Resized(shotSpeed):Rotated(BeckyMod.RandomFloat(-MONSTROS_LUNG_SPREAD, MONSTROS_LUNG_SPREAD, rng)) + moveInhe,
+            40 *laserMult,
+            entShooting,
+            mult *laserMult
+        )
+
+        table.insert(weapTab, laser)
+    end
+
+    return weapTab
+end
+
+
+local function MonstrosLung_Bomb(entShooting, player, shotDir, shotPos, shotSpeed, moveInhe, fireData, multishotParams, mult)
+    local weapTab = {}
+    local TearsShoot= 6 + multishotParams:GetNumTears() -1
+    local fallingAcc = 0.75 * ((player.TearRange /40) / 6.5)
+    local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
+    
+    for i=1, TearsShoot do
+        local bomb = player:FireBomb(
+            shotPos,
+            shotDir:Resized(shotSpeed):Rotated(BeckyMod.RandomFloat(-MONSTROS_LUNG_SPREAD, MONSTROS_LUNG_SPREAD, rng)) + moveInhe,
+            entShooting
+        )
+        bomb:SetScale(0.5)
+        bomb:SetFallSpeed(BeckyMod.RandomFloat(-8, 4, rng))
+        bomb:SetFallAcceleration(fallingAcc)
+        bomb:SetExplosionCountdown( math.floor(bomb:GetExplosionCountdown() * BeckyMod.RandomFloat(0.86, 1.2, rng)) )
+
+        table.insert(weapTab, bomb)
+    end
+
+    return weapTab
+end
+
 
 
 ---@param entShooting   - the entity that is shooting. can be the player or a familiar
@@ -1196,30 +1321,41 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
         fireData.ExtraTears = false
     end
 
+    local moveInhe = player:GetTearMovementInheritance(shotDir)
     if effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_BOMBS)
-
-        for i=0, multishotParams:GetNumTears()-1 do
-            local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_BOMBS, shotDir, shotSpeed, multishotParams)
-            local bomb = player:FireBomb(shotPos + posVel.Position *scale, posVel.Velocity, entShooting)
-            table.insert(weaponList, bomb)
+        
+        if fireData.MonstroLung then
+            BeckyMod:AppendTable(weaponList, MonstrosLung_Bomb(
+                entShooting,
+                player,
+                shotDir, shotPos, shotSpeed, moveInhe,
+                fireData,
+                multishotParams,
+                mult))
+        else
+            for i=0, multishotParams:GetNumTears()-1 do
+                local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_BOMBS, shotDir, shotSpeed, multishotParams)
+                local bomb = player:FireBomb(shotPos + posVel.Position *scale, posVel.Velocity + moveInhe, entShooting)
+                table.insert(weaponList, bomb)
+            end
         end
 
         if fireData.ExtraTears then
             if multishotParams:IsShootingBackwards() then
-                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180) , entShooting)
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(180) , entShooting)
                 table.insert(weaponList, bomb)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
-                    local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
+                    local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(angle) , entShooting)
                     table.insert(weaponList, bomb)
                 end
             end
 
             for i=1, multishotParams:GetNumRandomDirTears() do
                 local angle = Random() % 360
-                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(angle) , entShooting)
                 table.insert(weaponList, bomb)
             end
         end
@@ -1259,7 +1395,7 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
             if multishotParams:IsShootingBackwards() then
                 local tear = player:FireTear(
                     shotPos,
-                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
+                    shotDir:Resized(shotSpeed):Rotated(180),
                     false, false, false, entShooting, mult
                 )
                 tear:ChangeVariant(TearVariant.FETUS)
@@ -1271,7 +1407,7 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
                 for angle=-90, 90, 180 do
                     local tear = player:FireTear(
                         shotPos,
-                        shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle),
+                        shotDir:Resized(shotSpeed):Rotated(angle),
                         false, false, false, entShooting, mult
                     )
                     tear:ChangeVariant(TearVariant.FETUS)
@@ -1285,7 +1421,7 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
                 local angle = Random() % 360
                 local tear = player:FireTear(
                     shotPos,
-                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
+                    shotDir:Resized(shotSpeed):Rotated(angle),
                     false, false, false, entShooting, mult
                 )
                 tear:ChangeVariant(TearVariant.FETUS)
@@ -1297,27 +1433,37 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
     elseif effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_BOMBS)
         
-        for i=0, multishotParams:GetNumTears()-1 do
-            local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_BOMBS, shotDir, shotSpeed, multishotParams)
-            local bomb = player:FireBomb(shotPos + posVel.Position *scale, posVel.Velocity, entShooting)
-            table.insert(weaponList, bomb)
+        if fireData.MonstroLung then
+            BeckyMod:AppendTable(weaponList, MonstrosLung_Bomb(
+                entShooting,
+                player,
+                shotDir, shotPos, shotSpeed, moveInhe,
+                fireData,
+                multishotParams,
+                mult))
+        else
+            for i=0, multishotParams:GetNumTears()-1 do
+                local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_BOMBS, shotDir, shotSpeed, multishotParams)
+                local bomb = player:FireBomb(shotPos + posVel.Position *scale, posVel.Velocity + moveInhe, entShooting)
+                table.insert(weaponList, bomb)
+            end
         end
 
         if fireData.ExtraTears then
             if multishotParams:IsShootingBackwards() then
-                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180) , entShooting)
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(180) , entShooting)
                 table.insert(weaponList, bomb)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
-                    local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
+                    local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(angle) , entShooting)
                     table.insert(weaponList, bomb)
                 end
             end
 
             for i=1, multishotParams:GetNumRandomDirTears() do
                 local angle = Random() % 360
-                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle) , entShooting)
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(angle) , entShooting)
                 table.insert(weaponList, bomb)
             end
         end
@@ -1334,25 +1480,34 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
 
         for i=0, multishotParams:GetNumTears()-1 do
             local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_TECH_X, shotDir, shotSpeed, multishotParams)
-            local tech_x = player:FireTechXLaser(shotPos + posVel.Position *scale, posVel.Velocity, 40, entShooting, mult)
+            local tech_x = player:FireTechXLaser(shotPos + posVel.Position *scale, posVel.Velocity + moveInhe, 40, entShooting, mult)
             table.insert(weaponList, tech_x)
+        end
+        if fireData.MonstroLung then
+            BeckyMod:AppendTable(weaponList, MonstrosLung_TechX(
+                entShooting,
+                player,
+                shotDir, shotPos, shotSpeed, moveInhe,
+                fireData,
+                multishotParams,
+                mult))
         end
 
         if fireData.ExtraTears then
             if multishotParams:IsShootingBackwards() then
-                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180), 40 *mult, entShooting, mult)
+                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(180), 40 *mult, entShooting, mult)
                 table.insert(weaponList, tech_x)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=0, 180, 180 do
-                    local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle), 40 *mult, entShooting, mult)
+                    local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(angle), 40 *mult, entShooting, mult)
                     table.insert(weaponList, tech_x)
                 end
             end
 
             for i=1, multishotParams:GetNumRandomDirTears() do
                 local angle = Random() % 360
-                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle), 40 *mult, entShooting, mult)
+                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(angle), 40 *mult, entShooting, mult)
                 table.insert(weaponList, tech_x)
             end
         end
@@ -1380,19 +1535,19 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
         
         if fireData.ExtraTears then
             if multishotParams:IsShootingBackwards() then
-                local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180), entShooting, mult)
+                local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(180), entShooting, mult)
                 table.insert(weaponList, brim)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
-                    local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle), entShooting, mult)
+                    local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(angle), entShooting, mult)
                     table.insert(weaponList, brim)
                 end
             end
 
             for i=1, multishotParams:GetNumRandomDirTears() do
                 local angle = Random() % 360
-                local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle), entShooting, mult)
+                local brim = player:FireBrimstone(shotDir:Resized(shotSpeed):Rotated(angle), entShooting, mult)
                 table.insert(weaponList, brim)
             end
         end
@@ -1407,24 +1562,34 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_LASER)
 
-        for i=0, multishotParams:GetNumTears()-1 do
-            local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_LASER, shotDir, shotSpeed, multishotParams)
-            local tech = player:FireTechLaser(
-                shotPos + posVel.Position *scale,
-                LaserOffset.LASER_TECH1_OFFSET,
-                posVel.Velocity,
-                false, false, entShooting, mult
-            )
-            table.insert(weaponList, tech)
+        if fireData.MonstroLung then
+            BeckyMod:AppendTable(weaponList, MonstrosLung_Laser(
+                entShooting,
+                player,
+                shotDir, shotPos, shotSpeed, moveInhe,
+                fireData,
+                multishotParams,
+                mult))
+        else
+            for i=0, multishotParams:GetNumTears()-1 do
+                local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_LASER, shotDir, shotSpeed, multishotParams)
+                local tech = player:FireTechLaser(
+                    shotPos + posVel.Position *scale,
+                    LaserOffset.LASER_TECH1_OFFSET,
+                    posVel.Velocity + moveInhe,
+                    false, false, entShooting, mult
+                )
+                table.insert(weaponList, tech)
+            end
         end
 
         if fireData.ExtraTears then
             if multishotParams:IsShootingBackwards() then
-                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180) , entShooting)
+                local bomb = player:FireBomb(shotPos, shotDir:Resized(shotSpeed):Rotated(180) , entShooting)
                 local tech = player:FireTechLaser(
                     shotPos,
                     LaserOffset.LASER_TECH1_OFFSET,
-                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
+                    shotDir:Resized(shotSpeed):Rotated(180),
                     false, false, entShooting, mult
                 )
                 table.insert(weaponList, tech)
@@ -1434,7 +1599,7 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
                     local tech = player:FireTechLaser(
                         shotPos,
                         LaserOffset.LASER_TECH1_OFFSET,
-                        shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle),
+                        shotDir:Resized(shotSpeed):Rotated(angle),
                         false, false, entShooting, mult
                     )
                     table.insert(weaponList, tech)
@@ -1446,7 +1611,7 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
                 local tech = player:FireTechLaser(
                     shotPos,
                     LaserOffset.LASER_TECH1_OFFSET,
-                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() + angle),
+                    shotDir:Resized(shotSpeed):Rotated(angle),
                     false, false, entShooting, mult
                 )
                 table.insert(weaponList, tech)
@@ -1458,47 +1623,90 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
     else
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
 
-        for i=0, multishotParams:GetNumTears()-1 do
-            local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_TEARS, shotDir, shotSpeed, multishotParams)
-            local tear = player:FireTear(
-                shotPos + posVel.Position *scale,
-                posVel.Velocity,
-                fireData.CanBeEye, fireData.TractorBeam, true, entShooting, mult
-            )
-            table.insert(weaponList, tear)
+        if fireData.MonstroLung then
+            BeckyMod:AppendTable(weaponList, MonstrosLung_Tears(
+                entShooting,
+                player, shotDir, shotPos, shotSpeed, moveInhe,
+                fireData,
+                multishotParams,
+                mult))
+        else
+            for i=0, multishotParams:GetNumTears()-1 do
+                local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_TEARS, shotDir, shotSpeed, multishotParams)
+                local tear = player:FireTear(
+                    shotPos + posVel.Position *scale,
+                    posVel.Velocity + moveInhe,
+                    fireData.CanBeEye, fireData.TractorBeam, true, entShooting, mult
+                )
+                table.insert(weaponList, tear)
+            end
         end
 
         if fireData.ExtraTears then
+            fireData.TractorBeam = false
             if multishotParams:IsShootingBackwards() then
-                local tear = player:FireTear(
-                    shotPos,
-                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
-                    fireData.CanBeEye, false, false, entShooting, mult
-                )
+                if fireData.MonstroLung then
+                    BeckyMod:AppendTable(weaponList, MonstrosLung_Tears(
+                        entShooting,
+                        player,
+                        shotDir:Rotated(180),
+                        shotPos, shotSpeed, Vector.Zero,
+                        fireData,
+                        multishotParams,
+                        mult))
+                else
+                    local tear = player:FireTear(
+                        shotPos,
+                        shotDir:Resized(shotSpeed):Rotated(180),
+                        fireData.CanBeEye, false, false, entShooting, mult
+                    )
 
-                table.insert(weaponList, tear)
+                    table.insert(weaponList, tear)
+                end
             end
             if multishotParams:IsShootingSideways() then
                 for angle=-90, 90, 180 do
-                    local tear = player:FireTear(
-                        shotPos,
-                        shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +angle),
-                        fireData.CanBeEye, false, false, entShooting, mult
-                    )
-                
-                    table.insert(weaponList, tear)
+                    if fireData.MonstroLung then
+                        BeckyMod:AppendTable(weaponList, MonstrosLung_Tears(
+                            entShooting,
+                            player,
+                            shotDir:Rotated(angle),
+                            shotPos, shotSpeed, Vector.Zero,
+                            fireData,
+                            multishotParams,
+                            mult))
+                    else
+                        local tear = player:FireTear(
+                            shotPos,
+                            shotDir:Resized(shotSpeed):Rotated(angle),
+                            fireData.CanBeEye, false, false, entShooting, mult
+                        )
+                    
+                        table.insert(weaponList, tear)
+                    end
                 end
             end
 
             for i=1, multishotParams:GetNumRandomDirTears() do
                 local angle = Random() % 360
-                local tear = player:FireTear(
-                    shotPos,
-                    shotDir:Resized(shotSpeed):Rotated(shotDir:GetAngleDegrees() +180),
-                    fireData.CanBeEye, false, false, entShooting, mult
-                )
-                
-                table.insert(weaponList, tear)
+                if fireData.MonstroLung then
+                    BeckyMod:AppendTable(weaponList, MonstrosLung_Tears(
+                        entShooting,
+                        player,
+                        shotDir:Rotated(angle),
+                        shotPos, shotSpeed, Vector.Zero,
+                        fireData,
+                        multishotParams,
+                        mult))
+                else
+                    local tear = player:FireTear(
+                        shotPos,
+                        shotDir:Resized(shotSpeed):Rotated(angle),
+                        fireData.CanBeEye, false, false, entShooting, mult
+                    )
+                    
+                    table.insert(weaponList, tear)
+                end
             end
         end
     end
