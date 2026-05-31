@@ -14,6 +14,6 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, familia
     local player = familiar.Player
     if player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) or player:HasCollectible(CollectibleType.COLLECTIBLE_FRUIT_CAKE) or player:HasCollectible(CollectibleType.COLLECTIBLE_3_DOLLAR_BILL) then
         local gay = hueToRGB((player.FrameCount/255)*2)
-        familiar:SetColor(familiar.Color*gay, 2, 999, false, true)
+        familiar:SetColor(familiar.Color*gay, 2, 100, false, true)
     end
 end)

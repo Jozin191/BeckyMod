@@ -314,10 +314,11 @@ end, CacheFlag.CACHE_FAMILIARS)
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
     local ghostData = familiar:GetData()
+    
     familiar:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
     local player = familiar.Player
-
+ghostData.TEARPARAMS = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     if player then
         local playerData = player:GetData()
         playerData.GhostBalls = playerData.GhostBalls or {}
@@ -378,7 +379,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         if not ghostData.URETHRABLAST then
             uc = 1
         else
-            uc = 1-(uc*.7)
+            uc = 1-(math.min(uc,1)*.7)
         end
         local ghostTrail = ghostData.GhostTrail 
 
@@ -398,8 +399,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         else
            color.A = math.max(color.A - .05, 0)
         end
-
-        ghostTrail.Color = Color(color.R, color.G, color.B, color.A, color.RO, color.GO, color.BO)
+        local testColor = ghost:GetColor()
+        ghostTrail.Color = Color(testColor.R, testColor.G, testColor.B, color.A, testColor.RO, testColor.GO, testColor.BO)
 
         if ghost.SubType == 1 then
             local target = ghost.Target
@@ -554,7 +555,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
                 local resizer = 1.5 * shotSpeed
                 local final = targetPos:Normalized():Resized(resizer)
-                if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ) or player:GetEffects():HasNullEffect(NullItemID.ID_WIZARD) then
+                if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ) or (player:GetRUAWizardTimer() > 0) then
                     local angle = 45*(((ghostData.GHOST_IDX or 1) % 2)*2+-1)
                     final = final:Rotated(angle)
                 end
@@ -620,7 +621,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local IsPlayingRegTear1 = GhostSprite:IsPlaying("RegularTear1")
     local GhostSize = Vector.One * exp((player.Damage / 5) * ghostData.ChocolateMilkMult, 1, 1.2)
     local gridFromPos = room:GetGridEntityFromPos(familiar.Position+familiar.Velocity/2)
-    local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
+
+    if (not ghostData.TEARPARAMS) or (ghostData.TEARPARAMS and familiar.FrameCount % 12 == 0) then
+        ghostData.TEARPARAMS = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
+    end
+    local tearParams = ghostData.TEARPARAMS or player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     
     local wide = (player:GetTrinketMultiplier(TrinketType.TRINKET_FLAT_WORM)+player:GetCollectibleNum(CollectibleType.COLLECTIBLE_PUPULA_DUPLEX))*.5
     familiar.SizeMulti = GhostSize*Vector(1+wide, 1+wide) -- making it an oval would probably mess some other stuff up
@@ -733,8 +738,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     local npc = collider and collider:ToNPC()
     local player = familiar.Player
     local ghostData = familiar:GetData()
-    local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
+    local tearParams = ghostData.TEARPARAMS or player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     local baseDamage = (GHOST_AMULET:GetGhostDamage(player, tearParams.TearDamage) + (ghostData.CoalBonus or 0)) * ghostData.ChocolateMilkMult * (ghostData.ProptosisMulti or 1)
+
 
     local multi = 1
     if tearParams.TearFlags & TearFlags.TEAR_KNOCKBACK == TearFlags.TEAR_KNOCKBACK then

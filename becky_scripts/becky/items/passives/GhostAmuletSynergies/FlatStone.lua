@@ -16,7 +16,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function (_, fam, t
         data.GTVeloH = bounce*3
         local splash = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.RIPPLE_POOF, 0,  fam.Position, Vector.Zero, fam):ToEffect()
         splash.SpriteScale = fam.SpriteScale*1.25
-        splash.Color = tearParams.TearColor
+        splash.Color = fam:GetColor()
         splash:GetSprite():ReplaceSpritesheet(0, "gfx/effect_ripplepoof_ghost.png", true)
         SFXManager():Play(SoundEffect.SOUND_TEARIMPACTS, .3, 0, false, 1.2)
         local enemies = Isaac.FindInRadius(fam.Position, fam.SizeMulti:Length()*37.5, EntityPartition.ENEMY)
