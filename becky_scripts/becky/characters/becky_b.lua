@@ -293,9 +293,10 @@ local function ProcessStaffSwing(entShooting, player)
             Sprite = Sprite("gfx/chargebar.anm2", true)
         }
     end
+    local CountForgotenLullaby = entShooting.Type == 3 and player:HasTrinket(TrinketType.TRINKET_FORGOTTEN_LULLABY)
     if aimVec:Length() ~= 0 then
         local sprite = knife:GetSprite()
-        local SoyMilkMod = weapon:GetModifiers() & WeaponModifier.SOY_MILK > 0 --(WeaponModifier.CHOCOLATE_MILK | WeaponModifier.SOY_MILK) > 0
+        local playerMaxFireDelay = player.MaxFireDelay
         if HasShouldDoNeptunus(player) then
             if IsKnifeSwinging(sprite) and sprite:GetFrame() == 1 and data.MagicStaff_ChargeBar then
                 DoNeptunusCluster(entShooting, player, (data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge)) 
@@ -303,19 +304,25 @@ local function ProcessStaffSwing(entShooting, player)
             end
             return
         end
-
-        if not SoyMilkMod and IsKnifeSwinging(sprite) and sprite:GetFrame() < sprite:GetCurrentAnimationData():GetLength() - 3 then return end
+        if CountForgotenLullaby then playerMaxFireDelay = playerMaxFireDelay /2 end
+        if playerMaxFireDelay <= 3.2 then
+            data.MagicStaff_ChargeBar.NoRender = true
+        elseif IsKnifeSwinging(sprite) and sprite:GetFrame() < sprite:GetCurrentAnimationData():GetLength() - 3 then
+            data.MagicStaff_ChargeBar.Charge = 0
+            data.MagicStaff_ChargeBar.NoRender = false
+            return
+        end
         
         data.MagicStaff_CursedEyeTears = nil
         --if entShooting.Type == 1 and save.ManaCharge < BECKY_B.ManaTearCost then return end
         
         local addToCharge = 1
         if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) then
-            local c_sectionCharge = 30 /(player.MaxFireDelay *3 +1)
+            local c_sectionCharge = 30 /(playerMaxFireDelay *3 +1)
             if c_sectionCharge < MAX_TEARS_DPS_C_SECTION then c_sectionCharge = MAX_TEARS_DPS_C_SECTION end
             addToCharge = addToCharge * (c_sectionCharge /BASE_TEAR_DPS * 1.25)
         else
-            addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(player.MaxFireDelay) /BASE_TEAR_DPS * 1.25)
+            addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(playerMaxFireDelay) /BASE_TEAR_DPS * 1.25)
             if HasShouldDoCursedEye(player) then
                 addToCharge = addToCharge /4
             elseif ShouldDoChocolateMilk(player) then
@@ -329,34 +336,16 @@ local function ProcessStaffSwing(entShooting, player)
                 end
             end
         end
-        if entShooting.Type == 3 and player:HasTrinket(TrinketType.TRINKET_FORGOTTEN_LULLABY) then
-            addToCharge = addToCharge * 2
-        end
         data.MagicStaff_ChargeBar.Charge = math.min(data.MagicStaff_ChargeBar.Charge +addToCharge, data.MagicStaff_ChargeBar.MaxCharge)
         
 
-        if SoyMilkMod then
-            --if markTarget then
-            --    local rawDistance = (markTarget.Position - entShooting.Position):Length()
-            --    local normDistance = BeckyMod:InverseLerp(50, 300, rawDistance)
-            --    if normDistance < 0 then normDistance = 0
-            --    elseif normDistance > 1 then normDistance = 1
-            --    end
-            --    
-            --    local minCharge = BeckyMod:Lerp(5, data.MagicStaff_ChargeBar.MaxCharge * 2.5, normDistance) - 1
-            --    if ShouldDoChocolateMilk(player) and data.MagicStaff_ChargeBar.Charge > minCharge then
-            --        BeckyFire(entShooting, player, data)
-            --    elseif HasShouldDoCursedEye(player) then
-            --        if math.floor(data.MagicStaff_ChargeBar.MaxCharge / data.MagicStaff_ChargeBar.Charge) >= math.floor(BeckyMod:Lerp(1, 5, normDistance)) then
-            --            BeckyFire(entShooting, player, data)
-            --        end
-            --    end
-            --else
+        if playerMaxFireDelay <= 3.2 then
+            if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
                 BeckyFire(entShooting, player, data)
-            --end
+            end
         else
             local fireDelay = weapon:GetFireDelay()
-            if fireDelay < 0.05 then fireDelay = 0.05 end
+            if data.MagicStaff_ChargeBar.Charge > 3 and fireDelay < playerMaxFireDelay/4 then fireDelay = playerMaxFireDelay/4 end
             weapon:SetFireDelay(fireDelay)
         end
     else
@@ -367,7 +356,7 @@ local function ProcessStaffSwing(entShooting, player)
             local addToCharge = 1
             addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(player.MaxFireDelay) /BASE_TEAR_DPS * 1.25) /5
 
-            if entShooting.Type == 3 and player:HasTrinket(TrinketType.TRINKET_FORGOTTEN_LULLABY) then
+            if CountForgotenLullaby then
                 addToCharge = addToCharge * 2
             end
             data.MagicStaff_ChargeBar.Charge = math.min(data.MagicStaff_ChargeBar.Charge +addToCharge, data.MagicStaff_ChargeBar.MaxCharge)
