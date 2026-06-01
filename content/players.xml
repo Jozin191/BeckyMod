@@ -19,7 +19,7 @@
         portrait="playerportrait_becky_b.png"
         black="4"
         hp="2"
-        costumeSuffix="becky"
+        costumeSuffix="becky_b"
         modcostume="7"
 		birthright="Spell swap"
         pocketActive="​Magic Staff"
