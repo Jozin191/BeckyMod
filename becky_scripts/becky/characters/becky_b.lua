@@ -207,21 +207,33 @@ local EPIPHORA_FRAME_MULT = 1/EPIPHORA_TIME_MULT
 local function BeckyFire(entShooting, player, data)
     
     if ShouldDoMonstrosLung(player) then
-        if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
+        if player:GetEffects():HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
+            local minCharge = math.max( BeckyMod:InverseLerp(0.01, 30, BeckyMod:toTearsPerSecond(player.MaxFireDelay)), 0.05 )
+            local charge = data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge
+            
+            if charge > minCharge then
+                local chocoMult = BeckyMod:Lerp(0, 2, charge)
+                if chocoMult < 0.1 then chocoMult = 0.1 end
+                BECKY_B:FireWeapon(entShooting, player, {MonstroLung = true, ChocoMilk = chocoMult})
+            end
+
+        elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
             BECKY_B:FireWeapon(entShooting, player, {MonstroLung = true})
         end
     elseif ShouldDoChocolateMilk(player) then
-        if data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge > BeckyMod:InverseLerp(0.01, 30, BeckyMod:toTearsPerSecond(player.MaxFireDelay)) then
-            local chocoMult = BeckyMod:Lerp(0, 4, data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge)
+        local minCharge = math.max( BeckyMod:InverseLerp(0.01, 30, BeckyMod:toTearsPerSecond(player.MaxFireDelay)), 0.05 )
+        local charge = data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge
+        if charge > minCharge then
+            local chocoMult = BeckyMod:Lerp(0, 4, charge)
             if chocoMult < 0.1 then chocoMult = 0.1 end
 
             if HasShouldDoCursedEye(player) then
                 local shots = 0
             
                 if player:HasCollectible(CollectibleType.COLLECTIBLE_EPIPHORA) then
-                    shots = math.floor(BeckyMod:Lerp(1, 5, data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge* ( 1+ EPIPHORA_FRAME_MULT * player:GetEpiphoraCharge() )))
+                    shots = math.floor(BeckyMod:Lerp(1, 5, charge* ( 1+ EPIPHORA_FRAME_MULT * player:GetEpiphoraCharge() )))
                 else
-                    shots = math.floor(BeckyMod:Lerp(0, 4, data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge))
+                    shots = math.floor(BeckyMod:Lerp(0, 4, charge))
                 end
 
 
@@ -317,7 +329,7 @@ local function ProcessStaffSwing(entShooting, player)
         --if entShooting.Type == 1 and save.ManaCharge < BECKY_B.ManaTearCost then return end
         
         local addToCharge = 1
-        if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) then
+        if not player:GetEffects():HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) then
             local c_sectionCharge = 30 /(playerMaxFireDelay *3 +1)
             if c_sectionCharge < MAX_TEARS_DPS_C_SECTION then c_sectionCharge = MAX_TEARS_DPS_C_SECTION end
             addToCharge = addToCharge * (c_sectionCharge /BASE_TEAR_DPS * 1.25)
@@ -325,13 +337,15 @@ local function ProcessStaffSwing(entShooting, player)
             addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(playerMaxFireDelay) /BASE_TEAR_DPS * 1.25)
             if HasShouldDoCursedEye(player) then
                 addToCharge = addToCharge /4
+                if player:GetEffects():HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
+                    addToCharge = addToCharge /2.5
+                end
             elseif ShouldDoChocolateMilk(player) then
                 if player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
                     addToCharge = addToCharge /3.75
+                --elseif ShouldDoMonstrosLung(player) and not player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then
+                    --addToCharge = addToCharge /2
                 else
-                    if player:HasCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE) then
-                        addToCharge = addToCharge /4
-                    end
                     addToCharge = addToCharge /2.5
                 end
             end
@@ -345,7 +359,8 @@ local function ProcessStaffSwing(entShooting, player)
             end
         else
             local fireDelay = weapon:GetFireDelay()
-            if data.MagicStaff_ChargeBar.Charge > 3 and fireDelay < playerMaxFireDelay/4 then fireDelay = playerMaxFireDelay/4 end
+            local maxTearDelay = math.min(playerMaxFireDelay/4, 0.5)
+            if data.MagicStaff_ChargeBar.Charge > 3 and fireDelay < maxTearDelay then fireDelay = maxTearDelay end
             weapon:SetFireDelay(fireDelay)
         end
     else
@@ -382,10 +397,10 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, 200, function(_, pl
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     if CacheFlag.CACHE_DAMAGE & cacheFlags > 0 then
         player.Damage = player.Damage * 0.5
-    elseif CacheFlag.CACHE_FIREDELAY & cacheFlags > 0 then
-        local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
+    --elseif CacheFlag.CACHE_FIREDELAY & cacheFlags > 0 then
+        --local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
         --tps = tps * 0.42
-        player.MaxFireDelay = BeckyMod:toMaxFireDelay(tps)
+        --player.MaxFireDelay = BeckyMod:toMaxFireDelay(tps)
     elseif CacheFlag.CACHE_TEARCOLOR & cacheFlags > 0 then
         --player.TearColor = player.TearColor * COLOR_WHITE
         --player.LaserColor = player.LaserColor * COLOR_WHITE
@@ -396,7 +411,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFl
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     if CacheFlag.CACHE_DAMAGE & cacheFlags > 0 then
         if player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then
-            player.Damage = player.Damage * 1.2 + 0.5
+            player.Damage = player.Damage * 1.25 + 0.5
         end
     elseif CacheFlag.CACHE_FIREDELAY & cacheFlags > 0 then
         if player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then
@@ -777,35 +792,65 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_TRIGGER_EFFECT_REMOVED, functio
     end
 end)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
+    local effects = player:GetEffects()
     if player:GetPlayerType() == BECKY_B.PLAYERTYPE then
         local data = BeckyMod.GetEntData(player)
         if data.HeadSpriteData and data.HeadSpriteData.Update then
             data.HeadSpriteData.Sprite:Update()
         end
+        if effects:HasNullEffect(BECKY_B.BlockItems.MonstrosLung) then
+            player:BlockCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
+        else
+            player:UnblockCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
+        end
+        if effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
+            player:BlockCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK)
+        --elseif effects:HasNullEffect(BECKY_B.BlockItems.Neptunus) then
+        ---    player:BlockCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS)
+        else
+            player:UnblockCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK)
+        end
+        if effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) then
+            player:BlockCollectible(CollectibleType.COLLECTIBLE_DR_FETUS)
+        else
+            player:UnblockCollectible(CollectibleType.COLLECTIBLE_DR_FETUS)
+        end
+        if effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
+            player:BlockCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS)
+        else
+            player:UnblockCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS)
+        end
         return
     end
-    local effects = player:GetEffects()
     if effects:HasNullEffect(BECKY_B.BlockItems.MonstrosLung) then
         player:GetEffects():RemoveNullEffect(BECKY_B.BlockItems.MonstrosLung, -1)
-    elseif effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
+        player:UnblockCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
+    end
+    if effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
         player:GetEffects():RemoveNullEffect(BECKY_B.BlockItems.ChocolateMilk, -1)
+        player:UnblockCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK)
     --elseif effects:HasNullEffect(BECKY_B.BlockItems.Neptunus) then
     --    player:GetEffects():RemoveNullEffect(BECKY_B.BlockItems.Neptunus, -1)
-    elseif effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) then
+    end
+    if effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) then
         player:GetEffects():RemoveNullEffect(BECKY_B.BlockItems.DrFetus, -1)
-    elseif effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
+        player:UnblockCollectible(CollectibleType.COLLECTIBLE_DR_FETUS)
+    end
+    if effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
         player:GetEffects():RemoveNullEffect(BECKY_B.BlockItems.EpicFetus, -1)
+        player:UnblockCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS)
     end
 end)
 
 
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, -400000, function(_, player, cacheFlag)
     local effects = player:GetEffects()
-    if cacheFlag & CacheFlag.CACHE_FIREDELAY > 0 then
+    if cacheFlag & CacheFlag.CACHE_FIREDELAY == CacheFlag.CACHE_FIREDELAY then
         local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
-        if effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) or effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
+        if (effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) and not player:HasCollectible(CollectibleType.COLLECTIBLE_HAEMOLACRIA)) or effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
             tps = tps /2.5
         end
+
         if ShouldDoMonstrosLung(player) then
             if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) and ShouldDoTechX(player) then
                 tps = tps /3.1
@@ -815,8 +860,9 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, -400000, function(_
                 tps = tps /4.3
             end
         end
+
         player.MaxFireDelay = BeckyMod:toMaxFireDelay(tps)
-    elseif cacheFlag & CacheFlag.CACHE_TEARCOLOR > 0 then
+    elseif cacheFlag & CacheFlag.CACHE_TEARCOLOR == CacheFlag.CACHE_TEARCOLOR then
         if effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
             local tearColor = player.TearColor
             local laserColor = player.LaserColor
@@ -890,6 +936,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player,
                 Sprite = Sprite("gfx/characters/229_monstros lung.anm2", true),
                 SpriteType = "Monstro's Lung",
                 Update = false,
+                PrevCharge = 0,
             }
             spriteData = data.HeadSpriteData
             sprite = spriteData.Sprite
@@ -902,21 +949,48 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player,
         local dir = player:GetHeadDirection()
         local charge = data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge
 
-        if charge == 1 then
-            if not sprite:IsPlaying(DirToHeadAnim[dir].."ChargeFull") then
-                sprite:Play(DirToHeadAnim[dir].."ChargeFull", true)
-                spriteData.WasPlayingCharge = true
-                --player:SetHeadDirectionLockTime(sprite:GetCurrentAnimationData():GetLength())
+        if effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
+            if charge == 1 then
+                if not sprite:IsPlaying(DirToHeadAnim[dir].."ChargeFull") then
+                    sprite:Play(DirToHeadAnim[dir].."ChargeFull", true)
+                    spriteData.WasPlayingCharge = true
+                    --player:SetHeadDirectionLockTime(sprite:GetCurrentAnimationData():GetLength())
+                end
+                spriteData.Update = true
+            elseif spriteData.WasPlayingCharge then
+                sprite:Play(DirToHeadAnim[dir].."Shoot", true)
+                player:SetHeadDirectionLockTime(sprite:GetCurrentAnimationData():GetLength())
+                spriteData.WasPlayingCharge = false
+                spriteData.Update = true
+            else
+                if spriteData.PrevCharge > charge then
+                    sprite:Play(DirToHeadAnim[dir].."Shoot", true)
+                    player:SetHeadDirectionLockTime(sprite:GetCurrentAnimationData():GetLength())
+                    spriteData.WasPlayingCharge = false
+                    spriteData.Update = true
+                elseif not (sprite:IsPlaying(DirToHeadAnim[0].."Shoot") or sprite:IsPlaying(DirToHeadAnim[1].."Shoot") or sprite:IsPlaying(DirToHeadAnim[2].."Shoot") or sprite:IsPlaying(DirToHeadAnim[3].."Shoot") ) then
+                    sprite:SetFrame( DirToHeadAnim[dir].."Charge", math.floor(18 * charge))
+                    spriteData.Update = false
+                end
+                spriteData.PrevCharge = charge
             end
-            spriteData.Update = true
-        elseif spriteData.WasPlayingCharge then
-            sprite:Play(DirToHeadAnim[dir].."Shoot", true)
-            player:SetHeadDirectionLockTime(sprite:GetCurrentAnimationData():GetLength())
-            spriteData.WasPlayingCharge = false
-            spriteData.Update = true
-        elseif not (sprite:IsPlaying(DirToHeadAnim[0].."Shoot") or sprite:IsPlaying(DirToHeadAnim[1].."Shoot") or sprite:IsPlaying(DirToHeadAnim[2].."Shoot") or sprite:IsPlaying(DirToHeadAnim[3].."Shoot") ) then
-            sprite:SetFrame( DirToHeadAnim[dir].."Charge", math.floor(18 * charge))
-            spriteData.Update = false
+        else
+            if charge == 1 then
+                if not sprite:IsPlaying(DirToHeadAnim[dir].."ChargeFull") then
+                    sprite:Play(DirToHeadAnim[dir].."ChargeFull", true)
+                    spriteData.WasPlayingCharge = true
+                    --player:SetHeadDirectionLockTime(sprite:GetCurrentAnimationData():GetLength())
+                end
+                spriteData.Update = true
+            elseif spriteData.WasPlayingCharge then
+                sprite:Play(DirToHeadAnim[dir].."Shoot", true)
+                player:SetHeadDirectionLockTime(sprite:GetCurrentAnimationData():GetLength())
+                spriteData.WasPlayingCharge = false
+                spriteData.Update = true
+            elseif not (sprite:IsPlaying(DirToHeadAnim[0].."Shoot") or sprite:IsPlaying(DirToHeadAnim[1].."Shoot") or sprite:IsPlaying(DirToHeadAnim[2].."Shoot") or sprite:IsPlaying(DirToHeadAnim[3].."Shoot") ) then
+                sprite:SetFrame( DirToHeadAnim[dir].."Charge", math.floor(18 * charge))
+                spriteData.Update = false
+            end
         end
 
         sprite:Render(renderPos)
@@ -1160,8 +1234,11 @@ end
 
 local MONSTROS_LUNG_SPREAD = 30
 local function MonstrosLung_Tears(entShooting, player, shotDir, shotPos, shotSpeed, moveInhe, fireData, multishotParams, mult)
+    local sizeMult = 1
+    if fireData.ChocoMilk and fireData.ChocoMilk < 1 then sizeMult = fireData.ChocoMilk end
     local weapTab = {}
-    local TearsShoot= 14 + math.floor((multishotParams:GetNumTears() -1) *2.4)
+    local TearsShoot= math.floor( (14 + math.floor((multishotParams:GetNumTears() -1) *2.4)) * sizeMult )
+    if fireData.Haemolacria then TearsShoot = math.ceil(TearsShoot *0.57) end
     local fallingAcc = 0.75 * ((player.TearRange /40) / 6.5)
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
     
@@ -1184,8 +1261,10 @@ end
 
 
 local function MonstrosLung_Laser(entShooting, player, shotDir, shotPos, shotSpeed, moveInhe, fireData, multishotParams, mult)
+    local sizeMult = 1
+    if fireData.ChocoMilk and fireData.ChocoMilk < 1 then sizeMult = fireData.ChocoMilk end
     local weapTab = {}
-    local TearsShoot= math.min(multishotParams:GetNumTears() *12, 128)
+    local TearsShoot= math.floor( (math.min(multishotParams:GetNumTears() *12, 128)) * sizeMult )
     local fallingAcc = 0.75 * ((player.TearRange /40) / 6.5)
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
     
@@ -1417,6 +1496,96 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
                 tear:AddTearFlags(tearFlags)
                 
                 table.insert(weaponList, tear)
+            end
+        end
+    elseif player:HasCollectible(CollectibleType.COLLECTIBLE_HAEMOLACRIA) then
+        local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
+        fireData.Haemolacria = true
+
+        if fireData.MonstroLung then
+            BeckyMod:AppendTable(weaponList, MonstrosLung_Tears(
+                entShooting,
+                player, shotDir, shotPos, shotSpeed, moveInhe,
+                fireData,
+                multishotParams,
+                mult))
+        else
+            for i=0, multishotParams:GetNumTears()-1 do
+                local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_TEARS, shotDir, shotSpeed, multishotParams)
+                local tear = player:FireTear(
+                    shotPos + posVel.Position *scale,
+                    posVel.Velocity + moveInhe,
+                    fireData.CanBeEye, fireData.TractorBeam, true, entShooting, mult
+                )
+                table.insert(weaponList, tear)
+            end
+        end
+
+        if fireData.ExtraTears then
+            fireData.TractorBeam = false
+            if multishotParams:IsShootingBackwards() then
+                if fireData.MonstroLung then
+                    BeckyMod:AppendTable(weaponList, MonstrosLung_Tears(
+                        entShooting,
+                        player,
+                        shotDir:Rotated(180),
+                        shotPos, shotSpeed, Vector.Zero,
+                        fireData,
+                        multishotParams,
+                        mult))
+                else
+                    local tear = player:FireTear(
+                        shotPos,
+                        shotDir:Resized(shotSpeed):Rotated(180),
+                        fireData.CanBeEye, false, false, entShooting, mult
+                    )
+
+                    table.insert(weaponList, tear)
+                end
+            end
+            if multishotParams:IsShootingSideways() then
+                for angle=-90, 90, 180 do
+                    if fireData.MonstroLung then
+                        BeckyMod:AppendTable(weaponList, MonstrosLung_Tears(
+                            entShooting,
+                            player,
+                            shotDir:Rotated(angle),
+                            shotPos, shotSpeed, Vector.Zero,
+                            fireData,
+                            multishotParams,
+                            mult))
+                    else
+                        local tear = player:FireTear(
+                            shotPos,
+                            shotDir:Resized(shotSpeed):Rotated(angle),
+                            fireData.CanBeEye, false, false, entShooting, mult
+                        )
+                    
+                        table.insert(weaponList, tear)
+                    end
+                end
+            end
+
+            for i=1, multishotParams:GetNumRandomDirTears() do
+                local angle = Random() % 360
+                if fireData.MonstroLung then
+                    BeckyMod:AppendTable(weaponList, MonstrosLung_Tears(
+                        entShooting,
+                        player,
+                        shotDir:Rotated(angle),
+                        shotPos, shotSpeed, Vector.Zero,
+                        fireData,
+                        multishotParams,
+                        mult))
+                else
+                    local tear = player:FireTear(
+                        shotPos,
+                        shotDir:Resized(shotSpeed):Rotated(angle),
+                        fireData.CanBeEye, false, false, entShooting, mult
+                    )
+                    
+                    table.insert(weaponList, tear)
+                end
             end
         end
     elseif effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) then

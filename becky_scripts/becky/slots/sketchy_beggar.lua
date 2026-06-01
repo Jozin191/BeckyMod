@@ -2,7 +2,7 @@ local SKETCHY_BEGGAR = {}
 SKETCHY_BEGGAR.ID = Isaac.GetEntityVariantByName("Sketchy Beggar")
 
 local game = BeckyMod.Game
-
+local itemPool = game:GetItemPool()
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_SLOT_INIT, function(_, slot)
     slot:SetState(SlotState.IDLE)
@@ -44,7 +44,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, function(_, slot)
             local rng = slot:GetDropRNG()
 
             for _=1, rng:RandomInt(3, 5) do
-                Isaac.Spawn(5, 20, 1, slot.Position, rng:RandomVector():Resized(rng:RandomInt(5, 12) /3), slot)
+                Isaac.Spawn(5, 20, 1, slot.Position, rng:RandomVector():Resized(rng:RandomInt(5, 12) /3), nil)
             end
             local save = BeckyMod:RunSave()
             save.SketchyBeggar = save.SketchyBeggar or {}
@@ -58,10 +58,13 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, function(_, slot)
 
 
                 local itemPayout
-                if Isaac.GetPersistentGameData():Unlocked(Achievement.EVERYTHING_JAR) and game:GetItemPool():HasCollectible(CollectibleType.COLLECTIBLE_EVERYTHING_JAR) and rng:RandomInt(5) == 0 then
-                    itemPayout = CollectibleType.COLLECTIBLE_EVERYTHING_JAR
-                else
-                    itemPayout = game:GetItemPool():GetCollectible(ItemPoolType.POOL_BEGGAR, true, rng:Next(), CollectibleType.COLLECTIBLE_BREAKFAST)
+                if Isaac.GetPersistentGameData():Unlocked(Achievement.EVERYTHING_JAR) and itemPool:HasCollectible(CollectibleType.COLLECTIBLE_EVERYTHING_JAR) and rng:RandomInt(5) == 0 then
+                    if itemPool:RemoveCollectible(CollectibleType.COLLECTIBLE_EVERYTHING_JAR) then
+                        itemPayout = CollectibleType.COLLECTIBLE_EVERYTHING_JAR
+                    end
+                end
+                if itemPayout == nil then
+                    itemPayout = itemPool:GetCollectible(ItemPoolType.POOL_BEGGAR, true, rng:Next(), CollectibleType.COLLECTIBLE_BREAKFAST)
                 end
 
                 local spawnPos = game:GetRoom():FindFreePickupSpawnPosition(slot.Position, 40, true, false)
