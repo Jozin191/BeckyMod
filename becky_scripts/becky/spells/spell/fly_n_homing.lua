@@ -1,5 +1,5 @@
 
-local SPELL_COST = 45
+local SPELL_COST = 70
 local nullItem = Isaac.GetNullItemIdByName("SPELL_FlyHoming")
 BeckyMod.Spells.NULL_ITEMS.FLY_N_HOMING = nullItem
 local HOMING_COLOR = Color

@@ -131,10 +131,13 @@ local function ShouldDoChocolateMilk(player)
     return effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk)
 end
 
-local function ShouldShowBrimstone(player)
+local function ShouldDoBrimstone(player)
+    local effects = player:GetEffects()
     if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) or
     player:HasCollectible(CollectibleType.COLLECTIBLE_HAEMOLACRIA) or
-    player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then
+    player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X)or
+    effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) or
+    effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
         return false
     end
     return player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE)
@@ -208,10 +211,10 @@ local function BeckyFire(entShooting, player, data)
     
     if ShouldDoMonstrosLung(player) then
         if player:GetEffects():HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
-            local minCharge = math.max( BeckyMod:InverseLerp(0.01, 30, BeckyMod:toTearsPerSecond(player.MaxFireDelay)), 0.05 )
+            local minCharge = BeckyMod:InverseLerp(0.01, 30, BeckyMod:toTearsPerSecond(player.MaxFireDelay))
             local charge = data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge
             
-            if charge > minCharge then
+            if charge >= minCharge and charge > 0.12 then
                 local chocoMult = BeckyMod:Lerp(0, 2, charge)
                 if chocoMult < 0.1 then chocoMult = 0.1 end
                 BECKY_B:FireWeapon(entShooting, player, {MonstroLung = true, ChocoMilk = chocoMult})
@@ -221,9 +224,9 @@ local function BeckyFire(entShooting, player, data)
             BECKY_B:FireWeapon(entShooting, player, {MonstroLung = true})
         end
     elseif ShouldDoChocolateMilk(player) then
-        local minCharge = math.max( BeckyMod:InverseLerp(0.01, 30, BeckyMod:toTearsPerSecond(player.MaxFireDelay)), 0.05 )
+        local minCharge = BeckyMod:InverseLerp(0.01, 30, BeckyMod:toTearsPerSecond(player.MaxFireDelay))
         local charge = data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge
-        if charge > minCharge then
+        if charge >= minCharge and charge > 0.075 then
             local chocoMult = BeckyMod:Lerp(0, 4, charge)
             if chocoMult < 0.1 then chocoMult = 0.1 end
 
@@ -249,9 +252,17 @@ local function BeckyFire(entShooting, player, data)
                     }
                 end
                 BECKY_B:FireWeapon(entShooting, player, {ChocoMilk = chocoMult})
+            elseif ShouldDoTechX(player) then
+                if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /7 then
+                    BECKY_B:FireWeapon(entShooting, player, {ChocoMilk = chocoMult})
+                end
             else
                 BECKY_B:FireWeapon(entShooting, player, {ChocoMilk = chocoMult})
             end
+        end
+    elseif ShouldDoTechX(player) then
+        if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /7 then
+            BECKY_B:FireWeapon(entShooting, player)
         end
     elseif HasShouldDoCursedEye(player) then
         if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /5 then
@@ -309,6 +320,28 @@ local function ProcessStaffSwing(entShooting, player)
     if aimVec:Length() ~= 0 then
         local sprite = knife:GetSprite()
         local playerMaxFireDelay = player.MaxFireDelay
+        if ShouldDoBrimstone(player) and data.MagicStaff_ChargeBar.Charge <= 3 and weapon:GetFireDelay() <=0 then
+            local mult = 1
+            if entShooting.Type == 3 then
+                local fam = entShooting:ToFamiliar()
+                if fam then
+                    if fam.Variant == FamiliarVariant.TWISTED_BABY then
+                        mult= 0.375 * fam:GetMultiplier()
+                    elseif fam.Variant == FamiliarVariant.BLOOD_BABY then
+                        mult= 0.35 * fam:GetMultiplier()
+                    else
+                        mult= 0.75 * fam:GetMultiplier()
+                    end
+                end
+            end
+            local ballEnt = player:FireBrimstoneBall(entShooting.Position, aimVec:Resized(5), aimVec:Resized(math.max(player.TearRange / 260, 1)*40 * mult))
+            ballEnt.CollisionDamage = ballEnt.CollisionDamage *3 *mult
+            ballEnt.SpriteScale = ballEnt.SpriteScale * mult
+            ballEnt.Size = ballEnt.Size * mult
+            
+            ballEnt:SetTimeout(4)
+            weapon:SetFireDelay( weapon:GetMaxFireDelay() )
+        end
         if HasShouldDoNeptunus(player) then
             if IsKnifeSwinging(sprite) and sprite:GetFrame() == 1 and data.MagicStaff_ChargeBar then
                 DoNeptunusCluster(entShooting, player, (data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge)) 
@@ -396,7 +429,7 @@ end)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, 200, function(_, player, cacheFlags)
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     if CacheFlag.CACHE_DAMAGE & cacheFlags > 0 then
-        player.Damage = player.Damage * 0.5
+        player.Damage = player.Damage * 0.666666
     --elseif CacheFlag.CACHE_FIREDELAY & cacheFlags > 0 then
         --local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
         --tps = tps * 0.42
@@ -570,13 +603,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_TAKE_DMG, function(_, ent, dmg,
     local data = BeckyMod.GetEntData(player)
     if not (data.NoChargeMana and data.NoChargeMana > 0) then
         local save = BeckyMod:RunSave(player)
-        if srcEnt.Type == 1 then
-            save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *1.14
-        elseif BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.SPELL_DMG_UP) then
-            save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) / 1.35 *0.85
-        else
-            save.ManaCharge = save.ManaCharge + math.min(ent.HitPoints, dmg) *0.66
+        local manaGranted = math.min(ent.HitPoints, dmg) *0.80
+        if BeckyMod.Spells:HasSpell(player, BeckyMod.Spells.SpellType.SPELL_DMG_UP) then
+            save.ManaCharge = save.ManaCharge + manaGranted / 1.35
         end
+        save.ManaCharge = save.ManaCharge + manaGranted
     end
 end)
 
@@ -963,7 +994,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player,
                 spriteData.WasPlayingCharge = false
                 spriteData.Update = true
             else
-                if spriteData.PrevCharge > charge then
+                if spriteData.PrevCharge > charge and charge > 0.12 then
                     sprite:Play(DirToHeadAnim[dir].."Shoot", true)
                     player:SetHeadDirectionLockTime(sprite:GetCurrentAnimationData():GetLength())
                     spriteData.WasPlayingCharge = false
@@ -1149,7 +1180,7 @@ DoNeptunusCluster = function (entShooting, player, charge)
     if charge < 0.05 then return end
     local shotSpeed = player:GetAimDirection():Resized(player.ShotSpeed *10)
     local shotPos = entShooting.Position
-    local mult = 3.25 --1
+    local mult = 1
     local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
     local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
 
@@ -1157,10 +1188,7 @@ DoNeptunusCluster = function (entShooting, player, charge)
     
     local TearsShoot = 12 + math.floor(multishotParams:GetNumTears() *2.4) * (tps *0.66)
     TearsShoot = math.floor(TearsShoot * charge)
-    
-    --if player:GetPlayerType() == BECKY_B.PLAYERTYPE then
-    --    mult = 3.25
-    --end
+
 
     if entShooting.Type == 3 then
         local fam = entShooting:ToFamiliar()
@@ -1297,7 +1325,7 @@ local function MonstrosLung_TechX(entShooting, player, shotDir, shotPos, shotSpe
         local laser = player:FireTechXLaser(
             shotPos,
             shotDir:Resized(shotSpeed):Rotated(BeckyMod.RandomFloat(-MONSTROS_LUNG_SPREAD, MONSTROS_LUNG_SPREAD, rng)) + moveInhe,
-            40 *laserMult,
+            40 * fireData.TechXCharge *laserMult,
             entShooting,
             mult *laserMult
         )
@@ -1361,9 +1389,9 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
     local mult = 1
     local weaponList = {}
 
-    if player:GetPlayerType() == BECKY_B.PLAYERTYPE then
-        mult = 3.25
-    end
+    --if player:GetPlayerType() == BECKY_B.PLAYERTYPE then
+    --    mult = 3.25
+    --end
 
     if entShooting.Type == 3 then
         local fam = entShooting:ToFamiliar()
@@ -1635,10 +1663,19 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
         end
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_TECH_X)
+        local data = BeckyMod.GetEntData(entShooting)
+        local charge = BeckyMod:InverseLerp(
+            data.MagicStaff_ChargeBar.MaxCharge /7, 
+            data.MagicStaff_ChargeBar.MaxCharge,
+            data.MagicStaff_ChargeBar.Charge
+        )
+        print(charge)
 
+        mult = mult * BeckyMod:Lerp(0.25, 1, charge)
+        fireData.TechXCharge = charge
         for i=0, multishotParams:GetNumTears()-1 do
             local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_TECH_X, shotDir, shotSpeed, multishotParams)
-            local tech_x = player:FireTechXLaser(shotPos + posVel.Position *scale, posVel.Velocity + moveInhe, 40, entShooting, mult)
+            local tech_x = player:FireTechXLaser(shotPos + posVel.Position *scale, posVel.Velocity + moveInhe, 40 * charge, entShooting, mult)
             table.insert(weaponList, tech_x)
         end
         if fireData.MonstroLung then
@@ -1653,19 +1690,19 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
 
         if fireData.ExtraTears then
             if multishotParams:IsShootingBackwards() then
-                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(180), 40 *mult, entShooting, mult)
+                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(180), 40 * charge, entShooting, mult)
                 table.insert(weaponList, tech_x)
             end
             if multishotParams:IsShootingSideways() then
                 for angle=0, 180, 180 do
-                    local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(angle), 40 *mult, entShooting, mult)
+                    local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(angle), 40 * charge, entShooting, mult)
                     table.insert(weaponList, tech_x)
                 end
             end
 
             for i=1, multishotParams:GetNumRandomDirTears() do
                 local angle = Random() % 360
-                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(angle), 40 *mult, entShooting, mult)
+                local tech_x = player:FireTechXLaser(shotPos, shotDir:Resized(shotSpeed):Rotated(angle), 40 * charge, entShooting, mult)
                 table.insert(weaponList, tech_x)
             end
         end
@@ -1710,12 +1747,13 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
             end
         end
         
+        --[[
         for _, ent in ipairs(weaponList) do
             local laser = ent:ToLaser()
             if laser then
                 laser:SetScale(laser:GetScale() / 2)
             end
-        end
+        end]]
         
     elseif player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_LASER)

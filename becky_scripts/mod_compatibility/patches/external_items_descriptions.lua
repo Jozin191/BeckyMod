@@ -5,6 +5,7 @@
 
 local loader = BeckyMod.PatchesLoader
 local synergiesFun = include("becky_scripts.mod_compatibility.patches.eid_ghost_amulet_synergies")
+local spellsEIDFun = include("becky_scripts.mod_compatibility.patches.eid_t_becky_spells")
 
 local function EIDPatch()
 	local Mod = BeckyMod
@@ -54,8 +55,10 @@ local function EIDPatch()
 	local CharIcons = Sprite()
 	CharIcons:Load("gfx/ui/eid/becky_icons.anm2", true)
 	EID:addIcon("Becky", "Becky", 0, 16, 16, 6, 6, CharIcons)
+	--EID:addIcon("Tainted Becky", "Tainted Becky", 0, 16, 16, 6, 6, CharIcons)
 
 	EID.InlineIcons["Player" .. Character.BECKY.PLAYERTYPE] = EID.InlineIcons["Becky"]
+	EID.InlineIcons["Player" .. Character.BECKY_B.PLAYERTYPE] = EID.InlineIcons["Becky"] --EID.InlineIcons["Tainted Becky"]
 
 	-- Dynamic Callbacks
 
@@ -351,16 +354,35 @@ local function EIDPatch()
 				},
 			},
 		},
-		[Item.MAGIC_STAFF.ID] = { -- EN: [X] | SPA: [X] 
+		[Item.MAGIC_STAFF.ID] = { -- EN: [OK] | SPA: [X]
 			en_us = {
 				Name = "Magic Staff",
 				Description = {
-					""
+					"On use, lets Isaac select 1 of 4 spells",
+					"#This spells change between uses",
+				},
+			},
+		},
+		[Item.MAGIC_STAFF.TAINTED_BECKY_ID] = { -- EN: [X] | SPA: [X] 
+			_modifier = function(descObj)
+				local desc = "{{ColorYellow}}Current spells:{{CR}}"
+
+				for idx, spell in ipairs(BeckyMod.Spells:GetSpells(EID.player)) do
+					if spell ~= BeckyMod.Spells.SpellType.NULL then
+						desc = desc .."#"..BeckyMod.Spells:GetSpellEIDDesc(spell)
+					end
+				end
+				return desc
+			end,
+			en_us = {
+				Name = "Magic Staff",
+				Description = {
+					function(descObj) return EID_Collectibles[Item.MAGIC_STAFF.TAINTED_BECKY_ID]._modifier(descObj) end,
 				},
 			},
 		},
 
-		[Item.POUL.ID] = {
+		[Item.POUL.ID] = { -- EN: [OK] | SPA: [X]
 			en_us = {
 				_BFFSMod = function(descObj, line)
 					if not BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_BFFS) then return end
@@ -609,6 +631,24 @@ local function EIDPatch()
 				}
 			}
 		},
+		[Pickup.SOUL_OF_BECKY.ID] = {
+			_metadata = {2, true},
+			--[[
+			_modifier = function(descObj)
+				if BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_TAROT_CLOTH) then
+					return "Activates 2 random {{ColorShinyPurple}}tarot card{{CR}}"
+				end
+
+				return "Activates 2 random but weaker version of a tarot card"
+			end,]]
+
+			en_us = {
+				Name = "Soul of Becky",
+				Description = {
+					"Forces Isaac to select 1 of 4 spells"
+				}
+			}
+		},
 	}
 
 	for id, cardDescData in pairs(EID_Cards) do
@@ -722,9 +762,10 @@ local function EIDPatch()
 	
 
 	EID:addBirthright(Character.BECKY.PLAYERTYPE, "The Ghost's range becomes unlimited.")
-	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "!!!! TO BE ADDED !!!!")
+	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Rerolls all of Becky's spells to others of the same pool")
 
 	synergiesFun()
+	spellsEIDFun()
 	--EID._currentMod = "" --So items added after this with no set mod don't display as the becky mod
 end
 

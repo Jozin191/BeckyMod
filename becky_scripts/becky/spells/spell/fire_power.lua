@@ -32,6 +32,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
     local fire = Isaac.Spawn(1000, EffectVariant.RED_CANDLE_FLAME, 0, room:FindFreeTilePosition(spawnPos, 40), Vector.Zero, Isaac.GetPlayer()):ToEffect()
     fire.CollisionDamage = 15
     fire:SetTimeout(90)
+    BeckyMod.GetEntData(fire).NoGrantMana = true
 
     FireCooldown = 60 + 15 * (Random() % 4) - 15 *effectNum
     if FireCooldown < 15 then FireCooldown = 15 end

@@ -20,6 +20,6 @@
 		description="Soul magic!"
 		name="Soul of Becky"
 		hud="Soul of Becky_BeckyMod"
-		mimiccharge="5"
+		mimiccharge="2"
 		achievement="Soul of Becky" />
 </pocketitems>

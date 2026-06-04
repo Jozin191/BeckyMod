@@ -107,7 +107,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
 
     if player then
         local mult = 3.25
-        if player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then mult = mult *3 end
+        --if player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then mult = mult *3 end
 
         tearParam = player:GetTearHitParams(WeaponType.WEAPON_BRIMSTONE, mult, 1, player)
         sp.Color = tearParam.TearColor

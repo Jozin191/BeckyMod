@@ -51,7 +51,7 @@ local function fun(player)
     for _, ent in ipairs(Isaac.GetRoomEntities()) do
         if ent:ToNPC() then
             if ent:IsBoss() then
-                ent:TakeDamage(500, DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(ent), 0)
+                ent:TakeDamage(660, DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(ent), 0)
             else
                 ent:Remove()
             end

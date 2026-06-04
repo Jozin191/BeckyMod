@@ -645,11 +645,16 @@ local EFFECTVAR_TO_GRIDVAR = {
 local STATUE_MAX_DISTANCE = 2.25 * 40
 BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, statue)
     if not PlayerManager.AnyoneIsPlayerType(BeckyMod.Character.BECKY_B.PLAYERTYPE) then return end
-    if game:GetLevel():GetCurrentRoomIndex() ~= GridRooms.ROOM_DEVIL_IDX then return end
+    local level = game:GetLevel()
+    if level:GetCurrentRoomIndex() ~= GridRooms.ROOM_DEVIL_IDX then return end
     local var = EFFECTVAR_TO_GRIDVAR[statue.Variant]-- Statue variant. 0 - Devil, 1 - Angel
     if var == nil then return end
     local statuePos = statue.Position
 
+    local room = game:GetRoom()
+    local isBlindCurseInStage = level:GetCurses() & LevelCurse.CURSE_OF_BLIND >0
+    local EID_Desc
+    local dis
     for i, player in ipairs(PlayerManager.GetPlayers()) do
         local save = BeckyMod:FloorSave(player)
         if not save.DealSpell and player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then
@@ -660,11 +665,43 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, statue)
                 end
                 return
             end
-            if statuePos:Distance(player.Position) >= STATUE_MAX_DISTANCE then
+            local playerDis = statuePos:Distance(player.Position)
+            if playerDis >= STATUE_MAX_DISTANCE then
                 data.ReplaceSpell = -1
                 return
             end
             data.ReplaceSpell = var
+
+            if EID and (dis == nil or playerDis < dis) then
+                dis = playerDis
+                
+                if isBlindCurseInStage then
+                    EID_Desc = EID.InlineIcons["QuestionMark"]
+                else
+                    local spell = SPELLS.SpellType.NULL
+                    DEAL_SPELL_RNG:SetSeed(room:GetDecorationSeed() + player.InitSeed, 35)
+                    local spellPool
+                    if var == 0 then -- devil statue
+                        spellPool = BeckyMod:ShuffleTable(DevilSpellsPool, DEAL_SPELL_RNG)
+                    elseif var == 1 then -- angel statue
+                        spellPool = BeckyMod:ShuffleTable(AngelSpellsPool, DEAL_SPELL_RNG)
+                    end
+
+                    for i=1, #spellPool do
+                        if not SPELLS:HasSpell(player, spellPool[i]) then
+                            spell = spellPool[i]
+                            break
+                        end
+                    end
+                    EID_Desc = BeckyMod.Spells:GetSpellEIDDesc(spell)
+                end
+            end
+        end
+
+        if EID_Desc then
+            local desc = EID:getEntityData(statue, "EID_Description") or ""
+            desc = desc .. "{{Player".. BeckyMod.Character.BECKY_B.PLAYERTYPE .."}} {{ColorSilver}}Tainted Becky{{CR}}#"..EID_Desc
+            EID:setEntityData(statue, "EID_Description", desc)
         end
 	end
 end)

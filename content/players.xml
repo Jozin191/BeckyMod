@@ -12,7 +12,7 @@
 		birthright="Freedom!!!"
     />
     <player name="Becky" bSkinParent="Becky"
-		damagemodifier="1.5"
+		damagemodifier="0.5"
         skin="character_beckyb.png"
         skinColor = "1"
         nameimage="playername_becky.png"
