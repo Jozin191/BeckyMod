@@ -699,9 +699,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, statue)
         end
 
         if EID_Desc then
-            local desc = EID:getEntityData(statue, "EID_Description") or ""
-            desc = desc .. "{{Player".. BeckyMod.Character.BECKY_B.PLAYERTYPE .."}} {{ColorSilver}}Tainted Becky{{CR}}#"..EID_Desc
-            EID:setEntityData(statue, "EID_Description", desc)
+            EID:setEntityData(statue, "EID_Description", "{{Player".. BeckyMod.Character.BECKY_B.PLAYERTYPE .."}} {{ColorSilver}}Tainted Becky{{CR}}#"..EID_Desc)
         end
 	end
 end)

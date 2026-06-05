@@ -364,7 +364,7 @@ local function ProcessStaffSwing(entShooting, player)
         local addToCharge = 1
         if not player:GetEffects():HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) then
             local c_sectionCharge = 30 /(playerMaxFireDelay *3 +1)
-            if c_sectionCharge < MAX_TEARS_DPS_C_SECTION then c_sectionCharge = MAX_TEARS_DPS_C_SECTION end
+            if c_sectionCharge > MAX_TEARS_DPS_C_SECTION then c_sectionCharge = MAX_TEARS_DPS_C_SECTION end
             addToCharge = addToCharge * (c_sectionCharge /BASE_TEAR_DPS * 1.25)
         else
             addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(playerMaxFireDelay) /BASE_TEAR_DPS * 1.25)
@@ -386,15 +386,18 @@ local function ProcessStaffSwing(entShooting, player)
         data.MagicStaff_ChargeBar.Charge = math.min(data.MagicStaff_ChargeBar.Charge +addToCharge, data.MagicStaff_ChargeBar.MaxCharge)
         
 
+        local fireDelay = weapon:GetFireDelay()
+        local maxTearDelay = playerMaxFireDelay/4
+        if maxTearDelay > 0.5 then maxTearDelay = 0.5
+        elseif maxTearDelay < 0 then maxTearDelay = 0
+        end
+        if data.MagicStaff_ChargeBar.Charge > 3 and fireDelay < maxTearDelay then fireDelay = maxTearDelay end
+        weapon:SetFireDelay(fireDelay)
+        
         if playerMaxFireDelay <= 3.2 then
-            if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
+            --if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
                 BeckyFire(entShooting, player, data)
-            end
-        else
-            local fireDelay = weapon:GetFireDelay()
-            local maxTearDelay = math.min(playerMaxFireDelay/4, 0.5)
-            if data.MagicStaff_ChargeBar.Charge > 3 and fireDelay < maxTearDelay then fireDelay = maxTearDelay end
-            weapon:SetFireDelay(fireDelay)
+            --end
         end
     else
         if HasShouldDoNeptunus(player) then
@@ -1669,7 +1672,6 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
             data.MagicStaff_ChargeBar.MaxCharge,
             data.MagicStaff_ChargeBar.Charge
         )
-        print(charge)
 
         mult = mult * BeckyMod:Lerp(0.25, 1, charge)
         fireData.TechXCharge = charge
