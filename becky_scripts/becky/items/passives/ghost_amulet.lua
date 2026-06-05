@@ -360,7 +360,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     if not ghosts then return end
 
     local isShooting = IsPlayerShooting(player)
+    local ForceTargetPos = nil
+    
+    if Options.MouseControl and player.ControllerIndex == 0 then
+        if Input.IsMouseBtnPressed(0) then ForceTargetPos = Input.GetMousePosition(true)
+        end
+    end
     local marked = player:GetMarkedTarget()
+    if marked then ForceTargetPos = marked.Position end
+
     local shotSpeed = player.ShotSpeed
     local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
     local maxDistIdle = 40
@@ -458,12 +466,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
                 ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) *uc
             end
-        elseif marked or isShooting then
-            if marked or not player:AreOpposingShootDirectionsPressed() then
+        elseif ForceTargetPos or isShooting then
+            if ForceTargetPos or not player:AreOpposingShootDirectionsPressed() then
                 ghost.State = 1
                 local targetPos
-                if marked then
-                    targetPos = marked.Position - ghost.Position
+                if ForceTargetPos then
+                    targetPos = ForceTargetPos - ghost.Position
                 else
                     
                     local input = {
@@ -566,7 +574,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 end
 
 
-                if not marked then
+                if not ForceTargetPos then
                     local dir = (famPos - playerPos):Normalized()
                     player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
                 end
