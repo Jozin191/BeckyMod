@@ -151,7 +151,7 @@ local UnlockTable = {
 
 
 local CheckForAchivementsPlayer = {
-    [BeckyID] = function(player, mark)
+    [BeckyID] = function(mark)
         local pgd = Isaac.GetPersistentGameData()
         local difficulty = game.Difficulty % 2
         local unlock = UnlockTable.Becky[mark]
@@ -171,7 +171,7 @@ local CheckForAchivementsPlayer = {
             pgd:TryUnlock(achievements.ACHIEVEMENT_GHOST_AMULET)
         end
     end,
-    [BeckyB_ID] = function(player, mark)
+    [BeckyB_ID] = function(mark)
         local pgd = Isaac.GetPersistentGameData()
         
         if Isaac.AllTaintedCompletion(BeckyB_ID, TaintedMarksGroup.SOULSTONE) -1 >= Difficulty.DIFFICULTY_NORMAL then
@@ -242,10 +242,10 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_PICKUP_INIT, unlocks.OnPickupInit)]]
 
 ---@param mark CompletionType
----@param player PlayerType
-function unlocks:OnTriggerCompletion(mark, player)
-    local unlocks = CheckForAchivementsPlayer[player:GetPlayerType()]
-    if unlocks then unlocks(player, mark) end
+---@param playerId PlayerType
+function unlocks:OnTriggerCompletion(mark, playerId)
+    local beckyUnlocks = CheckForAchivementsPlayer[playerId]
+    if beckyUnlocks then beckyUnlocks(mark) end
 end
 mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion)
 

@@ -207,7 +207,7 @@ end
 
 local EPIPHORA_TIME_MULT = (30 *6)
 local EPIPHORA_FRAME_MULT = 1/EPIPHORA_TIME_MULT
-local function BeckyFire(entShooting, player, data)
+local function BeckyFire(entShooting, player, data, autofire)
     
     if ShouldDoMonstrosLung(player) then
         if player:GetEffects():HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
@@ -220,8 +220,10 @@ local function BeckyFire(entShooting, player, data)
                 BECKY_B:FireWeapon(entShooting, player, {MonstroLung = true, ChocoMilk = chocoMult})
             end
 
+            if autofire then data.MagicStaff_ChargeBar.Charge = 0 end
         elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
             BECKY_B:FireWeapon(entShooting, player, {MonstroLung = true})
+            if autofire then data.MagicStaff_ChargeBar.Charge = 0 end
         end
     elseif ShouldDoChocolateMilk(player) then
         local minCharge = BeckyMod:InverseLerp(0.01, 30, BeckyMod:toTearsPerSecond(player.MaxFireDelay))
@@ -259,10 +261,12 @@ local function BeckyFire(entShooting, player, data)
             else
                 BECKY_B:FireWeapon(entShooting, player, {ChocoMilk = chocoMult})
             end
+            if autofire then data.MagicStaff_ChargeBar.Charge = 0 end
         end
     elseif ShouldDoTechX(player) then
         if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /7 then
             BECKY_B:FireWeapon(entShooting, player)
+            if autofire then data.MagicStaff_ChargeBar.Charge = 0 end
         end
     elseif HasShouldDoCursedEye(player) then
         if data.MagicStaff_ChargeBar.Charge >= data.MagicStaff_ChargeBar.MaxCharge /5 then
@@ -285,11 +289,16 @@ local function BeckyFire(entShooting, player, data)
                 }
             end
             BECKY_B:FireWeapon(entShooting, player)
+            
+            if autofire then data.MagicStaff_ChargeBar.Charge = 0 end
         end
     elseif data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
         BECKY_B:FireWeapon(entShooting, player)
+        if autofire then data.MagicStaff_ChargeBar.Charge = 0 end
     end
-    data.MagicStaff_ChargeBar.Charge = 0
+    if not autofire then
+        data.MagicStaff_ChargeBar.Charge = 0
+    end
 end
 
 
@@ -389,14 +398,14 @@ local function ProcessStaffSwing(entShooting, player)
         local fireDelay = weapon:GetFireDelay()
         local maxTearDelay = playerMaxFireDelay/4
         if maxTearDelay > 0.5 then maxTearDelay = 0.5
-        elseif maxTearDelay < 0 then maxTearDelay = 0
+        elseif maxTearDelay < 0 then maxTearDelay = weapon:GetMaxFireDelay()
         end
         if data.MagicStaff_ChargeBar.Charge > 3 and fireDelay < maxTearDelay then fireDelay = maxTearDelay end
         weapon:SetFireDelay(fireDelay)
         
-        if playerMaxFireDelay <= 3.2 then
+        if (not player:GetEffects():HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION)) or playerMaxFireDelay <= 3.2 then
             --if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
-                BeckyFire(entShooting, player, data)
+                BeckyFire(entShooting, player, data, true)
             --end
         end
     else
@@ -463,6 +472,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     if player:IsDead() then return end
     local weapon = player:GetWeapon(1)
+    local effects = player:GetEffects()
+    local data = BeckyMod.GetEntData(player)
+    if effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_BERSERK) or effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_NOTCHED_AXE) then
+        if not data.DestroidWeapon then
+            if weapon then Isaac.DestroyWeapon(weapon) end
+            data.DestroidWeapon = true
+        end
+        return
+    end
     if weapon == nil or weapon:GetWeaponType() ~= WeaponType.WEAPON_BONE then
         if weapon then Isaac.DestroyWeapon(weapon) end
         weapon = Isaac.CreateWeapon(WeaponType.WEAPON_BONE, player)
@@ -470,6 +488,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         player:EnableWeaponType(WeaponType.WEAPON_BONE, 1)
         --player:SetWeapon()
         player:AddCacheFlags(CacheFlag.CACHE_DAMAGE| CacheFlag.CACHE_FIREDELAY, true)
+        data.DestroidWeapon = false
     end
     if weapon:GetMainEntity() == nil then return end
     local data = BeckyMod.GetEntData(player)
@@ -486,6 +505,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
     if save.UnblockCursedEyeNextFrame then
         player:UnblockCollectible(CollectibleType.COLLECTIBLE_CURSED_EYE)
         save.UnblockCursedEyeNextFrame = false
+    end
+    local effects = player:GetEffects()
+    if effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_BERSERK) or effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_NOTCHED_AXE) then
+        return
     end
     local data = BeckyMod.GetEntData(player)
     
@@ -542,6 +565,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
     if player == nil or player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     
     if player:IsDead() then return end
+    local effects = player:GetEffects()
+    if effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_BERSERK) or effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_NOTCHED_AXE) then
+        return
+    end
     local weapon = fam:GetWeapon()
     if weapon == nil or weapon:GetMainEntity() == nil then return end
     
@@ -1727,6 +1754,8 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
         for i=0, multishotParams:GetNumTears()-1 do
             local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_BRIMSTONE, shotDir, shotSpeed, multishotParams)
             local brim = player:FireBrimstone(posVel.Velocity, entShooting, mult)
+            brim.Parent = entShooting
+            if brim == nil or not brim:Exists() then print("Brimstone fail to be fire with", player.Damage * mult,"damage. fired by", entShooting.Type,"",entShooting.Variant) end
             table.insert(weaponList, brim)
         end
         
