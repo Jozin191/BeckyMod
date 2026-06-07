@@ -115,7 +115,7 @@ local SELECTION_POS = {
 
 local SPELLS_SPRITE = Sprite("gfx/ui/taintedBecky/spells.anm2", true)
 
--- max frame : 16
+-- max frame : 16 - i should have added it on the return table lol
 local SPELLS_FRAME = {
     [SPELLS.SpellType.NULL] = 99,
 
@@ -244,8 +244,9 @@ end
 local DEAL_SPELL_RNG = RNG()
 local function renderPlayerSpellSelection(player)
     local data = BeckyMod.GetEntData(player)
+    local save = BeckyMod:RunSave(player)
     local selectType = data.MagicStaff_SelectingSpell or SPELLS.SpellSelectType.NONE
-    if not BeckyMod:RunSave(player).SelectedSpells then selectType = SPELLS.SpellSelectType.RUN_INIT_SELECT
+    if not save.SelectedSpells then selectType = SPELLS.SpellSelectType.RUN_INIT_SELECT
     end
     
     if selectType == SPELLS.SpellSelectType.NONE then
@@ -282,28 +283,34 @@ local function renderPlayerSpellSelection(player)
     local pos = (player:GetFlyingOffset() *1.5) + player.Position + (SELECTION_POS.POS * player.SpriteScale.Y)
 
     if selectType == SPELLS.SpellSelectType.RUN_INIT_SELECT then
-        DEAL_SPELL_RNG:SetSeed(room:GetDecorationSeed() + player.InitSeed, 20)
-        local playerSpells = SPELLS:GetSpells(player)
+        DEAL_SPELL_RNG:SetSeed(game:GetLevel():GetDungeonPlacementSeed() + player.InitSeed, 20 - (save.ForceSelectSpells or 2) )
         local spellPool = BeckyMod:ShuffleTable(StartingSpellsPool, DEAL_SPELL_RNG)
-        
-        local spell = SPELLS.SpellType.NULL
+        local show = {}
+
         for i=1, #spellPool do
+            if #show == 4 then break end
             if not SPELLS:HasSpell(player, spellPool[i]) then
-                spell = spellPool[i]
-                break
+                show[#show+1] = spellPool[i]
             end
         end
 
-        if game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND >0 then
-            spell = SPELLS.SpellType.NULL
-        end
-        SPELLS_SPRITE:SetFrame("Spells", SPELLS_FRAME[spell])
-        SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos))
+        --if not data.HasShowTable then
+        --    print("-- Spell Sprite Selection")
+        --    BeckyMod:PrintTable(show)
+        --    print("-----")
+        --    data.HasShowTable = true
+        --end
 
+        local isBlind = game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND >0
+        
         for i=1, 4 do
-            local spell = playerSpells[i]
+            local spell = show[i]
+            if isBlind then
+                SPELLS_SPRITE:SetFrame("UnknownSpellGreen", 0)
+            else
+                SPELLS_SPRITE:SetFrame("SpellsGreen", SPELLS_FRAME[spell])
+            end
             
-            SPELLS_SPRITE:SetFrame("SpellsGreen", SPELLS_FRAME[spell])
             SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos + SELECTION_POS.OFFSETS[i]))
         end
 
@@ -552,17 +559,25 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     end
 
     if selectType == SPELLS.SpellSelectType.RUN_INIT_SELECT then
-        DEAL_SPELL_RNG:SetSeed(game:GetRoom():GetDecorationSeed() + player.InitSeed, 20)
+        DEAL_SPELL_RNG:SetSeed(game:GetLevel():GetDungeonPlacementSeed() + player.InitSeed, 20 - (save.ForceSelectSpells or 2))
         local spellPool = BeckyMod:ShuffleTable(StartingSpellsPool, DEAL_SPELL_RNG)
         
-        local spell = SPELLS.SpellType.NULL
+        local selectionPool = {}
+        local slot = ((save.ForceSelectSpells or 2) == 2 and Direction.LEFT) or Direction.RIGHT
         for i=1, #spellPool do
+            if #selectionPool == 4 then break end
             if not SPELLS:HasSpell(player, spellPool[i]) then
-                spell = spellPool[i]
-                break
+                selectionPool[#selectionPool+1] = spellPool[i]
             end
         end
-        SPELLS:SetSpellType(player, dir, spell)
+        
+        --print("-- Spell Select")
+        --BeckyMod:PrintTable(selectionPool)
+        --print("------")
+        --print(selectionPool[dir+1])
+        --data.HasShowTable = false
+
+        SPELLS:SetSpellType(player, slot, selectionPool[dir+1])
 
         data.SpellNoSelect = true
         save.ForceSelectSpells = (save.ForceSelectSpells or 2) -1
