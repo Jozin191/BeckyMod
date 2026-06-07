@@ -16,7 +16,7 @@ local function fun(player)
     --tear.Scale = 2
     --tear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
 
-    for _, weap in ipairs(BeckyMod.Character.BECKY_B:FireWeapon(player, player, {ForceDir = Vector(1,0):Rotated(angle), ForceMult = 3.5, CanBeEye = false, ExtraTears = false, TractorBeam = false} )) do
+    for _, weap in ipairs(BeckyMod.Character.BECKY_B:FireWeapon(player, player, {ForceDir = Vector(1,0):Rotated(angle), ForceMult = 4, CanBeEye = false, ExtraTears = false, TractorBeam = false} )) do
         if weap == 4 then
             if weap.ExplosionDamage < 15 then
                 weap.ExplosionDamage = 15

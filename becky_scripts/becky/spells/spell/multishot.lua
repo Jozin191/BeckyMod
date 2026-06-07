@@ -1,5 +1,5 @@
 
-local SPELL_COST = 50
+local SPELL_COST = 45
 local nullItem = Isaac.GetNullItemIdByName("SPELL_Multishot")
 BeckyMod.Spells.NULL_ITEMS.MULTISHOT = nullItem
 local SPREAD_ANGLE = 4.34
