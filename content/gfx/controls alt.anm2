@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="trtv" CreatedOn="07/06/2026 16:14:12" Version="71" Fps="30"/>
+	<Info CreatedBy="Jozin191" CreatedOn="07/06/2026 22:57:54" Version="72" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="controls.png" Id="0"/>
@@ -31,11 +31,13 @@
 			</LayerAnimations>
 			<NullAnimations>
 				<NullAnimation NullId="0" Visible="true"/>
-				<NullAnimation NullId="1" Visible="true"/>
+				<NullAnimation NullId="1" Visible="true">
+					<Frame XPosition="-80" YPosition="35" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
+				</NullAnimation>
 				<NullAnimation NullId="2" Visible="true"/>
 				<NullAnimation NullId="3" Visible="true"/>
 				<NullAnimation NullId="4" Visible="true">
-					<Frame XPosition="0" YPosition="35" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
+					<Frame XPosition="72" YPosition="35" XScale="100" YScale="100" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
 				</NullAnimation>
 				<NullAnimation NullId="5" Visible="true"/>
 				<NullAnimation NullId="6" Visible="true"/>
