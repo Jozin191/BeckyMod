@@ -4,7 +4,7 @@ local boomerangAltVar = Isaac.GetEntityVariantByName("Spell Boomerang Alt")
 BeckyMod.Spells.ENTITIES.BOOMERANG = { Type = 1000, Variant = boomerangVar }
 BeckyMod.Spells.ENTITIES.BOOMERANG_ALT = { Type = 1000, Variant = boomerangAltVar }
 
-local BOOMERANG_VEL = Vector(2.5 *7.5, 0)
+local BOOMERANG_VEL = Vector(2.5 *5.5, 0)
 local function Lerp(vec1, vec2, percent)
     return vec1 * (1 - percent) + vec2 * percent
 end
@@ -100,10 +100,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
 end, boomerangVar)
 
 local function fun(player)
+    local data = BeckyMod.GetEntData(player)
+    if data.MagicStaff_SelectSpellDir == nil then
+        data.MagicStaff_SelectSpellDir = { Type = BeckyMod.Spells.SpellType.BOOMERANG }
+        return
+    end
     local pos = player.Position
+    local angle = -180 + data.MagicStaff_SelectSpellDir.Dir * 90
 
-    local eff = Isaac.Spawn(1000, boomerangVar, 0, pos, BOOMERANG_VEL:Rotated(Random() % 360), player)
+    local eff = Isaac.Spawn(1000, boomerangVar, 0, pos, BOOMERANG_VEL:Rotated(angle) , player)
     BeckyMod.GetEntData(eff).NoGrantMana = true
+    data.MagicStaff_SelectSpellDir = nil
 end
 
 local function canSelectFun(player, manaLeft)
