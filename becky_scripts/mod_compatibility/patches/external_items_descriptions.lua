@@ -594,40 +594,49 @@ local function EIDPatch()
 		[Pickup.RIPPED_CARD.ID] = {
 			_metadata = {2, false},
 
-			_modifier = function(descObj)
+			_modifier = function(descObj, line, replace)
 				if BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_TAROT_CLOTH) then
-					return "Activates a random {{ColorShinyPurple}}tarot card{{CR}}"
+					return replace
 				end
 
-				return "Activates a random but weaker version of a tarot card"
+				return line
 			end,
 
 			en_us = {
 				Name = "Ripped Card",
 				Description = {
+					"Activates a random ",
 					function(descObj)
-						return EID_Cards[Pickup.RIPPED_CARD.ID]._modifier(descObj) .. "#This card is more likely to spawn while holding it"
+						return EID_Cards[Pickup.RIPPED_CARD.ID]._modifier(descObj,
+							"but weaker version of a tarot card",
+							"{{ColorShinyPurple}}tarot card{{CR}}"
+						)
 					end,
+					"#This card is more likely to spawn while holding it"
 				}
 			}
 		},
 		[Pickup.RIPPED_CARD.ID2] = {
 			_metadata = {4, false},
 
-			_modifier = function(descObj)
+			_modifier = function(descObj, line, replace)
 				if BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_TAROT_CLOTH) then
-					return "Activates 2 random {{ColorShinyPurple}}tarot card{{CR}}"
+					return replace
 				end
 
-				return "Activates 2 random but weaker version of a tarot card"
+				return line
 			end,
 
 			en_us = {
 				Name = "Patched Card",
 				Description = {
+					"Activates 2 random ",
 					function(descObj)
-						return EID_Cards[Pickup.RIPPED_CARD.ID2]._modifier(descObj) .. "#Ripped Card is more likely to spawn while holding this"
+						return EID_Cards[Pickup.RIPPED_CARD.ID2]._modifier(descObj,
+							"but weaker version of the tarot cards",
+							"{{ColorShinyPurple}}tarot cards{{CR}}")
 					end,
+					"#Ripped Card is more likely to spawn while holding this"
 				}
 			}
 		},
@@ -764,8 +773,96 @@ local function EIDPatch()
 	EID:addBirthright(Character.BECKY.PLAYERTYPE, "The Ghost's range becomes unlimited.")
 	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Rerolls all of Becky's spells to others of the same pool")
 
+	local BeckyDeals = {
+		{
+			Ids = "5.350."..TrinketType.TRINKET_DEVILS_CROWN,
+			Desc = {
+				en_us = "{{ColorSilver}}The deals in the treasure room cost money instead of health{{CR}}",
+			}
+		},
+		{
+			Ids = CollectibleType.COLLECTIBLE_SATANIC_BIBLE,
+			Desc = {
+				en_us = "{{ColorSilver}}The deals in the boss room cost money instead of health{{CR}}",
+			}
+		},
+		{
+			Ids = CollectibleType.COLLECTIBLE_STAIRWAY,
+			Desc = {
+				en_us = "{{ColorSilver}}The angel shop cost health instead of money{{CR}}",
+			}
+		},
+	}
+
+	for _, data in ipairs(BeckyDeals) do
+		for leng, desc in pairs(data.Desc) do
+			EID:addPlayerCondition(data.Ids, Character.BECKY.PLAYERTYPE, desc, nil, leng, nil, true)
+		end
+	end
+	if EID.TaintedToRegularID then
+		EID.TaintedToRegularID[Character.BECKY_B.PLAYERTYPE] = Character.BECKY.PLAYERTYPE
+	end
+
+	if Epiphany then
+		local BrokenHaloDesc = {
+			en_us = "{{ColorSilver}}The devil deals in the room will cost money instead of health{{CR}}",
+		}
+		for leng, desc in pairs(BrokenHaloDesc) do
+			EID:addPlayerCondition(Epiphany.Item.BROKEN_HALO.ID, Character.BECKY.PLAYERTYPE, desc, nil, leng, nil, true)
+		end
+	end
+
+
+	local EID_ENT_DESC
+	EID_ENT_DESC = {
+		_modifier = function(descObj)
+			local player = BECKY_EID:ClosestPlayerTo(descObj.Entity)
+			local spell = BeckyMod.Spells:GetDealSpellFromPlayer(player)
+			if BeckyMod.Level():GetCurses() & LevelCurse.CURSE_OF_BLIND >0 then
+				spell = BeckyMod.Spells.SpellType.NULL
+			end
+			return BeckyMod.Spells:GetSpellEIDDesc(spell)
+		end,
+		en_us = {
+			Name = "Spell Deal Entity",
+			Description = {
+				"{{Player".. Character.BECKY_B.PLAYERTYPE .."}} {{ColorSilver}}Tainted Becky{{CR}}",
+				"#", function(descObj) return EID_ENT_DESC._modifier(descObj) end,
+			}
+		},
+	}
+	for language, descData in pairs(EID_ENT_DESC) do
+		if language:match('^_') then goto continue end -- skip helper private fields
+
+		local name = descData.Name
+		local description = descData.Description
+
+		if not DD:IsValidDescription(description) then
+			Mod:Log("Invalid card description for Spell Deal (" .. BeckyMod.Spells.ENTITIES.EID_ENT.Type..".".. BeckyMod.Spells.ENTITIES.EID_ENT.Variant.. ")", "Language: " .. language)
+			goto continue
+		end
+
+		local minimized = DD:MakeMinimizedDescription(description)
+
+		if not containsFunction(minimized) then
+			EID:addEntity(BeckyMod.Spells.ENTITIES.EID_ENT.Type, BeckyMod.Spells.ENTITIES.EID_ENT.Variant, 0, "Spell Deal", table.concat(minimized, ""), language)
+		else
+			if not EID.descriptions[language].custom[BeckyMod.Spells.ENTITIES.EID_ENT.Type .. "." .. BeckyMod.Spells.ENTITIES.EID_ENT.Variant .. "." .. 0] then
+				EID:addEntity(BeckyMod.Spells.ENTITIES.EID_ENT.Type, BeckyMod.Spells.ENTITIES.EID_ENT.Variant, 0, "Spell Deal", "", language)
+			end
+
+			DD:SetCallback(DD:CreateCallback(minimized, false), BeckyMod.Spells.ENTITIES.EID_ENT.Type,
+			BeckyMod.Spells.ENTITIES.EID_ENT.Variant, 0, language)
+		end
+
+		::continue::
+	end
+
+
 	synergiesFun()
 	spellsEIDFun()
+
+	
 	--EID._currentMod = "" --So items added after this with no set mod don't display as the becky mod
 end
 

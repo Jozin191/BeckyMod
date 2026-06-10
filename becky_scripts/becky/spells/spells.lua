@@ -66,7 +66,6 @@ local RandomSpellsPool = {
     SPELLS.SpellType.BOOMERANG,
     SPELLS.SpellType.SPREAD,
     SPELLS.SpellType.BIG,
-    SPELLS.SpellType.SUMMON,
     SPELLS.SpellType.MULTISHOT,
     SPELLS.SpellType.FLY_N_HOMING,
     SPELLS.SpellType.OPEN_SESAMO,
@@ -80,6 +79,7 @@ local StartingSpellsPool = {
     SPELLS.SpellType.BIG,
     SPELLS.SpellType.SHIELD,
     SPELLS.SpellType.OPEN_SESAMO,
+    SPELLS.SpellType.SUMMON,
 }
 
 
@@ -95,6 +95,7 @@ SPELLS.SpellSelectType = {
 SPELLS.ENTITIES = {
     MANA_TEAR =     { Type = 2, Variant = Isaac.GetEntityVariantByName("Mana Tear") },
     BIG_MANA_TEAR = { Type = 2, Variant = Isaac.GetEntityVariantByName("Big Mana Tear") },
+    EID_ENT = {Type =1000, Variant = Isaac.GetEntityVariantByName("John Becky - Spell EID")}
 }
 
 SPELLS.NULL_ITEMS = {}
@@ -115,30 +116,9 @@ local SELECTION_POS = {
 
 local SPELLS_SPRITE = Sprite("gfx/ui/taintedBecky/spells.anm2", true)
 
--- max frame : 16 - i should have added it on the return table lol
+-- last highest frame : 16
 local SPELLS_FRAME = {
     [SPELLS.SpellType.NULL] = 99,
-
-    [SPELLS.SpellType.SPREAD] = 0,
-    [SPELLS.SpellType.BIG] = 2,
-    [SPELLS.SpellType.SUMMON] = 3,
-    [SPELLS.SpellType.SHIELD] = 1,
-
-    [SPELLS.SpellType.SACRIFICIAL_BUFF] = 4,
-    [SPELLS.SpellType.FIRE_POWER] = 13,
-    [SPELLS.SpellType.NUKE] = 7,
-    [SPELLS.SpellType.DEVIL] = 10,
-    [SPELLS.SpellType.SPELL_DMG_UP] = 15,
-
-    [SPELLS.SpellType.DASH] = 8,
-    [SPELLS.SpellType.BOOMERANG] = 9,
-    [SPELLS.SpellType.WEAKEN_ENEMIES] = 11,
-    [SPELLS.SpellType.MANA_REGEN] = 16,
-
-    [SPELLS.SpellType.MULTISHOT] = 5,
-    [SPELLS.SpellType.FLY_N_HOMING] = 6,
-    [SPELLS.SpellType.OPEN_SESAMO] = 12,
-    [SPELLS.SpellType.KNIGHT_ATTACK] = 14,
 }
 
 local SPELLS_COST = {}
@@ -209,6 +189,36 @@ function SPELLS:IsPlayerSelectingSpell(player, spellType)
     return data.MagicStaff_SelectingSpell > SPELLS.SpellSelectType.NONE
 end
 
+local DEAL_SPELL_RNG = RNG()
+function SPELLS:GetDealSpellFromPlayer(player)
+    local data = BeckyMod.GetEntData(player)
+    
+    if data.CachedDealPool == nil then
+        local dealSpell = data.ReplaceSpell
+        DEAL_SPELL_RNG:SetSeed(game:GetRoom():GetDecorationSeed() + player.InitSeed, 35)
+                
+        if dealSpell == 0 then -- devil statue
+            data.CachedDealPool = BeckyMod:ShuffleTable(DevilSpellsPool, DEAL_SPELL_RNG)
+        elseif dealSpell == 1 then -- angel statue
+            data.CachedDealPool = BeckyMod:ShuffleTable(AngelSpellsPool, DEAL_SPELL_RNG)
+        else data.CachedDealPool = {} end
+    end
+    local spellPool= data.CachedDealPool
+
+    local spell = SPELLS.SpellType.NULL
+    for i=1, #spellPool do
+        if not SPELLS:HasSpell(player, spellPool[i]) then
+            spell = spellPool[i]
+            break
+        end
+    end
+    return spell
+end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
+    for _, player in ipairs(PlayerManager.GetPlayers()) do
+        BeckyMod.GetEntData(player).CachedDealPool = nil
+    end
+end)
 
 local SPELLS_RUTE = "becky_scripts.becky.spells.spell."
 for _, file in ipairs({
@@ -237,39 +247,24 @@ for _, file in ipairs({
     SPELLS.SPELL_FUNC[spell] = data.Func
     SPELLS.SPELL_FUNC_CAN_SELECT[spell] = data.CanSelect
     SPELLS_COST[spell] = data.Cost or 30
+    SPELLS_FRAME[spell] = data.Frame or 99
     --print("spell loaded!")
 end
 
 
-local DEAL_SPELL_RNG = RNG()
 local function renderPlayerSpellSelection(player)
     local data = BeckyMod.GetEntData(player)
     local save = BeckyMod:RunSave(player)
     local selectType = data.MagicStaff_SelectingSpell or SPELLS.SpellSelectType.NONE
-    if not save.SelectedSpells then selectType = SPELLS.SpellSelectType.RUN_INIT_SELECT
-    end
+    --if not save.SelectedSpells then selectType = SPELLS.SpellSelectType.RUN_INIT_SELECT
+    --end
     
     if selectType == SPELLS.SpellSelectType.NONE then
         local dealSpell = data.ReplaceSpell
         if dealSpell and dealSpell >= 0 then
             local room = game:GetRoom()
             local pos = (player:GetFlyingOffset() *1.5) + player.Position + (SELECTION_POS.POS * player.SpriteScale.Y)
-            DEAL_SPELL_RNG:SetSeed(room:GetDecorationSeed() + player.InitSeed, 35)
-            
-            local spellPool
-            if dealSpell == 0 then -- devil statue
-                spellPool = BeckyMod:ShuffleTable(DevilSpellsPool, DEAL_SPELL_RNG)
-            elseif dealSpell == 1 then -- angel statue
-                spellPool = BeckyMod:ShuffleTable(AngelSpellsPool, DEAL_SPELL_RNG)
-            end
-    
-            local spell = SPELLS.SpellType.NULL
-            for i=1, #spellPool do
-                if not SPELLS:HasSpell(player, spellPool[i]) then
-                    spell = spellPool[i]
-                    break
-                end
-            end
+            local spell = SPELLS:GetDealSpellFromPlayer(player)
     
             if game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND >0 then
                 spell = SPELLS.SpellType.NULL
@@ -282,6 +277,7 @@ local function renderPlayerSpellSelection(player)
     local room = game:GetRoom()
     local pos = (player:GetFlyingOffset() *1.5) + player.Position + (SELECTION_POS.POS * player.SpriteScale.Y)
 
+    --[[
     if selectType == SPELLS.SpellSelectType.RUN_INIT_SELECT then
         DEAL_SPELL_RNG:SetSeed(game:GetLevel():GetDungeonPlacementSeed() + player.InitSeed, 20 - (save.ForceSelectSpells or 2) )
         local spellPool = BeckyMod:ShuffleTable(StartingSpellsPool, DEAL_SPELL_RNG)
@@ -314,25 +310,10 @@ local function renderPlayerSpellSelection(player)
             SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos + SELECTION_POS.OFFSETS[i]))
         end
 
-    elseif data.ReplaceSpell and data.ReplaceSpell >= 0 then
+    else]] if data.ReplaceSpell and data.ReplaceSpell >= 0 then
         local playerSpells = SPELLS:GetSpells(player)
-        --local spellSeed = (room:GetDecorationSeed() + player.InitSeed)
-        DEAL_SPELL_RNG:SetSeed(room:GetDecorationSeed() + player.InitSeed, 35)
-            
-        local spellPool
-        if data.ReplaceSpell == 0 then -- devil statue
-            spellPool = BeckyMod:ShuffleTable(DevilSpellsPool, DEAL_SPELL_RNG)
-        elseif data.ReplaceSpell == 1 then -- angel statue
-            spellPool = BeckyMod:ShuffleTable(AngelSpellsPool, DEAL_SPELL_RNG)
-        end
 
-        local spell = SPELLS.SpellType.NULL
-        for i=1, #spellPool do
-            if not SPELLS:HasSpell(player, spellPool[i]) then
-                spell = spellPool[i]
-                break
-            end
-        end
+        local spell = SPELLS:GetDealSpellFromPlayer(player)
 
         if game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND >0 then
             spell = SPELLS.SpellType.NULL
@@ -401,7 +382,7 @@ local function renderPlayerSpellSelection(player)
             selectData.Choices.Anim = selectData.Choices.Anim or "Spells"
             for i=0, 3 do
                 if selectData.Choices[i] then
-                    SPELLS_SPRITE:SetFrame("Spells", selectData.Choices[i])
+                    SPELLS_SPRITE:SetFrame(selectData.Choices.Anim, selectData.Choices[i])
                     SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos + SELECTION_POS.OFFSETS[i+1]))
                 end
             end
@@ -537,8 +518,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local data = BeckyMod.GetEntData(player)
     local selectType = data.MagicStaff_SelectingSpell or SPELLS.SpellSelectType.NONE
     local save = BeckyMod:RunSave(player)
-    if not save.SelectedSpells then selectType = SPELLS.SpellSelectType.RUN_INIT_SELECT
-    end
+    --if not save.SelectedSpells then selectType = SPELLS.SpellSelectType.RUN_INIT_SELECT
+    --end
     if selectType == SPELLS.SpellSelectType.NONE then return end
     
     local joystick = player:GetShootingJoystick()
@@ -558,6 +539,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         dir = Direction.UP
     end
 
+    --[[
     if selectType == SPELLS.SpellSelectType.RUN_INIT_SELECT then
         DEAL_SPELL_RNG:SetSeed(game:GetLevel():GetDungeonPlacementSeed() + player.InitSeed, 20 - (save.ForceSelectSpells or 2))
         local spellPool = BeckyMod:ShuffleTable(StartingSpellsPool, DEAL_SPELL_RNG)
@@ -586,30 +568,14 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             data.MagicStaff_SelectingSpell = SPELLS.SpellSelectType.NONE
         end
         return
-    end
+    end]]
 
 
     if data.ReplaceSpell and data.ReplaceSpell >= 0 and player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then
-        DEAL_SPELL_RNG:SetSeed(game:GetRoom():GetDecorationSeed() + player.InitSeed, 35)
-        
-        local spellPool
-        if data.ReplaceSpell == 0 then -- devil statue
-            spellPool = BeckyMod:ShuffleTable(DevilSpellsPool, DEAL_SPELL_RNG)
-        elseif data.ReplaceSpell == 1 then -- angel statue
-            spellPool = BeckyMod:ShuffleTable(AngelSpellsPool, DEAL_SPELL_RNG)
-        end
-
-        local spell = SPELLS.SpellType.NULL
-        for i=1, #spellPool do
-            if not SPELLS:HasSpell(player, spellPool[i]) then
-                spell = spellPool[i]
-                break
-            end
-        end
-        SPELLS:SetSpellType(player, dir, spell)
+        SPELLS:SetSpellType(player, dir, SPELLS:GetDealSpellFromPlayer(player))
 
         if player:GetItemState() == BeckyMod.Item.MAGIC_STAFF.TAINTED_BECKY_ID then
-            player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.TAINTED_BECKY_ID, "HideItem")
+            player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.SPELLING_ID, "HideItem")
             player:ResetItemState()
         end
         SPELLS:SetPlayerSelectSpell(player, SPELLS.SpellSelectType.NONE)
@@ -665,7 +631,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 return
                 
             elseif player:GetItemState() == BeckyMod.Item.MAGIC_STAFF.ID then
-                player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.ID, "HideItem")
+                player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.SPELLING_ID, "HideItem")
                 player:ResetItemState()
                 for slot = 0, 2 do
                     if player:GetActiveItem(slot) == BeckyMod.Item.MAGIC_STAFF.ID then
@@ -677,7 +643,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 end
                 
             elseif player:GetItemState() == BeckyMod.Item.MAGIC_STAFF.TAINTED_BECKY_ID then
-                player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.TAINTED_BECKY_ID, "HideItem")
+                player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.SPELLING_ID, "HideItem")
                 player:ResetItemState()
             end
             SPELLS:SetPlayerSelectSpell(player, SPELLS.SpellSelectType.NONE)
@@ -732,9 +698,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, statue)
     local statuePos = statue.Position
 
     local room = game:GetRoom()
-    local isBlindCurseInStage = level:GetCurses() & LevelCurse.CURSE_OF_BLIND >0
-    local EID_Desc
-    local dis
     for i, player in ipairs(PlayerManager.GetPlayers()) do
         local save = BeckyMod:FloorSave(player)
         if not save.DealSpell and player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then
@@ -751,38 +714,24 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, statue)
                 return
             end
             data.ReplaceSpell = var
-
-            if EID and (dis == nil or playerDis < dis) then
-                dis = playerDis
-                
-                if isBlindCurseInStage then
-                    EID_Desc = EID.InlineIcons["QuestionMark"]
-                else
-                    local spell = SPELLS.SpellType.NULL
-                    DEAL_SPELL_RNG:SetSeed(room:GetDecorationSeed() + player.InitSeed, 35)
-                    local spellPool
-                    if var == 0 then -- devil statue
-                        spellPool = BeckyMod:ShuffleTable(DevilSpellsPool, DEAL_SPELL_RNG)
-                    elseif var == 1 then -- angel statue
-                        spellPool = BeckyMod:ShuffleTable(AngelSpellsPool, DEAL_SPELL_RNG)
-                    end
-
-                    for i=1, #spellPool do
-                        if not SPELLS:HasSpell(player, spellPool[i]) then
-                            spell = spellPool[i]
-                            break
-                        end
-                    end
-                    EID_Desc = BeckyMod.Spells:GetSpellEIDDesc(spell)
-                end
-            end
-        end
-
-        if EID_Desc then
-            EID:setEntityData(statue, "EID_Description", "{{Player".. BeckyMod.Character.BECKY_B.PLAYERTYPE .."}} {{ColorSilver}}Tainted Becky{{CR}}#"..EID_Desc)
+            local eff = Isaac.Spawn(SPELLS.ENTITIES.EID_ENT.Type, SPELLS.ENTITIES.EID_ENT.Variant, 0, player.Position, Vector.Zero, player):ToEffect()
+            eff:FollowParent(player)
         end
 	end
 end)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eidEnt)
+    local player = eidEnt.Parent and eidEnt.Parent:ToPlayer()
+    if player == nil then
+        eidEnt:Remove()
+        return
+    end
+    local save = BeckyMod:FloorSave(player)
+    local data = BeckyMod.GetEntData(player)
+
+    if save.DealSpell or data.ReplaceSpell == nil or data.ReplaceSpell < 0 then
+        eidEnt:Remove()
+    end
+end, SPELLS.ENTITIES.EID_ENT.Variant)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function()
     for i, player in ipairs(PlayerManager.GetPlayers()) do
@@ -791,6 +740,20 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function()
 	end
 end)
 
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function(_, player)
+    
+    if player:GetPlayerType() ~= BeckyMod.Character.BECKY_B.PLAYERTYPE then return end
+    local save = BeckyMod:RunSave(player)
+    if not save.SelectedSpells then
+        DEAL_SPELL_RNG:SetSeed(game:GetLevel():GetDungeonPlacementSeed() + player.InitSeed, 20)
+        local spellPool = BeckyMod:ShuffleTable(StartingSpellsPool, DEAL_SPELL_RNG)
+        
+        for i=1, 2 do
+            SPELLS:SetSpellType(player, ((i == 2 and Direction.LEFT) or Direction.RIGHT), spellPool[i])
+        end
+        save.SelectedSpells = true
+    end
+end)
 
 --------------------------------------------------------
 ------------------DEBUG STUFF---------------------------

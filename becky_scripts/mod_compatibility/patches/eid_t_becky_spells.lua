@@ -43,6 +43,11 @@ EID:addIcon("BeckySpellDown",   "Directions", 3, 11, 11, -1, 0, SpellsIcons)
 
 EID:addIcon("BeckyMana", "ManaPoints", 0, 11, 11, -1, 0, SpellsIcons)
 
+EID:addIcon("BeckySpellSummon_1", "SummonSpellFams", 0, 11, 11, -1, 0, SpellsIcons) --Follower familiar
+EID:addIcon("BeckySpellSummon_2", "SummonSpellFams", 1, 11, 11, -1, 0, SpellsIcons) --Shooting familiar
+EID:addIcon("BeckySpellSummon_3", "SummonSpellFams", 2, 11, 11, -1, 0, SpellsIcons) --Chase familiar
+EID:addIcon("BeckySpellSummon_4", "SummonSpellFams", 3, 11, 11, -1, 0, SpellsIcons) --Charge familiar
+
 
 local SpellDescs = {
     [SpellType.NULL] = {
@@ -73,10 +78,10 @@ local SpellDescs = {
     [SpellType.SUMMON] = {
         en_us = {
             "{{BeckySpell".. SpellType.SUMMON .."}} Can spawn different familiars depending on what is selected",
-            "{{BeckySpellUp}} ",
-            "{{BeckySpellRight}} ",
-            "{{BeckySpellDown}} ",
-            "{{BeckySpellLeft}} ",
+            "{{BeckySpellSummon_1}} Spawns a familiar that follow Isaac behind. Tears that pass through it will be double",
+            "{{BeckySpellSummon_2}} Spawns a familiar that shoots",
+            "{{BeckySpellSummon_3}} Spawns a familiar that chases enemies",
+            "{{BeckySpellSummon_4}} Spawns a familiar that can be charge. On release the familiar will be throw",
             "{{BeckyMana}} Cost varies by what is selected",
             "{{!!!}} Only one summon can be active at the time",
         },

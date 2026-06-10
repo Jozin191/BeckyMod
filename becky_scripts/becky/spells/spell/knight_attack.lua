@@ -156,5 +156,6 @@ return {
     BeckyMod.Spells.SpellType.KNIGHT_ATTACK,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 14
 }

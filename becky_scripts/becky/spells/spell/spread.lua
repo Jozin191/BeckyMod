@@ -22,5 +22,6 @@ return {
     BeckyMod.Spells.SpellType.SPREAD,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 0
 }

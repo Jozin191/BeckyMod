@@ -54,5 +54,6 @@ return {
     BeckyMod.Spells.SpellType.FLY_N_HOMING,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 6
 }

@@ -36,5 +36,6 @@ return {
     BeckyMod.Spells.SpellType.WEAKEN_ENEMIES,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 11
 }

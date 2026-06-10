@@ -47,5 +47,6 @@ return {
     BeckyMod.Spells.SpellType.BIG,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 2
 }

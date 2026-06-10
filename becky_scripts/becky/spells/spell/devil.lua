@@ -209,5 +209,6 @@ return {
     BeckyMod.Spells.SpellType.DEVIL,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 10
 }

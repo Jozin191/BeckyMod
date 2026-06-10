@@ -62,5 +62,6 @@ return {
     BeckyMod.Spells.SpellType.DASH,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 8
 }

@@ -435,9 +435,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function(_, player)
     player:AddNullCostume(BECKY_B.BODY_COSTUME)
     local save = BeckyMod:RunSave(player)
     save.ManaCharge = save.ManaCharge or 0
-    if not save.SelectedSpells then
-        save.ForceSelectSpells = save.ForceSelectSpells or 2
-    end
+    --if not save.SelectedSpells then
+    --    save.ForceSelectSpells = save.ForceSelectSpells or 2
+    --end
 end)
 
 
@@ -723,7 +723,7 @@ HudHelper.RegisterHUDElement({
 	OnRender = function(player, playerHUDIndex, hudLayout, position)
         local save = BeckyMod:RunSave(player)
         local manaOffset = (BeckyMod.GetEntData(player).MaxManaOffset or 0)
-        
+
         local a = math.min(math.floor(save.ManaCharge + manaOffset), 100)
         local b = math.min(math.floor(manaOffset), 100)
 

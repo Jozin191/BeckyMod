@@ -8,5 +8,6 @@ return {
     BeckyMod.Spells.SpellType.SPELL_DMG_UP,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = 0
+    Cost = 0,
+    Frame = 15
 }

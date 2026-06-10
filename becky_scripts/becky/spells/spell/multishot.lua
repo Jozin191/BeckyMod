@@ -76,5 +76,6 @@ return {
     BeckyMod.Spells.SpellType.MULTISHOT,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = 0
+    Cost = 0,
+    Frame = 5
 }

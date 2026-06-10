@@ -80,5 +80,6 @@ return {
     BeckyMod.Spells.SpellType.NUKE,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 7
 }

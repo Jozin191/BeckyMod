@@ -76,5 +76,6 @@ return {
     BeckyMod.Spells.SpellType.FIRE_POWER,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = 0
+    Cost = 0,
+    Frame = 13
 }

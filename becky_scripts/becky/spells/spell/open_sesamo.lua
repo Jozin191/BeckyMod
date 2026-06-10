@@ -42,5 +42,6 @@ return {
     BeckyMod.Spells.SpellType.OPEN_SESAMO,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 12
 }

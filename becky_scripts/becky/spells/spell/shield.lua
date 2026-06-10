@@ -102,5 +102,6 @@ return {
     BeckyMod.Spells.SpellType.SHIELD,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = 0
+    Cost = 0,
+    Frame = 1
 }

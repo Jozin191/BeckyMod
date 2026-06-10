@@ -114,5 +114,6 @@ return {
     BeckyMod.Spells.SpellType.BOOMERANG,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST
+    Cost = SPELL_COST,
+    Frame = 9
 }
