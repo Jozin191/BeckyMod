@@ -23,7 +23,7 @@ local sfx = BeckyMod.SFX
 BeckyMod.Character.BECKY_B = BECKY_B
 
 local BASE_TEAR_DPS = 30 /11 /2
-local MAX_TEARS_DPS_C_SECTION = 30 / (0.1*3+1)
+local MAX_TEARS_DPS_C_SECTION = 30 / (0.1*3+1)/2
 local CURSE_EYE_COOLDOWN = 0
 local DirToVector = {
     [Direction.NO_DIRECTION] = Vector(0,-1),
@@ -359,8 +359,14 @@ local function ProcessStaffSwing(entShooting, player)
             return
         end
         if CountForgotenLullaby then playerMaxFireDelay = playerMaxFireDelay /2 end
+        local C_SectionIsMainWeapon = not player:GetEffects():HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION)
+        
         if playerMaxFireDelay <= 3.2 then
-            data.MagicStaff_ChargeBar.NoRender = true
+            if C_SectionIsMainWeapon then
+                data.MagicStaff_ChargeBar.NoRender = false
+            else
+                data.MagicStaff_ChargeBar.NoRender = true
+            end
         elseif IsKnifeSwinging(sprite) and sprite:GetFrame() < sprite:GetCurrentAnimationData():GetLength() - 3 then
             data.MagicStaff_ChargeBar.Charge = 0
             data.MagicStaff_ChargeBar.NoRender = false
@@ -371,9 +377,9 @@ local function ProcessStaffSwing(entShooting, player)
         --if entShooting.Type == 1 and save.ManaCharge < BECKY_B.ManaTearCost then return end
         
         local addToCharge = 1
-        if not player:GetEffects():HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) then
+        if C_SectionIsMainWeapon then
             local c_sectionCharge = 30 /(playerMaxFireDelay *3 +1)
-            if c_sectionCharge > MAX_TEARS_DPS_C_SECTION then c_sectionCharge = MAX_TEARS_DPS_C_SECTION end
+            if c_sectionCharge > MAX_TEARS_DPS_C_SECTION *1.5 then c_sectionCharge = MAX_TEARS_DPS_C_SECTION *1.5 end
             addToCharge = addToCharge * (c_sectionCharge /BASE_TEAR_DPS * 1.25)
         else
             addToCharge = addToCharge * (BeckyMod:toTearsPerSecond(playerMaxFireDelay) /BASE_TEAR_DPS * 1.25)
@@ -398,12 +404,12 @@ local function ProcessStaffSwing(entShooting, player)
         local fireDelay = weapon:GetFireDelay()
         local maxTearDelay = playerMaxFireDelay/4
         if maxTearDelay > 0.5 then maxTearDelay = 0.5
-        elseif maxTearDelay < 0 then maxTearDelay = weapon:GetMaxFireDelay()
+        --elseif maxTearDelay < 0 then maxTearDelay = weapon:GetMaxFireDelay()
         end
         if data.MagicStaff_ChargeBar.Charge > 3 and fireDelay < maxTearDelay then fireDelay = maxTearDelay end
         weapon:SetFireDelay(fireDelay)
         
-        if (not player:GetEffects():HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION)) or playerMaxFireDelay <= 3.2 then
+        if C_SectionIsMainWeapon or playerMaxFireDelay <= 3.2 then
             --if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
                 BeckyFire(entShooting, player, data, true)
             --end
@@ -671,13 +677,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     if player == nil then return end
     if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
     --knife.SpriteScale = Vector.One * 0.85
-    if knife.FrameCount >1 then
+    local data = BeckyMod.GetEntData(knife)
+    if data.Inited or knife.FrameCount >1 then
         knife.Charge = -1
         return
     end
     local sp = knife:GetSprite()
     sp:Load(taintedBeckysWandAnim, true)
     sp:Play("Idle", true)
+    data.Inited = true
 end, KnifeSubType.DEFAULT)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
@@ -685,10 +693,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     if player == nil then return end
     if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
     local parent = knife:GetHitboxParentKnife()
+    local data = BeckyMod.GetEntData(knife)
     if parent ~= nil and parent.SpriteScale then
         knife.SpriteScale = parent.SpriteScale * 1.2805
     end
-    if knife.FrameCount >1 then
+    if data.Inited or knife.FrameCount >1 then
         return
     end
 
@@ -697,9 +706,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     sp:Load(taintedBeckysWandAnim, true)
     sp:Play(isPlaying, true)
     sp.Color.A = 0.0
+    data.Inited = true
 end, KnifeSubType.CLUB_HITBOX)
 
-
+--[[
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_MULTI_SHOT_PARAMS, 3000, function(_, player, multishotParam, weaponType)
     if player:GetPlayerType() == BECKY_B.PLAYERTYPE and weaponType == WeaponType.WEAPON_BONE then
         multishotParam:SetNumTears(1)
@@ -707,7 +717,7 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_MULTI_SHOT_PARAMS, 3000, f
         multishotParam:SetSpreadAngle(WeaponType.WEAPON_BONE, 0)
         return multishotParam
     end
-end)
+end)]]
 
 ----------------------------------------------------------------------------
 ---------------------------------BECKY HUD----------------------------------
@@ -911,6 +921,7 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, -400000, function(_
     local effects = player:GetEffects()
     if cacheFlag & CacheFlag.CACHE_FIREDELAY == CacheFlag.CACHE_FIREDELAY then
         local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
+
         if (effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) and not player:HasCollectible(CollectibleType.COLLECTIBLE_HAEMOLACRIA)) or effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
             tps = tps /2.5
         end

@@ -35,22 +35,14 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, eff)
 end, shieldEntVar)
 
 
-BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
-    local player = eff.Parent and eff.Parent:ToPlayer()
-    if not player then
-        eff:Remove()
-        return
-    end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
     
     local save = BeckyMod:RunSave(player)
     if player:IsDead() or not save.ManaCharge or save.ManaCharge <= 0 then
-        eff:Remove()
-        local data = BeckyMod.GetEntData(player)
-
-        data.NoChargeMana = data.NoChargeMana -1*count
-        data.ManaDischarge = data.ManaDischarge -MANA_DISCHARGE
+        player:GetEffects():RemoveNullEffect(nullItem, -1)
+        
     end
-end, shieldEntVar)
+end)
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_ADD_EFFECT, function(_, player, itemConfig, addCostume, count)
