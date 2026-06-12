@@ -56,7 +56,7 @@ local SpellDescs = {
     },
     [SpellType.SPREAD] = {
         en_us = {
-            "{{BeckySpell".. SpellType.SPREAD .."}} Isaac shoots 8 tears around",
+            "{{BeckySpell".. SpellType.SPREAD .."}} Isaac shoots 4 tears on a cross shape",
             "{{BeckyMana}} Cost 15 mana points",
         },
         --spa = ,
@@ -80,7 +80,7 @@ local SpellDescs = {
             "{{BeckySpell".. SpellType.SUMMON .."}} Can spawn different familiars depending on what is selected",
             "{{BeckySpellSummon_1}} Spawns a familiar that follow Isaac behind. Tears that pass through it will be double",
             "{{BeckySpellSummon_2}} Spawns a familiar that shoots",
-            "{{BeckySpellSummon_3}} Spawns a familiar that chases enemies",
+            "{{BeckySpellSummon_3}} Spawns a familiar that chases enemies. it can takes damage and die",
             "{{BeckySpellSummon_4}} Spawns a familiar that can be charge. On release the familiar will be throw",
             "{{BeckyMana}} Cost varies by what is selected",
             "{{!!!}} Only one summon can be active at the time",
@@ -130,7 +130,7 @@ local SpellDescs = {
     [SpellType.DASH] = {
         en_us = {
             "{{BeckySpell".. SpellType.DASH .."}} On use will make Isaac dash to the direction is moving",
-            "Isaac can go through enemies",
+            "Isaac can go through and damage enemies",
             "{{BeckyMana}} Cost 10 mana points",
         },
         --spa = ,
@@ -146,7 +146,7 @@ local SpellDescs = {
     },
     [SpellType.WEAKEN_ENEMIES] = {
         en_us = {
-            "{{BeckySpell".. SpellType.WEAKEN_ENEMIES .."}} Makes all enemies take double damage for 10 seconds",
+            "{{BeckySpell".. SpellType.WEAKEN_ENEMIES .."}} Slows all enemies in the room for 10 seconds",
             "{{BeckyMana}} Cost 70 mana points",
         },
         --spa = ,

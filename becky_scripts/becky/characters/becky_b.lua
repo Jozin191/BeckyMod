@@ -401,15 +401,15 @@ local function ProcessStaffSwing(entShooting, player)
         data.MagicStaff_ChargeBar.Charge = math.min(data.MagicStaff_ChargeBar.Charge +addToCharge, data.MagicStaff_ChargeBar.MaxCharge)
         
 
-        local fireDelay = weapon:GetFireDelay()
-        local maxTearDelay = playerMaxFireDelay/4
-        if maxTearDelay > 0.5 then maxTearDelay = 0.5
-        --elseif maxTearDelay < 0 then maxTearDelay = weapon:GetMaxFireDelay()
-        end
-        if data.MagicStaff_ChargeBar.Charge > 3 and fireDelay < maxTearDelay then fireDelay = maxTearDelay end
-        weapon:SetFireDelay(fireDelay)
-        
-        if C_SectionIsMainWeapon or playerMaxFireDelay <= 3.2 then
+        --local fireDelay = weapon:GetFireDelay()
+        --local maxTearDelay = playerMaxFireDelay/4
+        --if maxTearDelay > 0.5 then maxTearDelay = 0.5
+        ----elseif maxTearDelay < 0 then maxTearDelay = weapon:GetMaxFireDelay()
+        --end
+        --if data.MagicStaff_ChargeBar.Charge > 3 and fireDelay < maxTearDelay then fireDelay = maxTearDelay end
+        --weapon:SetFireDelay(fireDelay)
+
+        if not (ShouldDoChocolateMilk(player) or HasShouldDoCursedEye(player)) or (C_SectionIsMainWeapon) or playerMaxFireDelay <= 3.2 then
             --if data.MagicStaff_ChargeBar.Charge == data.MagicStaff_ChargeBar.MaxCharge then
                 BeckyFire(entShooting, player, data, true)
             --end
@@ -490,7 +490,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         end
         return
     end
-    if weapon == nil or weapon:GetWeaponType() ~= WeaponType.WEAPON_BONE then
+    if weapon == nil or weapon:GetWeaponType() ~= WeaponType.WEAPON_BONE or data.DestroidWeapon then
         if weapon then Isaac.DestroyWeapon(weapon) end
         weapon = Isaac.CreateWeapon(WeaponType.WEAPON_BONE, player)
         player:SetWeapon(weapon, 1)

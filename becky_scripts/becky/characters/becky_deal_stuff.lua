@@ -34,6 +34,7 @@ end
 local VALID_HEALTHTYPES = { [HealthType.DEFAULT] = true, [HealthType.BONE] = true }
 local function SetRoomSaveData()
     local roomSave = BeckyMod:RoomSave()
+    local level = BeckyMod.Level()
 
     local keepersBargain = 0
     local healthCointainers = 0
@@ -67,7 +68,8 @@ local function SetRoomSaveData()
         HealthCointainers = healthCointainers,
         YourSoul = PlayerManager.AnyoneHasTrinket(TrinketType.TRINKET_YOUR_SOUL),
         KeepersBargain = keepersBargain,
-        KeepersBargainSeedTable = {}
+        KeepersBargainSeedTable = {},
+        --IsDarkRoomStartingRoom = level:GetStage() == LevelStage.STAGE6 and level:GetStageType() == StageType.STAGETYPE_ORIGINAL and level:GetCurrentRoomIndex() == level:GetStartingRoomIndex()
     }
 end
 
@@ -225,8 +227,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_GET_SHOP_ITEM_PRICE, DEVIL_DEAL.ShopPrice)
 
 
 local function UpdateRoomSaveData()
-    if BeckyMod:RoomSave().BeckyPrices == nil and
-    not (game:GetRoom():GetType() == RoomType.ROOM_BOSS and game:GetLevel():GetStateFlag(LevelStateFlag.STATE_SATANIC_BIBLE_USED)) then
+    local level = game:GetLevel()
+    if BeckyMod:RoomSave().BeckyPrices == nil and not (
+        (game:GetRoom():GetType() == RoomType.ROOM_BOSS and level:GetStateFlag(LevelStateFlag.STATE_SATANIC_BIBLE_USED)) or -- checking if it is the boss room and isaac has used the satanic bible
+        (level:GetStage() == LevelStage.STAGE6 and level:GetStageType() == StageType.STAGETYPE_ORIGINAL and level:GetCurrentRoomIndex() == level:GetStartingRoomIndex()) -- sets the dark room chest prices :)
+    ) then
         return
     end
     SetRoomSaveData()

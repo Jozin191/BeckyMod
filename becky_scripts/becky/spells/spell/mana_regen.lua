@@ -8,5 +8,6 @@ return {
     BeckyMod.Spells.SpellType.MANA_REGEN,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = 0
+    Cost = 0,
+    Frame = 16
 }

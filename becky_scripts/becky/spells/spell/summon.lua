@@ -1,5 +1,5 @@
 local SPELL_COST = 20
-local SPELL_COST2 = 45
+local SPELL_COST2 = 30
 local SPELL_COST3 = 30
 local SPELL_COST4 = 35
 local CanPickupGridList = {}
@@ -24,7 +24,7 @@ local GhostVar = Isaac.GetEntityVariantByName("Becky Summon Spell Ghost")
 
 local VALID_FAMS = {
     [FamiliarVariant.BROTHER_BOBBY] = true,
-    [FamiliarVariant.LIL_HAUNT] = true,
+    [BeckyMod.Item.UNDEAD_HAND.FAMILIAR] = true,
     [FamiliarVariant.MULTIDIMENSIONAL_BABY] = true,
     [GhostVar] = true,
 }
@@ -38,9 +38,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player)
         120
     )
     player:CheckFamiliar(
-        FamiliarVariant.LIL_HAUNT,
+        BeckyMod.Item.UNDEAD_HAND.FAMILIAR,
         player:GetEffects():GetNullEffectNum(NULL_ITEM_ID2),
-        player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_LIL_HAUNT),
+        player:GetCollectibleRNG(BeckyMod.Item.UNDEAD_HAND.ID),
         nil,
         120
     )

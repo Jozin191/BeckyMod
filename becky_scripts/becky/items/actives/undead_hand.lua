@@ -134,6 +134,8 @@ end
 
 function UNDEAD_HAND:TakeDamage(ent, dmg)
     if ent.Type ~= 3 or ent.Variant ~= UNDEAD_HAND.FAMILIAR then return end
+    if ent.SubType == 120 then return end
+    
     if ent.HitPoints - dmg <= 0 then
         ent.HitPoints = ent.HitPoints + dmg + 999999
         local sprite = ent:GetSprite()

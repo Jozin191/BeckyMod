@@ -35,20 +35,22 @@ local function fun(player)
             player:SetMinDamageCooldown(30)
         end
 
-        --local damageEnemiesList = {}
-        --local dmg = 3.5
-        --local ref = EntityRef(player)
-        --for i=1, trailAmount*2 do
-        --    for _, e in ipairs(Isaac.FindInRadius( BeckyMod:Lerp(pos, newPos, i / trailAmount), 10, EntityPartition.ENEMY)) do
-        --        local ptr = GetPtrHash(e)
-        --        if not damageEnemiesList[ptr] then
-        --            if not e:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) and e:IsVulnerableEnemy() then
-        --                e:TakeDamage(dmg, 0, ref, 0)
-        --            end
-        --            damageEnemiesList[ptr] = true
-        --        end
-        --    end
-        --end
+        if Isaac.CountEnemies() >0 then
+            local damageEnemiesList = {}
+            local dmg = 3.5
+            local ref = EntityRef(player)
+            for i=1, trailAmount*2 do
+                for _, e in ipairs(Isaac.FindInRadius( BeckyMod:Lerp(pos, newPos, i / trailAmount), 10, EntityPartition.ENEMY)) do
+                    local ptr = GetPtrHash(e)
+                    if not damageEnemiesList[ptr] then
+                        if not e:HasEntityFlags(EntityFlag.FLAG_FRIENDLY) and e:IsVulnerableEnemy() then
+                            e:TakeDamage(dmg, 0, ref, 0)
+                        end
+                        damageEnemiesList[ptr] = true
+                    end
+                end
+            end
+        end
 
     else return true
     end

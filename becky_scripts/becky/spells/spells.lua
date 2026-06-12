@@ -693,6 +693,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, statue)
     if not PlayerManager.AnyoneIsPlayerType(BeckyMod.Character.BECKY_B.PLAYERTYPE) then return end
     local level = game:GetLevel()
     if level:GetCurrentRoomIndex() ~= GridRooms.ROOM_DEVIL_IDX then return end
+    if Epiphany and Epiphany.Item.BROKEN_HALO:isBrokenHaloRoom() then -- broken halo is a devil room. we avoid them grating spells :)
+        return
+    end
+
     local var = EFFECTVAR_TO_GRIDVAR[statue.Variant]-- Statue variant. 0 - Devil, 1 - Angel
     if var == nil then return end
     local statuePos = statue.Position

@@ -7,8 +7,8 @@ local function fun(player)
     local src = EntityRef(player)
     for _, ent in ipairs(Isaac.GetRoomEntities()) do
         if ent:ToNPC() and ent:IsActiveEnemy() and ent:CanShutDoors() then
-            ent:AddWeakness(src, 300)
-            ent:AddSlowing(src, 300, 0.75, SLOWNESS_COLOR)
+            --ent:AddWeakness(src, 300)
+            ent:AddSlowing(src, 300, 0.5, SLOWNESS_COLOR)
         end
     end
 end
