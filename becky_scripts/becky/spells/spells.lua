@@ -28,6 +28,10 @@ local SPELLS_NAMES = {
     "FLY_N_HOMING",
     "OPEN_SESAMO",
     "KNIGHT_ATTACK",
+    
+    "VINE",
+    "AETHER_CIRCLE",
+    "GILDED_SPEAR",
 
     "SPELLS_NUM",
 }
@@ -239,6 +243,10 @@ for _, file in ipairs({
     "spell_dmg_up",
     "boomerang",
     "weaken_enemies",
+
+    "vines",
+    "aether_circle",
+    "gilded_spear",
 }) do
     local data = include(SPELLS_RUTE .. file)
     local spell = data[1] or 0

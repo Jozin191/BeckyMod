@@ -1,5 +1,5 @@
 
-local SPELL_COST = 10
+local SPELL_COST = 15
 local DASH_DIS = Vector(40 *4,0)
 local game = BeckyMod.Game
 
@@ -37,7 +37,7 @@ local function fun(player)
 
         if Isaac.CountEnemies() >0 then
             local damageEnemiesList = {}
-            local dmg = 3.5
+            local dmg = math.min(3.5 + player.Damage *0.3, 10)
             local ref = EntityRef(player)
             for i=1, trailAmount*2 do
                 for _, e in ipairs(Isaac.FindInRadius( BeckyMod:Lerp(pos, newPos, i / trailAmount), 10, EntityPartition.ENEMY)) do

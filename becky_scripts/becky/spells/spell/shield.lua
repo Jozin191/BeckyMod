@@ -33,6 +33,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, eff)
         eff:FollowParent(eff.Parent)
     end
 end, shieldEntVar)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
+    local parent = eff.Parent
+    if parent and parent:Exists() then
+        eff.SpriteScale = parent.SpriteScale *1.5
+    end
+end, shieldEntVar)
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
