@@ -483,7 +483,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local weapon = player:GetWeapon(1)
     local effects = player:GetEffects()
     local data = BeckyMod.GetEntData(player)
-    if effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_BERSERK) or effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_NOTCHED_AXE) then
+    if effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_BERSERK) then
+        if not data.DestroidWeapon then
+            data.DestroidWeapon = true
+        end 
+        return
+    elseif effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_NOTCHED_AXE) then
         if not data.DestroidWeapon then
             if weapon then Isaac.DestroyWeapon(weapon) end
             data.DestroidWeapon = true

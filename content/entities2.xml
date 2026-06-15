@@ -85,7 +85,7 @@
     <entity name="Spell Vine"
         anm2path="beckyMagic/vine.anm2"
         id="1000" friction="0"
-        baseHP="0" boss="0" champion="0" collisionDamage="2.35" collisionMass="100"
+        baseHP="0" boss="0" champion="0" collisionDamage="1.15" collisionMass="100"
         collisionRadius="12"  numGridCollisionPoints="12" shadowSize="0" stageHP="0">
     </entity>
     <entity name="Spell Gilded Spear Spear"
@@ -94,5 +94,6 @@
         baseHP="0" boss="0" champion="0" collisionDamage="3.5" collisionMass="0"
         collisionRadius="14"  numGridCollisionPoints="12" shadowSize="0" stageHP="0">
     </entity>
+    <entity name="Spell Haunt Helper" id="1000" friction="1" anm2path="beckyMagic/null.anm2"/>
 
 </entities>

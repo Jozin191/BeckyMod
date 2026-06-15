@@ -25,25 +25,29 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
 		if eff.Target then
             local targetData = BeckyMod.GetEntData(eff.Target)
             targetData.GrabbedByVine = (targetData.GrabbedByVine or 0) -1
-			targetData.VineSprite = nil
         end
 		sp:Play("Disappear", true)
+		eff:Remove()
 		return
 	end
 
     local effData = BeckyMod.GetEntData(eff)
-	if eff.Target then
-		local ent = eff.Target
+	local target = eff.Target
+	if target and not target:IsDead() and target:Exists() then
+		local ent = target
 		local grabTime = effData.MinWaitTime
 		
 		if grabTime and game:GetFrameCount() > grabTime  then
 			if ent.Position:Distance(eff.Position) > 60 then
+				
                 local targetData = BeckyMod.GetEntData(eff.Target)
                 targetData.GrabbedByVine = (targetData.GrabbedByVine or 0) -1
-				targetData.VineSprite = nil
-
+				
 				sp:Play("Disappear", true)
+				eff.Target = nil
+				
 				eff.Timeout = 0
+				eff:Remove()
 				return
 			end
 		end
@@ -68,8 +72,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eff)
             
             local targetData = BeckyMod.GetEntData(target)
             targetData.GrabbedByVine = (targetData.GrabbedByVine or 0) +1
-            targetData.VineSprite = Sprite("gfx/beckyMagic/vines.anm2", true)
-			targetData.VineSprite:Play("Grab", true)
+			if targetData.VineSprite == nil then
+				targetData.VineSprite = Sprite("gfx/beckyMagic/vines.anm2", true)
+				targetData.VineSprite:Play("Grab", true)
+			end
             
 			sp:Play("GrabNull", true)
 			eff.Timeout = 90
@@ -84,6 +90,7 @@ end, VINE_VAR)
 BeckyMod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function(_, npc)
     local npcData = BeckyMod.GetEntData(npc)
 	local amount = npcData.GrabbedByVine
+	--print(amount)
 	if amount == nil or amount <= 0 then return end
 	npc.Velocity = npc.Velocity * (0.985 ^ math.max(amount, 7))
     if npcData.VineSprite then

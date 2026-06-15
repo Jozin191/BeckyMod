@@ -32,6 +32,7 @@ local SPELLS_NAMES = {
     "VINE",
     "AETHER_CIRCLE",
     "GILDED_SPEAR",
+    "HAUNT",
 
     "SPELLS_NUM",
 }
@@ -247,6 +248,7 @@ for _, file in ipairs({
     "vines",
     "aether_circle",
     "gilded_spear",
+    "haunt",
 }) do
     local data = include(SPELLS_RUTE .. file)
     local spell = data[1] or 0
@@ -454,6 +456,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, itemID, c
     end
 end, CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 
+
+--BeckyMod:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, function(_, tear)
+--    local sp = tear:GetSprite()
+--    sp:Load("gfx/beckyMagic/mana_tear 1.anm2", true)
+--end, SPELLS.ENTITIES.MANA_TEAR.Variant)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear, offset)
     
