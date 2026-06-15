@@ -1,4 +1,4 @@
-local SPELL_COST = 0
+local SPELL_COST = 30
 local HELPER_VAR = Isaac.GetEntityVariantByName("Spell Haunt Helper")
 local NONO_FLAGS = (EntityFlag.FLAG_NO_QUERY | EntityFlag.FLAG_NO_STATUS_EFFECTS | EntityFlag.FLAG_NO_TARGET | EntityFlag.FLAG_FRIENDLY | EntityFlag.FLAG_ICE_FROZEN)
 local TEAR_SPEED = Vector(10, 0)
