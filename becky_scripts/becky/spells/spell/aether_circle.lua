@@ -25,5 +25,5 @@ return {
     Func = fun,
     CanSelect = canSelectFun,
     Cost = SPELL_COST,
-    Frame = 99
+    Frame = 18
 }

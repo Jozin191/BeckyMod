@@ -1,4 +1,4 @@
-local SPELL_COST = 30
+local SPELL_COST = 50
 local HELPER_VAR = Isaac.GetEntityVariantByName("Spell Haunt Helper")
 local NONO_FLAGS = (EntityFlag.FLAG_NO_QUERY | EntityFlag.FLAG_NO_STATUS_EFFECTS | EntityFlag.FLAG_NO_TARGET | EntityFlag.FLAG_FRIENDLY | EntityFlag.FLAG_ICE_FROZEN)
 local TEAR_SPEED = Vector(10, 0)
@@ -102,6 +102,16 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_PRE_TEAR_COLLISION, 200, function(_
         end
     end
 end, BeckyMod.Spells.ENTITIES.MANA_TEAR.Variant)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, function(_, tear)
+
+    local eff = Isaac.Spawn(1000, EffectVariant.TEAR_POOF_A, 0, tear.Position, Vector.Zero, tear):ToEffect()
+    local sp = eff:GetSprite()
+    local color = sp.Color
+    color:SetColorize(1,1,1,1)
+    sp.Color = color
+    eff.Color = tear.Color
+    eff.Scale = tear.Scale
+end, BeckyMod.Spells.ENTITIES.MANA_TEAR.Variant)
 
 
 local function fun(player)
@@ -113,7 +123,8 @@ local function fun(player)
     local pos = player.Position
     local angle = -180 + data.MagicStaff_SelectSpellDir.Dir * 90
 
-    local tear = Isaac.Spawn(2, BeckyMod.Spells.ENTITIES.MANA_TEAR.Variant, 0, pos, TEAR_SPEED:Rotated(angle), player):ToTear()
+    local tear = Isaac.Spawn(2, BeckyMod.Spells.ENTITIES.MANA_TEAR.Variant, 0, pos, TEAR_SPEED:Rotated(angle) + player:GetTearMovementInheritance( Vector(1,0):Rotated(angle) ), player):ToTear()
+    tear.Scale = 1.012
     BeckyMod.GetEntData(tear).NoGrantMana = true
     tear.CollisionDamage = 0
     data.MagicStaff_SelectSpellDir = nil
@@ -128,5 +139,5 @@ return {
     Func = fun,
     CanSelect = canSelectFun,
     Cost = SPELL_COST,
-    Frame = 99
+    Frame = 20
 }

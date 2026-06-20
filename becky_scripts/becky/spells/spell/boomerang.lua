@@ -108,7 +108,7 @@ local function fun(player)
     local pos = player.Position
     local angle = -180 + data.MagicStaff_SelectSpellDir.Dir * 90
 
-    local eff = Isaac.Spawn(1000, boomerangVar, 0, pos, BOOMERANG_VEL:Rotated(angle) , player)
+    local eff = Isaac.Spawn(1000, boomerangVar, 0, pos, BOOMERANG_VEL:Rotated(angle) + player:GetTearMovementInheritance( Vector(1,0):Rotated(angle) ) , player)
     BeckyMod.GetEntData(eff).NoGrantMana = true
     data.MagicStaff_SelectSpellDir = nil
 end

@@ -142,5 +142,5 @@ return {
     Func = fun,
     CanSelect = canSelectFun,
     Cost = 0,
-    Frame = 99
+    Frame = 17
 }

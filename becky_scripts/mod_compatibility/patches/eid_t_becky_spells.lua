@@ -34,6 +34,12 @@ EID:addIcon("BeckySpell".. SpellType.MULTISHOT,         "Spells", 5,  11, 11, -1
 EID:addIcon("BeckySpell".. SpellType.FLY_N_HOMING,      "Spells", 6,  11, 11, -1, 0, SpellsIcons)
 EID:addIcon("BeckySpell".. SpellType.OPEN_SESAMO,       "Spells", 12, 11, 11, -1, 0, SpellsIcons)
 EID:addIcon("BeckySpell".. SpellType.KNIGHT_ATTACK,     "Spells", 14, 11, 11, -1, 0, SpellsIcons)
+EID:addIcon("BeckySpell".. SpellType.VINE,              "Spells", 17, 11, 11, -1, 0, SpellsIcons)
+EID:addIcon("BeckySpell".. SpellType.AETHER_CIRCLE,     "Spells", 18, 11, 11, -1, 0, SpellsIcons)
+EID:addIcon("BeckySpell".. SpellType.GILDED_SPEAR,      "Spells", 19, 11, 11, -1, 0, SpellsIcons)
+EID:addIcon("BeckySpell".. SpellType.HAUNT,             "Spells", 20, 11, 11, -1, 0, SpellsIcons)
+EID:addIcon("BeckySpell".. SpellType.TIMEFREEZE,        "Spells", 21, 11, 11, -1, 0, SpellsIcons)
+EID:addIcon("BeckySpell".. SpellType.BOTTLE_WITH_WATER, "Spells", 22, 11, 11, -1, 0, SpellsIcons)
 EID:addIcon("BeckySpell??", "Spells", 99, 16, 16, -1, 0, SpellsIcons)
 
 EID:addIcon("BeckySpellLeft",   "Directions", 0, 11, 11, -1, 0, SpellsIcons)
@@ -190,6 +196,50 @@ local SpellDescs = {
             "{{BeckySpell".. SpellType.KNIGHT_ATTACK .."}} Spawns a knight on Isaac",
             "The knight will target the closest enemy to it and do 3 slashes",
             "{{BeckyMana}} Cost 45 mana points",
+        },
+        --spa = ,
+    },
+    [SpellType.VINE] = {
+        en_us = {
+            "{{BeckySpell".. SpellType.VINE .."}} Spawns various vines around enemies",
+            "{{BeckyMana}} Cost 14 mana points each vine spawned",
+        },
+        --spa = ,
+    },
+    [SpellType.AETHER_CIRCLE] = {
+        en_us = {
+            "{{BeckySpell".. SpellType.AETHER_CIRCLE .."}} Isaac shoots 8 fires around him",
+            "{{BeckyMana}} Cost 35 mana points",
+        },
+        --spa = ,
+    },
+    [SpellType.GILDED_SPEAR] = {
+        en_us = {
+            "{{BeckySpell".. SpellType.GILDED_SPEAR .."}} Spawns 5-7 spears around the edge of the room",
+            "{{BeckyMana}} Cost 40 mana points",
+        },
+        --spa = ,
+    },
+    [SpellType.HAUNT] = {
+        en_us = {
+            "{{BeckySpell".. SpellType.HAUNT .."}} Lets Isaac shoot a tear",
+            "If this tears hits an enemy will let him move all enemies of the same type for 5 seconds",
+            "If hits a boss it will confuse them for 2.5 seconds",
+            "{{BeckyMana}} Cost 50 mana points",
+        },
+        --spa = ,
+    },
+    [SpellType.TIMEFREEZE] = {
+        en_us = {
+            "{{BeckySpell".. SpellType.TIMEFREEZE .."}} Freezes all enemies in the room for 3 seconds",
+            "{{BeckyMana}} Cost 75 mana points",
+        },
+        --spa = ,
+    },
+    [SpellType.BOTTLE_WITH_WATER] = {
+        en_us = {
+            "{{BeckySpell".. SpellType.BOTTLE_WITH_WATER .."}} Isaac shoot a bottle that makes a puddle that damage enemies",
+            "{{BeckyMana}} Cost 50 mana points",
         },
         --spa = ,
     },

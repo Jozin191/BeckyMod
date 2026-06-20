@@ -33,6 +33,8 @@ local SPELLS_NAMES = {
     "AETHER_CIRCLE",
     "GILDED_SPEAR",
     "HAUNT",
+    "TIMEFREEZE",
+    "BOTTLE_WITH_WATER",
 
     "SPELLS_NUM",
 }
@@ -51,6 +53,9 @@ local DevilSpellsPool = {
     SPELLS.SpellType.SPELL_DMG_UP,
     SPELLS.SpellType.MULTISHOT,
     SPELLS.SpellType.KNIGHT_ATTACK,
+    SPELLS.SpellType.AETHER_CIRCLE,
+    SPELLS.SpellType.HAUNT,
+    SPELLS.SpellType.TIMEFREEZE,
 }
 local AngelSpellsPool = {
     SPELLS.SpellType.SPREAD,
@@ -62,6 +67,9 @@ local AngelSpellsPool = {
     SPELLS.SpellType.MANA_REGEN,
     SPELLS.SpellType.FLY_N_HOMING,
     SPELLS.SpellType.OPEN_SESAMO,
+    SPELLS.SpellType.VINE,
+    SPELLS.SpellType.GILDED_SPEAR,
+    SPELLS.SpellType.BOTTLE_WITH_WATER,
 }
 
 local RandomSpellsPool = {
@@ -74,6 +82,10 @@ local RandomSpellsPool = {
     SPELLS.SpellType.MULTISHOT,
     SPELLS.SpellType.FLY_N_HOMING,
     SPELLS.SpellType.OPEN_SESAMO,
+    SPELLS.SpellType.AETHER_CIRCLE,
+    SPELLS.SpellType.GILDED_SPEAR,
+    SPELLS.SpellType.TIMEFREEZE,
+    SPELLS.SpellType.BOTTLE_WITH_WATER,
 }
 
 local StartingSpellsPool = {
@@ -85,6 +97,9 @@ local StartingSpellsPool = {
     SPELLS.SpellType.SHIELD,
     SPELLS.SpellType.OPEN_SESAMO,
     SPELLS.SpellType.SUMMON,
+    SPELLS.SpellType.AETHER_CIRCLE,
+    SPELLS.SpellType.TIMEFREEZE,
+    SPELLS.SpellType.BOTTLE_WITH_WATER,
 }
 
 
@@ -121,7 +136,7 @@ local SELECTION_POS = {
 
 local SPELLS_SPRITE = Sprite("gfx/ui/taintedBecky/spells.anm2", true)
 
--- last highest frame : 16
+-- last highest frame : 22
 local SPELLS_FRAME = {
     [SPELLS.SpellType.NULL] = 99,
 }
@@ -249,6 +264,8 @@ for _, file in ipairs({
     "aether_circle",
     "gilded_spear",
     "haunt",
+    "timefreeze",
+    "bottle_with_water",
 }) do
     local data = include(SPELLS_RUTE .. file)
     local spell = data[1] or 0
