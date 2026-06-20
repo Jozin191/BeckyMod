@@ -24,6 +24,7 @@
 		birthright="Spell swap"
         pocketActive="​Magic Staff"
         achievement="Tainted Becky"
+        noshake="true"
     />
         <!--canShoot="false"-->
     

@@ -36,6 +36,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear, offset)
     else
         anim = "RegularTear13"
     end
+    if math.abs(tear.Velocity:GetAngleDegrees()) > 90 then
+        tear.FlipX = true
+    else tear.FlipX = false end
     sp:SetFrame(anim, tear.FrameCount % 16)
 
     if scale > 2.55 then

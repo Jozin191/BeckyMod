@@ -256,6 +256,13 @@ local function EIDPatch()
 					"#{{Damage}} The damage it does depends on Isaac's damage and tear rate"
 				},
 			},
+			spa = {
+				Name = "Amuleto Fantasmal",
+				Description = {
+					"Las lágrimas de Isaac son sustituidas por un familiar que controla",
+					"#{{Damage}} El daño que hace depende en el daño y lágrimas de Isaac"
+				}
+			},
 		},
 		[Item.DREAM_BANISHER.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
@@ -268,6 +275,16 @@ local function EIDPatch()
 					"#↑ {{Tears}} +0.5 Tears"
 				},
 			},
+			spa = {
+				Name = "Rompesueños",
+				Description = {
+					"{{HalfBlackHeart}} +1 medio Corazón Negro al ir a un nuevo piso",
+					"#{{AngelDevilChanceSmall}} +15% de probabilidad de salas de Ángel/Diablo",
+					"#{{CurseBlind}} Mientras tengas una maldición:",
+					"#↑ {{Damage}} +1.5 Daño",
+					"#↑ {{Tears}} +0.5 Lágrimas"
+				},
+			},
 		},
 		[Item.COXINHA.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
@@ -276,6 +293,14 @@ local function EIDPatch()
 					"↑ {{Heart}} +1 Health",
 					"#↑ {{Speed}} +" .. Item.COXINHA.SPEED_INCREASE .. " Speed",
 					"#{{HealingRed}} Heals 2 hearts",
+				},
+			},
+			spa = {
+				Name = "Coxinha",
+				Description = {
+					"↑ {{Heart}} +1 de Vida",
+					"#↑ {{Speed}} +" .. Item.COXINHA.SPEED_INCREASE .. " Velocidad",
+					"#{{HealingRed}} Cura 2 corazones",
 				},
 			},
 		},
@@ -287,12 +312,25 @@ local function EIDPatch()
 					"#Can spawn multiple Dead Birds per room, up to 5"
 				},
 			},
+			spa = {
+				Name = "Espantapájaros",
+				Description = {
+					"{{Collectible117}} Acertale a un enemigo sin fallar o cambiar de objetivo, invocará un Ave Muerta a atacar enemigos por el cuarto",
+					"#Puede invocar hastá 5 Ave Muertas"
+				},
+			},
 		},
 		[Item.BUTCHERS_COOKBOOK.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
 				Name = "Butcher's Cookbook",
 				Description = {
 					"When used Spawns a Sawblade"
+				},
+			},
+			spa = {
+				Name = "Recetario de carnicero",
+				Description = {
+					"Genera una sierra"
 				},
 			},
 		},
@@ -304,6 +342,13 @@ local function EIDPatch()
 					"#Consuming a Collectible fully heals Isaac and grants a {{BlackHeart}} Black Heart"
 				},
 			},
+			spa = {
+				Name = "Noche de los Asesinos",
+				Description = {
+					"{{HealingRed}} Consume un recolectable próximos a Isaac y lo cura por medio corazón",
+					"#Consumir un Objeto cura totalmente a Isaac y le dá un {{BlackHeart}} Corazón Negro"
+				},
+			},
 		},
 		[Item.NULL_BOMBS.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
@@ -311,6 +356,13 @@ local function EIDPatch()
 				Description = {
 					"{{Bomb}} +5 Bombs",
 					"#{{Collectible399}} Isaac's bombs spawn Maw Of The Void rings"
+				},
+			},
+			spa = {
+				Name = "Bombas Nulas",
+				Description = {
+					"{{Bomb}} +5 Bombas",
+					"#{{Collectible399}} Las bombas de Isaac generan un láser de Fauces del Vacío alrededor de ellas"
 				},
 			},
 		},
@@ -322,6 +374,13 @@ local function EIDPatch()
 					"#{{Collectible634}} Uppon using an active, generate multiple ghosts depending on the ghost charges"
 				},
 			},
+			spa = {
+				Name = "Enchufe Roto",
+				Description = {
+					"Limpiar un cuarto con el objeto activo totalmete cargado, agrega una carga fantasma",
+					"#{{Collectible634}} Al usar la activa, generará un fantasma por cada carga fantasma que la activa tenga"
+				},
+			},
 		},
 		[Item.SINNER.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
@@ -331,6 +390,13 @@ local function EIDPatch()
 					"#The faster it is, the more damage it does"
 				},
 			},
+			spa = {
+				Name = "Pecador",
+				Description = {
+					"Un orbital que cambia de velocidad por cada rotación que completa",
+					"#Cuanto mas rapido va, más daño hace"
+				},
+			},
 		},
 		[Item.DEFILED_CHALICE.ID] = { -- EN: [OK] | SPA: [X] 
 			en_us = {
@@ -338,6 +404,13 @@ local function EIDPatch()
 				Description = {
 					"{{HealingRed}} Heals 1 heart",
 					"#Killing an enemy drops creep that damages other enemies"
+				},
+			},
+			spa = {
+				Name = "Cáliz Profanado",
+				Description = {
+					"{{HealingRed}} Cura 1 corazón",
+					"#Matar a un enemigo genera un fluido rojo que daña a otros enemigos"
 				},
 			},
 		},
@@ -350,7 +423,17 @@ local function EIDPatch()
 					"#Spawns a familiar that chases enemies and dealing contact damage",
 					"#The familiar can take damage, going down if its hp goes to zero",
 					"#The familiar gets up again after 10 seconds",
-					"#Enemies killed by the familiar have a 13% to spawn this familiar"
+					"#Enemies killed by the familiar, have a 13% to spawn this familiar"
+				},
+			},
+			spa = {
+				Name = "Mano No Muerta",
+				Description = {
+					"Al usarlo, si hay enemigos presentes",
+					"#Genera un familiar que persigue enemigos e infligiendo daño por contacto",
+					"#El familiar puede ser dañado, cayendo si su vida llega a cero",
+					"#El familiar se vuelve a levantar despues de 10 segundos",
+					"#Enemigos matados por el familiar, tienen un 13% de generar a este familiar"
 				},
 			},
 		},
@@ -360,6 +443,13 @@ local function EIDPatch()
 				Description = {
 					"On use, lets Isaac select 1 of 4 spells",
 					"#This spells change between uses",
+				},
+			},
+			spa = {
+				Name = "Bastón Mágico",
+				Description = {
+					"Al usarlo, deja a Isaac elegir 1 de los 4 hechizos",
+					"#Estos hechizos cambian entre cada uso",
 				},
 			},
 		},
@@ -380,19 +470,33 @@ local function EIDPatch()
 					function(descObj) return EID_Collectibles[Item.MAGIC_STAFF.TAINTED_BECKY_ID]._modifier(descObj) end,
 				},
 			},
+			spa = {
+				Name = "Bastón Mágico",
+				Description = {
+					function(descObj) return EID_Collectibles[Item.MAGIC_STAFF.TAINTED_BECKY_ID]._modifier(descObj) end,
+				},
+			},
 		},
 
 		[Item.POUL.ID] = { -- EN: [OK] | SPA: [X]
+			_BFFSMod = function(descObj, line)
+				if not BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_BFFS) then return end
+				return "#{{Colletible".. CollectibleType.COLLECTIBLE_BFFS .."}} "..line
+			end,
 			en_us = {
-				_BFFSMod = function(descObj, line)
-					if not BECKY_EID:ClosestPlayerTo(descObj.Entity):HasCollectible(CollectibleType.COLLECTIBLE_BFFS) then return end
-					return "#{{Colletible".. CollectibleType.COLLECTIBLE_BFFS .."}} The familiar can pick up various rocks at the same time"
-				end,
 				Name = "Poul",
 				Description = {
 					"Spawns a familiar that moves around picking rocks and throwing it to enemies",
-					"#Pickups tainted rocks and throws it to Isaac if no enemy is pressent",
-					function(descObj) return EID_Collectibles[Item.POUL.ID]._BFFSMod(descObj) end,
+					"#Pickups tinted rocks and throws it to Isaac if no enemy is present",
+					function(descObj) return EID_Collectibles[Item.POUL.ID]._BFFSMod(descObj, "The familiar can pick up various rocks at the same time") end,
+				},
+			},
+			en_us = {
+				Name = "Poul",
+				Description = {
+					"Genera un familiar que se mueve por el cuarto agarrando piedras y lanzándolas a los enemigos",
+					"#Agarrar piedras marcadas y las lanza a Isaac si no hay enemigos presentes",
+					function(descObj) return EID_Collectibles[Item.POUL.ID]._BFFSMod(descObj, "El familiar puede agarrar varias piedras al mismo tiempo") end,
 				},
 			},
 		},
@@ -461,10 +565,20 @@ local function EIDPatch()
 				Name = "Holy Bookmark",
 				Description = {
 					function(descObj)
-						return EID_Trinkets[Trinket.HOLY_BOOKMARK.ID]._modifier(descObj, "↑ {{Luck}} +{1} luck")
+						return EID_Trinkets[Trinket.HOLY_BOOKMARK.ID]._modifier(descObj, "↑ {{Luck}} +{1} Luck")
 					end,
-					"#{{AngelChanceSmall}} Each unique angel-related item that the player owns grants an extra +" .. Trinket.HOLY_BOOKMARK.LUCK_PER_ITEM .. " luck",
+					"#{{AngelChanceSmall}} Each unique angel-related item that Isaac owns grants an extra +" .. Trinket.HOLY_BOOKMARK.LUCK_PER_ITEM .. " luck",
 					"#Actives grant twice the luck",
+				}
+			},
+			spa = {
+				Name = "Marcapáginas Sagrado",
+				Description = {
+					function(descObj)
+						return EID_Trinkets[Trinket.HOLY_BOOKMARK.ID]._modifier(descObj, "↑ {{Luck}} +{1} Suerte")
+					end,
+					"#{{AngelChanceSmall}} Cada objeto relacionado a los ángeles que Isaac posea le dará +" .. Trinket.HOLY_BOOKMARK.LUCK_PER_ITEM .. " suerte",
+					"#Activas dan el doble de suerte",
 				}
 			},
 		},
@@ -485,11 +599,21 @@ local function EIDPatch()
 				Description = {
 					function(descObj)
 						return EID_Trinkets[Trinket.DEVILZON_PRIME.ID]._modifier(descObj, 
-							"{{DevilChanceSmall}} For every deal taken in one floor, you get +{1} deal chance in the next"
+							"{{DevilChanceSmall}} For every deal taken in one floor, Isaac gets +{1} deal chance in the next floor"
 						)
 					end,
 				}
-			}
+			},
+			spa = {
+				Name = "Diablon Prime",
+				Description = {
+					function(descObj)
+						return EID_Trinkets[Trinket.DEVILZON_PRIME.ID]._modifier(descObj, 
+							"{{DevilChanceSmall}} Por cada pacto tomado en el piso, Isaac obtiene +{1} de encontrar la sala de pacto en la siguiente piso"
+						)
+					end,
+				}
+			},
 		},
 		[Trinket.CORPSE_TAG.ID] = {
 			en_us = {
@@ -497,15 +621,27 @@ local function EIDPatch()
 				Description = {
 					"Chance to get some bone spurs when clearing a room"
 				}
-			}
+			},
+			spa = {
+				Name = "Etiqueta de Cadáver",
+				Description = {
+					"Limpiar un cuarto puede que de unas espuelas de huesos"
+				}
+			},
 		},
 		[Trinket.SANGUINE_FEATHER.ID] = {
 			en_us = {
 				Name = "Sanguine Feather",
 				Description = {
-					"Has a 1/3 chance of giving flight after receiving damage for the room"
+					"Has a 33% chance of giving flight after receiving damage for the room"
 				}
-			}
+			},
+			spa = {
+				Name = "Pluma Sangrienta",
+				Description = {
+					"Tiene un 33% de probabilidad de dar vuelo por el cuarto al recibir daño"
+				}
+			},
 		},
 
 		[Trinket.ALARM_CLOCK.ID] = {
@@ -530,7 +666,18 @@ local function EIDPatch()
 						)
 					end,
 				}
-			}
+			},
+			spa = {
+				Name = "Despertador",
+				Description = {
+					"Al limpiar un cuarto",
+					function(descObj)
+						return EID_Trinkets[Trinket.ALARM_CLOCK.ID]._modifier(descObj, 
+							"#{{Timer}} -{1} segundos en el tiempo del juego"
+						)
+					end,
+				}
+			},
 		},
 		[Trinket.BUG_SPRAY.ID] = {
 			_modifier = function(descObj, line) ---@param descObj EID_DescObj
@@ -550,6 +697,16 @@ local function EIDPatch()
 					function(descObj)
 						return EID_Trinkets[Trinket.BUG_SPRAY.ID]._modifier(descObj, 
 							"Flies and spider type enemies take {1}% more damage"
+						)
+					end,
+				}
+			},
+			spa = {
+				Name = "Repelente de Insectos",
+				Description = {
+					function(descObj)
+						return EID_Trinkets[Trinket.BUG_SPRAY.ID]._modifier(descObj, 
+							"Enemigos del tipo mosca o aracnido reciben {1}% más daño"
 						)
 					end,
 				}
@@ -614,7 +771,20 @@ local function EIDPatch()
 					end,
 					"#This card is more likely to spawn while holding it"
 				}
-			}
+			},
+			spa = {
+				Name = "Carta Partida",
+				Description = {
+					"Activa el efecto ",
+					function(descObj)
+						return EID_Cards[Pickup.RIPPED_CARD.ID]._modifier(descObj,
+							"debil de una carta tarot",
+							"de una {{ColorShinyPurple}}carta tarot{{CR}}"
+						)
+					end,
+					"#Es más probable que esta carta vuelva a aparecer mientras Isaac lo sostenga"
+				}
+			},
 		},
 		[Pickup.RIPPED_CARD.ID2] = {
 			_metadata = {4, false},
@@ -638,7 +808,19 @@ local function EIDPatch()
 					end,
 					"#Ripped Card is more likely to spawn while holding this"
 				}
-			}
+			},
+			spa = {
+				Name = "Carta Parcheada",
+				Description = {
+					"Activa 2 efectos ",
+					function(descObj)
+						return EID_Cards[Pickup.RIPPED_CARD.ID2]._modifier(descObj,
+							"debiles de unas cartas tarot",
+							"{{ColorShinyPurple}}cartas tarot{{CR}}")
+					end,
+					"#Es mas probable que Carta Partida vuelva a aparecer mientras Isaac lo sostenga"
+				}
+			},
 		},
 		[Pickup.SOUL_OF_BECKY.ID] = {
 			_metadata = {2, true},
@@ -656,7 +838,13 @@ local function EIDPatch()
 				Description = {
 					"Forces Isaac to select 1 of 4 spells"
 				}
-			}
+			},
+			spa = {
+				Name = "Alma de Becky",
+				Description = {
+					"Obliga a Isaac a elegir 1 de los 4 hechizos"
+				}
+			},
 		},
 	}
 
@@ -705,7 +893,27 @@ local function EIDPatch()
 				Description = {
 					"{{AngelDevilChanceSmall}} Devil and Angel deal chances and prices are swapped",
 				}
-			}
+			},
+			spa = {
+				Name = "Becky",
+				Description = {
+					"{{AngelDevilChanceSmall}} Los pactos del Diablo y Angel estan invertidos",
+				}
+			},
+		},
+		[Character.BECKY_B.PLAYERTYPE] = { -- EN: [OK] | SPA: [X] 
+			en_us = {
+				Name = "Tainted Becky",
+				Description = {
+					"{{AngelDevilChanceSmall}} Devil and Angel deal chances and prices are swapped",
+				}
+			},
+			spa = {
+				Name = "Becky Corrupta",
+				Description = {
+					"{{AngelDevilChanceSmall}} Los pactos del Diablo y Angel estan invertidos",
+				}
+			},
 		}
 	}
 
@@ -770,26 +978,31 @@ local function EIDPatch()
 	)
 	
 
-	EID:addBirthright(Character.BECKY.PLAYERTYPE, "The Ghost's range becomes unlimited.")
-	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Rerolls all of Becky's spells to others of the same pool")
+	EID:addBirthright(Character.BECKY.PLAYERTYPE, "The Ghost's range becomes unlimited", "Becky", "en_us")
+	EID:addBirthright(Character.BECKY.PLAYERTYPE, "El Fantasma tiene rango ilimitado", "Becky", "spa")
+	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Rerolls all of Becky's spells to others of the same pool", "Tainted Becky", "en_us")
+	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Cambia todos los hechizos de Becky por otros del mismo grupo", "Becky Corrupta", "spa")
 
 	local BeckyDeals = {
 		{
 			Ids = "5.350."..TrinketType.TRINKET_DEVILS_CROWN,
 			Desc = {
 				en_us = "{{ColorSilver}}The deals in the treasure room cost money instead of health{{CR}}",
+				spa = "{{ColorSilver}}Los tratos en la sala del tesoro costara dinero envez de vida{{CR}}",
 			}
 		},
 		{
 			Ids = CollectibleType.COLLECTIBLE_SATANIC_BIBLE,
 			Desc = {
 				en_us = "{{ColorSilver}}The deals in the boss room cost money instead of health{{CR}}",
+				spa = "{{ColorSilver}}Los tratos en la sala del jefe costara dinero envez de vida{{CR}}",
 			}
 		},
 		{
 			Ids = CollectibleType.COLLECTIBLE_STAIRWAY,
 			Desc = {
 				en_us = "{{ColorSilver}}The angel shop cost health instead of money{{CR}}",
+				spa = "{{ColorSilver}}La tienda del ángel costara vida envez de dinero{{CR}}",
 			}
 		},
 	}
@@ -806,6 +1019,7 @@ local function EIDPatch()
 	if Epiphany then
 		local BrokenHaloDesc = {
 			en_us = "{{ColorSilver}}The devil deals in the room will cost money instead of health{{CR}}",
+			spa = "{{ColorSilver}}Los tratos del diablo costara dinero envez de vida{{CR}}",
 		}
 		for leng, desc in pairs(BrokenHaloDesc) do
 			EID:addPlayerCondition(Epiphany.Item.BROKEN_HALO.ID, Character.BECKY.PLAYERTYPE, desc, nil, leng, nil, true)
@@ -827,6 +1041,13 @@ local function EIDPatch()
 			Name = "Spell Deal Entity",
 			Description = {
 				"{{Player".. Character.BECKY_B.PLAYERTYPE .."}} {{ColorSilver}}Tainted Becky{{CR}}",
+				"#", function(descObj) return EID_ENT_DESC._modifier(descObj) end,
+			}
+		},
+		spa = {
+			Name = "Spell Deal Entity",
+			Description = {
+				"{{Player".. Character.BECKY_B.PLAYERTYPE .."}} {{ColorSilver}}Becky Corrupta{{CR}}",
 				"#", function(descObj) return EID_ENT_DESC._modifier(descObj) end,
 			}
 		},
