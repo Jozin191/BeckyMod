@@ -267,12 +267,12 @@ mod:AddCallback(ModCallbacks.MC_POST_SAVESLOT_LOAD, unlocks.PostLoadSaveslot)
 
 
 function unlocks:PreSpawnSlot(t, v, s, pos, vel, spawner, seed)
-    if t ~= 6 or v ~= SlotVariant.SHELL_GAME or Isaac.GetPersistentGameData():Unlocked(achievements.ACHIEVEMENT_SKETCHY_BEGGAR) then return end
+    if t ~= 6 or v ~= SlotVariant.SHELL_GAME or not Isaac.GetPersistentGameData():Unlocked(achievements.ACHIEVEMENT_SKETCHY_BEGGAR) then return end
     if game:GetRoom():GetType() ~= RoomType.ROOM_ARCADE then return end
 
     local rng = RNG(seed, 35)
     if rng:RandomInt(9) == 0 then
-        return {t, SKETCHY_BEGGAR.ID, 0, seed}
+        return {t, BeckyMod.Slot.SKETCHY_BEGGAR.ID, 0, seed}
     end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_ENTITY_SPAWN, unlocks.PreSpawnSlot)

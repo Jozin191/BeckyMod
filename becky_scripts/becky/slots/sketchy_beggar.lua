@@ -1,6 +1,8 @@
 local SKETCHY_BEGGAR = {}
 SKETCHY_BEGGAR.ID = Isaac.GetEntityVariantByName("Sketchy Beggar")
 
+BeckyMod.Slot.SKETCHY_BEGGAR = SKETCHY_BEGGAR
+
 local game = BeckyMod.Game
 local itemPool = game:GetItemPool()
 

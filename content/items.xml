@@ -40,6 +40,7 @@
         gfx="magic staff.png"
         description="Power Soul"
         quality="2"
+        craftquality="-1"
         maxcharges="0"
         chargetype="normal"
 
