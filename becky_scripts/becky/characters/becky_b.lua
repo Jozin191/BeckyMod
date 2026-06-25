@@ -683,11 +683,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
     --knife.SpriteScale = Vector.One * 0.85
     local data = BeckyMod.GetEntData(knife)
+    local sp = knife:GetSprite()
     if data.Inited or knife.FrameCount >1 then
         knife.Charge = -1
+        sp:GetLayer(1):SetVisible(false)
         return
     end
-    local sp = knife:GetSprite()
     sp:Load(taintedBeckysWandAnim, true)
     sp:Play("Idle", true)
     data.Inited = true
@@ -699,8 +700,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     if not BECKY_B.ValidBoneClubs[knife.Variant] then return end
     local parent = knife:GetHitboxParentKnife()
     local data = BeckyMod.GetEntData(knife)
-    if parent ~= nil and parent.SpriteScale then
-        knife.SpriteScale = parent.SpriteScale * 1.2805
+    if parent ~= nil and parent.Size then --parent.SpriteScale then
+        knife.Size = parent.Size * 1.2805
+        --knife.SpriteScale = parent.SpriteScale * 1.2805
     end
     if data.Inited or knife.FrameCount >1 then
         return
@@ -710,7 +712,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     local isPlaying = sp:GetAnimation()
     sp:Load(taintedBeckysWandAnim, true)
     sp:Play(isPlaying, true)
-    sp.Color.A = 0.0
+    sp:GetLayer(0):SetVisible(false)
+    --sp.Color.A = 0.0
     data.Inited = true
 end, KnifeSubType.CLUB_HITBOX)
 
