@@ -314,11 +314,12 @@ end, CacheFlag.CACHE_FAMILIARS)
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
     local ghostData = familiar:GetData()
-    
     familiar:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
     local player = familiar.Player
-ghostData.TEARPARAMS = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
+    
+    ghostData.BounceMomentum = 0
+    ghostData.TEARPARAMS = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     if player then
         local playerData = player:GetData()
         playerData.GhostBalls = playerData.GhostBalls or {}
@@ -360,7 +361,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     if not ghosts then return end
 
     local isShooting = IsPlayerShooting(player)
+    local ForceTargetPos = nil
+    
+    if Options.MouseControl and player.ControllerIndex == 0 then
+        if Input.IsMouseBtnPressed(0) then ForceTargetPos = Input.GetMousePosition(true)
+        end
+    end
     local marked = player:GetMarkedTarget()
+    if marked then ForceTargetPos = marked.Position end
+
     local shotSpeed = player.ShotSpeed
     local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
     local maxDistIdle = 40
@@ -375,6 +384,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         if not ghost then goto continue end
 
         local ghostData = ghost:GetData()
+        local momentum = ghostData.BounceMomentum or 0
+        shotSpeed = shotSpeed + momentum/4
+        maxDistMove = maxDistMove + momentum*2
         local uc = ghostData.URETHRACHARGE or 0
         if not ghostData.URETHRABLAST then
             uc = 1
@@ -400,8 +412,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
            color.A = math.max(color.A - .05, 0)
         end
         local testColor = ghost:GetColor()
+        
+        ghostTrail:GetSprite().Scale = Vector(2,2)+Vector.One*momentum*.5
         ghostTrail.Color = Color(testColor.R, testColor.G, testColor.B, color.A, testColor.RO, testColor.GO, testColor.BO)
-
         if ghost.SubType == 1 then
             local target = ghost.Target
             local ghostPos = ghost.Position
@@ -458,12 +471,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
                 ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove)) *uc
             end
-        elseif marked or isShooting then
-            if marked or not player:AreOpposingShootDirectionsPressed() then
+        elseif ForceTargetPos or isShooting then
+            if ForceTargetPos or not player:AreOpposingShootDirectionsPressed() then
                 ghost.State = 1
                 local targetPos
-                if marked then
-                    targetPos = marked.Position - ghost.Position
+                if ForceTargetPos then
+                    targetPos = ForceTargetPos - ghost.Position
                 else
                     
                     local input = {
@@ -560,13 +573,13 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                     final = final:Rotated(angle)
                 end
                 ghost.Velocity = ghost.Velocity + final*uc
-
+                
                 if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
                     ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove))*uc
                 end
 
 
-                if not marked then
+                if not ForceTargetPos then
                     local dir = (famPos - playerPos):Normalized()
                     player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
                 end
@@ -690,25 +703,28 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         end
     end
     --- Lump of coal and prop
-        local distance = (player.Position-familiar.Position):Length()
-        local grow = Vector.Zero
-        if (tearParams.TearFlags & TearFlags.TEAR_GROW == TearFlags.TEAR_GROW) then
-            grow = Vector.One*distance/550
-            ghostData.CoalBonus = distance/35
-        else
-            ghostData.CoalBonus = 0
-        end
-        local shrink = Vector.One
-        if (tearParams.TearFlags & TearFlags.TEAR_SHRINK == TearFlags.TEAR_SHRINK) then
-            local distance = math.max(distance-60,0)
-            shrink = (Vector.One*1.5)*(250/(distance+250))
-            ghostData.ProptosisMulti = (5/((distance/5)+5))
+    local distance = (player.Position - familiar.Position):Length()
+    local grow = Vector.Zero
+    if (tearParams.TearFlags & TearFlags.TEAR_GROW == TearFlags.TEAR_GROW) then
+        grow = Vector.One * distance / 550
+        ghostData.CoalBonus = distance / 35
+    else
+        ghostData.CoalBonus = 0
+    end
+    local shrink = Vector.One
+    if (tearParams.TearFlags & TearFlags.TEAR_SHRINK == TearFlags.TEAR_SHRINK) then
+        local distance = math.max(distance - 60, 0)
+        shrink = (Vector.One * 1.5) * (250 / (distance + 250))
+        ghostData.ProptosisMulti = (5 / ((distance / 5) + 5))
+    else
+        ghostData.ProptosisMulti = 1
+    end
+    
+    ghostData.BounceMomentum = math.max((ghostData.BounceMomentum * .997) - .02, 0)
 
-        else
-            ghostData.ProptosisMulti = 1
-        end
-        familiar.SpriteScale = (familiar.SpriteScale+grow)*shrink
-        familiar.SizeMulti = (familiar.SizeMulti+grow)*shrink
+    familiar:SetColor(Color(1,1-ghostData.BounceMomentum/30,1-ghostData.BounceMomentum/6, 1), 2, 10000, false, false)
+    familiar.SpriteScale = (familiar.SpriteScale + grow + Vector.Zero*ghostData.BounceMomentum) * shrink
+    familiar.SizeMulti = (familiar.SizeMulti + grow + Vector.Zero*ghostData.BounceMomentum) * shrink
 
     Isaac.RunCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, familiar, tearParams)
 end, GHOST_BALL_VAR)
@@ -716,13 +732,12 @@ end, GHOST_BALL_VAR)
 ---@param familiar EntityFamiliar
 ---@param offset Vector
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function (_, familiar, offset)
-    --local tearParams = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 1, 1, familiar)
-            local ghostData = familiar:GetData()
-        local ghostTrail = ghostData.GhostTrail 
+    local ghostData = familiar:GetData()
+    local ghostTrail = ghostData.GhostTrail 
     if ghostTrail then
         ghostTrail.ParentOffset = familiar.PositionOffset
     end
-    Isaac.RunCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, familiar, offset--[[, tearParams]])
+    Isaac.RunCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, familiar, offset)
 end, GHOST_BALL_VAR)
 
 local DestroyableFireplaces = {
@@ -738,11 +753,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     local npc = collider and collider:ToNPC()
     local player = familiar.Player
     local ghostData = familiar:GetData()
+    local sprite = familiar:GetSprite()
     local tearParams = ghostData.TEARPARAMS or player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     local baseDamage = (GHOST_AMULET:GetGhostDamage(player, tearParams.TearDamage) + (ghostData.CoalBonus or 0)) * ghostData.ChocolateMilkMult * (ghostData.ProptosisMulti or 1)
-
-
+    baseDamage = baseDamage*(1+((ghostData.DeadEyeMulti and ghostData.DeadEyeMulti.Multi) or 0)) -- Dead Eye
     local multi = 1
+
     if tearParams.TearFlags & TearFlags.TEAR_KNOCKBACK == TearFlags.TEAR_KNOCKBACK then
         multi = 1.5
     end
@@ -759,11 +775,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if not npc then return end
     if not IsValidEnemy(npc) then return end
 
-    familiar:GetSprite():Play("Hit")
+    sprite:Play("Hit",true)
     TriggerPush(npc, familiar, 20 * GHOST_AMULET:GetGhostTearMult(player)*multi)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
-        TriggerPush(familiar, npc, 10)
+        TriggerPush(familiar, npc, 10+ghostData.BounceMomentum*2)
     end
+    if tearParams.TearFlags & TearFlags.TEAR_BOUNCE == TearFlags.TEAR_BOUNCE then
+        ghostData.BounceMomentum = math.min(ghostData.BounceMomentum + .7, 6)
+    end
+    
     BeckyMod.SFX:Play(SoundEffect.SOUND_MEATY_DEATHS, 0.6, 0, false, 1.5)
 
     Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider, tearParams)

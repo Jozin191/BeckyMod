@@ -37,6 +37,9 @@ local function FireMonstroBurst(player, rng, pos, velocity, amount, spread)
         tear.Scale = tear.Scale*(.9+(rng:RandomFloat()*.45))
         tear.FallingSpeed = (rng:RandomFloat()*16)-8
         tear.FallingAcceleration = .5
+        if rng:RandomFloat()> .5 and i < 5  then
+            tear:AddTearFlags(TearFlags.TEAR_PIERCING)
+        end
     end
 end
 
@@ -48,7 +51,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function (_, fam)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) then return end
     local sprite = fam:GetSprite()
     local lungcharge = data.LUNGCHARGE or 0
-    lungcharge = math.min(lungcharge+BeckyMod:toTearsPerSecond(player.MaxFireDelay)/45, 1)
+    lungcharge = math.min(lungcharge+BeckyMod:toTearsPerSecond(player.MaxFireDelay)/40, 1)
     if lungcharge == 0 then
         SFXManager():Play(SoundEffect.SOUND_MONSTROS_LUG_CHARGE, 1.5)
     end
@@ -72,7 +75,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, np
             SFXManager():Play(SoundEffect.SOUND_MONSTROS_LUNG_BARF, 1.5)
             data.LUNGCHARGE = 0
         else
-            data.LUNGCHARGE = math.max(data.LUNGCHARGE-.1, 0)
+            data.LUNGCHARGE = math.max(data.LUNGCHARGE-.075, 0)
         end
     end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LEAD_PENCIL) then return end

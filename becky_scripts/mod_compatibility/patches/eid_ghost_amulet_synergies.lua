@@ -127,12 +127,17 @@ local SYNERGY_LIST = {
     -- General tear effects that behave how they should
     {
         Items = {CollectibleType.COLLECTIBLE_EUTHANASIA, CollectibleType.COLLECTIBLE_APPLE, CollectibleType.COLLECTIBLE_TOUGH_LOVE, CollectibleType.COLLECTIBLE_MOMS_EYESHADOW, CollectibleType.COLLECTIBLE_GLAUCOMA, CollectibleType.COLLECTIBLE_IRON_BAR, CollectibleType.COLLECTIBLE_KNOCKOUT_DROPS, CollectibleType.COLLECTIBLE_ABADDON, CollectibleType.COLLECTIBLE_MOMS_PERFUME, CollectibleType.COLLECTIBLE_DARK_MATTER, CollectibleType.COLLECTIBLE_URANUS, CollectibleType.COLLECTIBLE_MOMS_CONTACTS, CollectibleType.COLLECTIBLE_COMMON_COLD, CollectibleType.COLLECTIBLE_HOLY_LIGHT, CollectibleType.COLLECTIBLE_SERPENTS_KISS, CollectibleType.COLLECTIBLE_SCORPIO, CollectibleType.COLLECTIBLE_BALL_OF_TAR, CollectibleType.COLLECTIBLE_PARASITOID, CollectibleType.COLLECTIBLE_OCULAR_RIFT, CollectibleType.COLLECTIBLE_SPIDER_BITE, CollectibleType.COLLECTIBLE_GODS_FLESH, CollectibleType.COLLECTIBLE_BACKSTABBER, CollectibleType.COLLECTIBLE_ROTTEN_TOMATO, CollectibleType.COLLECTIBLE_LODESTONE,
-                    "5.350."..TrinketType.TRINKET_CHEWED_PEN, "5.350."..TrinketType.TRINKET_JAW_BREAKER, "5.350."..TrinketType.TRINKET_BLACK_TOOTH , "5.350."..TrinketType.TRINKET_PINKY_EYE },
+                    "5.350."..TrinketType.TRINKET_CHEWED_PEN, "5.350."..TrinketType.TRINKET_JAW_BREAKER, "5.350."..TrinketType.TRINKET_BLACK_TOOTH , "5.350."..TrinketType.TRINKET_PINKY_EYE},
         Desc = {
             en_us = "Tear effect is inherited by the ghost!",
         }
     },
-
+    {
+        Items = {CollectibleType.COLLECTIBLE_PISCES, CollectibleType.COLLECTIBLE_8_INCH_NAILS, "5.350."..TrinketType.TRINKET_BLISTER},
+        Desc = {
+            en_us = "Ghost has increased knockback",
+        }
+    },
     {
         Items = CollectibleType.COLLECTIBLE_LUMP_OF_COAL,
         Desc = {
@@ -196,7 +201,7 @@ local SYNERGY_LIST = {
     {
         Items = CollectibleType.COLLECTIBLE_EPIC_FETUS,
         Desc = {
-            en_us = "Marks appear on the ghosts forehead that cause becky to hurl a rocket at it when once it hits an enemy",
+            en_us = "Marks appear on the ghosts forehead that cause Isaac to hurl a rocket at it after it hits an enemy",
         }
     },
     {
@@ -293,6 +298,18 @@ local SYNERGY_LIST = {
         Items = CollectibleType.COLLECTIBLE_EYE_OF_BELIAL,
         Desc = {
             en_us = "Ghost turns {{ColorRed}}red{{BlinkGray}} and can be exorcised by hitting an enemy",
+        }
+    },
+   {
+        Items = CollectibleType.COLLECTIBLE_RUBBER_CEMENT,
+        Desc = {
+            en_us = "Hitting enemies builds up momentum#{{BlinkGray}}Momentum increases the range and speed of the ghost and is slowly lost while not hitting enemies",
+        }
+    },
+   {
+        Items = CollectibleType.COLLECTIBLE_DEAD_EYE,
+        Desc = {
+            en_us = "Hitting enemies builds up a damage multiplier#{{BlinkGray}}Damage multiplier is quickly lost after not hitting an enemy for 2 seconds",
         }
     },
    {

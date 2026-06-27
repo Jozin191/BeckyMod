@@ -125,9 +125,9 @@ for i, name in pairs({
     "LargeZit",
     "MonstrosLungLeadPencil",
     "KidneyStone",
-    -- Wip
     "EyeOfBelial",
-    "RubberCement",
+    "DeadEye",
+    -- Wip
     "Trisagion",
     "Worms" -- dunno
 }) do
