@@ -63,29 +63,38 @@ include("becky_scripts.becky.items.passives.defiled_chalice")
 include("becky_scripts.becky.items.passives.dead_battery")
 include("becky_scripts.becky.items.passives.sinner")
 include("becky_scripts.becky.items.passives.ghost_amulet")
+include("becky_scripts.becky.items.passives.poul")
 
-include("becky_scripts.becky.items.actives.hand_made_bible")
+--include("becky_scripts.becky.items.actives.hand_made_bible")
 include("becky_scripts.becky.items.actives.night_of_the_slasher")
 include("becky_scripts.becky.items.actives.butcher's_cookbook")
+include("becky_scripts.becky.items.actives.undead_hand")
+include("becky_scripts.becky.items.actives.magic_staff")
 
 --trinkets
 include("becky_scripts.becky.items.trinkets.sanguine_feather")
 include("becky_scripts.becky.items.trinkets.holy_bookmark")
 include("becky_scripts.becky.items.trinkets.devilzon_prime")
 include("becky_scripts.becky.items.trinkets.corpse_tag")
+include("becky_scripts.becky.items.trinkets.alarm_clock")
+include("becky_scripts.becky.items.trinkets.bug_spray")
 
 --characters
 include("becky_scripts.becky.characters.becky")
 include("becky_scripts.becky.characters.sofia")
-
---Mod compatibility! (all patches are loaded in this file)
-include("becky_scripts.mod_compatibility.load_patches")
+include("becky_scripts.becky.characters.becky_b")
 
 --pickups
 include("becky_scripts.becky.pickups.dead_battery")
+include("becky_scripts.becky.pickups.ripped_card")
+include("becky_scripts.becky.pickups.soul_of_becky")
+
+--slots
+include("becky_scripts.becky.slots.sketchy_beggar")
 
 --misc stuff
 include("becky_scripts.utils.achievements_revamp")
+include("becky_scripts.becky.characters.becky_deal_stuff")
 
 --ghost synergies
 for i, name in pairs({
@@ -133,5 +142,13 @@ for i, name in pairs({
 }) do
     include("becky_scripts.becky.items.passives.GhostAmuletSynergies." .. name)
 end
+
 --challenges
 include("becky_scripts.becky.challenges.path_of_pain")
+include("becky_scripts.becky.challenges.poltergeist")
+
+--spells
+include("becky_scripts.becky.spells.spells")
+
+--Mod compatibility! (all patches are loaded in this file)
+include("becky_scripts.mod_compatibility.load_patches")
