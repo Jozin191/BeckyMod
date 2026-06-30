@@ -1,7 +1,7 @@
 ---@param fam EntityFamiliar
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam)
     local player = fam.Player
-    local ghostdata = fam:GetData()
+    local ghostdata = BeckyMod.GetEntData(fam)
     if player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) then
         if fam.State > 0 then
             local fakeVelo = (fam.Position - ghostdata.LASTPOS) -- do this to patch the wall bug

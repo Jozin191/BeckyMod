@@ -5,7 +5,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     if not player then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then return end
 
-    local ghostdata = fam:GetData()
+    local ghostdata = BeckyMod.GetEntData(fam)
     ghostdata.ROCKETCD = ghostdata.ROCKETCD or 0
   
     if ghostdata.ROCKETCD <= 0 then
@@ -31,7 +31,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam)
     if not player then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then return end
 
-    local ghostdata = fam:GetData()
+    local ghostdata = BeckyMod.GetEntData(fam)
     ghostdata.ROCKETCD = ghostdata.ROCKETCD or 0
     ghostdata.ROCKETCD = math.max(ghostdata.ROCKETCD -1, 0)
 end)
@@ -48,7 +48,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, fam, of
     if not player then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then return end
 
-    local ghostdata = fam:GetData()
+    local ghostdata = BeckyMod.GetEntData(fam)
     local ghostsprite = fam:GetSprite()
     
     

@@ -14,7 +14,7 @@ local function butchersUse(_, collectibleID, rngObj, player, useFlags, activeSlo
     local pos = room:GetGridPosition(gridIndex)
 
     local saw = BeckyMod.Game:Spawn(EntityType.ENTITY_EFFECT, SAW_VARIANT, pos, Vector.Zero, player, 0, 1)
-    saw:GetData().player = player
+    BeckyMod.GetEntData(saw).player = player
 
     BeckyMod.SFX:Play(START_SOUND)
 
@@ -47,7 +47,7 @@ local function sawUpdate(_, effect)
 
     for _, entity in ipairs(Isaac.GetRoomEntities()) do
         if entity:IsVulnerableEnemy() and entity.Position:Distance(effect.Position) < 40 then
-            entity:TakeDamage(SAW_DPS/30, DamageFlag.DAMAGE_CLONES, EntityRef(effect:GetData(). player), 0)
+            entity:TakeDamage(SAW_DPS/30, DamageFlag.DAMAGE_CLONES, EntityRef(BeckyMod.GetEntData(effect).player), 0)
         end
     end
 end

@@ -9,7 +9,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function(_, fam)
     local player = fam.Player
     if not player or not player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_KNIFE) then return end
     
-    local ghostData = fam:GetData()
+    local ghostData = BeckyMod.GetEntData(fam)
     local knifeEnt = ghostData.KnifeEnt
 
     if not (knifeEnt and knifeEnt:Exists()) then

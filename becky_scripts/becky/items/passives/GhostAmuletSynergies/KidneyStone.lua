@@ -1,7 +1,7 @@
 ---@param fam EntityFamiliar
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function (_, fam)
     local player = fam.Player
-    local data = fam:GetData()
+    local data = BeckyMod.GetEntData(fam)
 
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then return end
     local urethracharge = data.URETHRACHARGE or 0
@@ -50,7 +50,7 @@ end)
 ---@param tearParams TearParams
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, npc,tearParams)
     local player = fam.Player
-    local data = fam:GetData()
+    local data = BeckyMod.GetEntData(fam)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_KIDNEY_STONE) then return end
     local blasting = data.URETHRABLAST or false
     local urethracharge = data.URETHRACHARGE or 0

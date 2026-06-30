@@ -4,7 +4,7 @@ local GHOST_BALL = Isaac.GetEntityVariantByName("Ghost Ball")
 ---@param fam EntityFamiliar
 ---@param tearParams TearParams
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, tearParams)
-    local ghostData = fam:GetData()
+    local ghostData = BeckyMod.GetEntData(fam)
     local laserRef = ghostData.TechXRing and ghostData.TechXRing.Ref 
     local exists = laserRef and laserRef:Exists()
     local teching = fam.Player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X)

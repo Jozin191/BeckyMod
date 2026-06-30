@@ -6,7 +6,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     if not player then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then return end
 
-    local ghostData = fam:GetData()
+    local ghostData = BeckyMod.GetEntData(fam)
 
     ghostData.BrimHits = ghostData.BrimHits or 3
 

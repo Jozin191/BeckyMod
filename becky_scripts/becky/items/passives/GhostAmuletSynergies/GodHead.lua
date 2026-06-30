@@ -4,7 +4,7 @@ local GHOST_BALL = Isaac.GetEntityVariantByName("Ghost Ball")
 ---@param fam EntityFamiliar
 ---@param tearParams TearParams
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, tearParams)
-    local ghostData = fam:GetData()
+    local ghostData = BeckyMod.GetEntData(fam)
     local tearRef = ghostData.GodHeadAura and ghostData.GodHeadAura.Ref 
     local exists = tearRef and tearRef:Exists()
     local glowing = (tearParams.TearFlags & TearFlags.TEAR_GLOW == TearFlags.TEAR_GLOW)

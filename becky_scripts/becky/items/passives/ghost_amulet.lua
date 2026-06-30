@@ -130,7 +130,7 @@ end
 
 ---@param entity Entity
 local function SpawnTrail(entity)
-    local entData = entity:GetData()
+    local entData = BeckyMod.GetEntData(entity)
 
     local entityParent = entity -- Set this to the parent of the trail
     local trail = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL, 0, entityParent.Position, Vector.Zero, entityParent):ToEffect() ---@cast trail EntityEffect
@@ -148,7 +148,7 @@ local function SpawnTrail(entity)
 end
 
 local function RemoveTrail(entity)
-    local entData = entity:GetData()
+    local entData = BeckyMod.GetEntData(entity)
     if not entData.GhostTrail then return end
 
     entData.GhostTrail:Remove()
@@ -178,7 +178,7 @@ local MultiShotItems = {
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
     if not HasGhostAmulet(player) then return end
 
-    local data = player:GetData()
+    local data = BeckyMod.GetEntData(player)
     local ghostBalls = data.GhostBalls
     if ghostBalls then
         for idx=#ghostBalls, 1, -1 do
@@ -253,7 +253,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, id, _, _
     StopShooting(id, player)
     if not HasGhostAmulet(player) then return end
     if id == CollectibleType.COLLECTIBLE_CONTINUUM then
-        local playerData = player:GetData()
+        local playerData = BeckyMod.GetEntData(player)
         local ghosts = playerData.GhostBalls
 
         if not ghosts then return end
@@ -270,7 +270,7 @@ end)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(player, ID)
     if ID ~= GHOST_AMULET.ID then return end
     if ID == CollectibleType.COLLECTIBLE_CONTINUUM then
-        local playerData = player:GetData()
+        local playerData = BeckyMod.GetEntData(player)
         local ghosts = playerData.GhostBalls
 
         if not ghosts then return end
@@ -292,28 +292,28 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     rng:SetSeed(seed, 35)
 
     -- respawning ghosts
-    player:GetData().LAST_GHOST_CHECK = player:GetData().LAST_GHOST_CHECK or 0
+    BeckyMod.GetEntData(player).LAST_GHOST_CHECK = BeckyMod.GetEntData(player).LAST_GHOST_CHECK or 0
     local num = GHOST_AMULET:GetGhostAmount(player)
-    if player:GetData().LAST_GHOST_CHECK ~= num then
+    if BeckyMod.GetEntData(player).LAST_GHOST_CHECK ~= num then
         player:CheckFamiliar(GHOST_BALL_VAR,0,rng)
     end
-    player:GetData().LAST_GHOST_CHECK = num
+    BeckyMod.GetEntData(player).LAST_GHOST_CHECK = num
     
     local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, num, rng)
     for i, ghost in pairs(fams) do
-        ghost:GetData().GHOST_IDX = i
+        BeckyMod.GetEntData(ghost).GHOST_IDX = i
     end
     if player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING then
         local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, 1)
         for _, ghost in pairs(fams) do
-            ghost:GetData().GHOST_IDX = num+1
+            BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
         end
     end
 end, CacheFlag.CACHE_FAMILIARS)
 
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
-    local ghostData = familiar:GetData()
+    local ghostData = BeckyMod.GetEntData(familiar)
     familiar:ClearEntityFlags(EntityFlag.FLAG_APPEAR)
 	familiar:AddEntityFlags(EntityFlag.FLAG_NO_PHYSICS_KNOCKBACK | EntityFlag.FLAG_NO_KNOCKBACK --[[@as EntityFlag]])
     local player = familiar.Player
@@ -321,7 +321,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
     ghostData.BounceMomentum = 0
     ghostData.TEARPARAMS = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     if player then
-        local playerData = player:GetData()
+        local playerData = BeckyMod.GetEntData(player)
         playerData.GhostBalls = playerData.GhostBalls or {}
         table.insert(playerData.GhostBalls, familiar)
     end
@@ -355,7 +355,7 @@ local Anims = {
 
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-    local playerData = player:GetData()
+    local playerData = BeckyMod.GetEntData(player)
     local ghosts = playerData.GhostBalls
 
     if not ghosts then return end
@@ -383,7 +383,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     for _, ghost in ipairs(ghosts) do ---@cast ghost EntityFamiliar
         if not ghost then goto continue end
 
-        local ghostData = ghost:GetData()
+        local ghostData = BeckyMod.GetEntData(ghost)
         local momentum = ghostData.BounceMomentum or 0
         shotSpeed = shotSpeed + momentum/4
         maxDistMove = maxDistMove + momentum*2
@@ -626,7 +626,7 @@ end
 
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
-    local ghostData = familiar:GetData()
+    local ghostData = BeckyMod.GetEntData(familiar)
     local GhostSprite = familiar:GetSprite()
     local player = familiar.Player
     local room = BeckyMod.Game:GetRoom()
@@ -732,7 +732,7 @@ end, GHOST_BALL_VAR)
 ---@param familiar EntityFamiliar
 ---@param offset Vector
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function (_, familiar, offset)
-    local ghostData = familiar:GetData()
+    local ghostData = BeckyMod.GetEntData(familiar)
     local ghostTrail = ghostData.GhostTrail 
     if ghostTrail then
         ghostTrail.ParentOffset = familiar.PositionOffset
@@ -752,7 +752,7 @@ local DestroyableFireplaces = {
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, familiar, collider)
     local npc = collider and collider:ToNPC()
     local player = familiar.Player
-    local ghostData = familiar:GetData()
+    local ghostData = BeckyMod.GetEntData(familiar)
     local sprite = familiar:GetSprite()
     local tearParams = ghostData.TEARPARAMS or player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     local baseDamage = (GHOST_AMULET:GetGhostDamage(player, tearParams.TearDamage) + (ghostData.CoalBonus or 0)) * ghostData.ChocolateMilkMult * (ghostData.ProptosisMulti or 1)

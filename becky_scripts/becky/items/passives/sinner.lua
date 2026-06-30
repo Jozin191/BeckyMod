@@ -36,7 +36,7 @@ end
 
 ---@param familiar Entity
 function SINNER:GetFamiliarData(familiar)
-    local data = familiar:GetData()
+    local data = BeckyMod.GetEntData(familiar)
     data.__BECKY_SINNER = data.__BECKY_SINNER or {}
     ---@class SinnerFamiliarData
     ---@field Dist number
@@ -48,7 +48,7 @@ end
 
 ---@param player Entity
 function SINNER:GetPlayerData(player)
-    local data = player:GetData()
+    local data = BeckyMod.GetEntData(player)
     data.__BECKY_SINNER = data.__BECKY_SINNER or {
         Speed = 0
     }

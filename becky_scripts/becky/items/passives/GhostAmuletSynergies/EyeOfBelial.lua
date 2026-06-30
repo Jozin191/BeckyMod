@@ -3,7 +3,7 @@
 ---@param tearParams TearParams
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams)
     local player = fam.Player 
-    local ghostData = fam:GetData()
+    local ghostData = BeckyMod.GetEntData(fam)
     if not (tearParams.TearFlags & TearFlags.TEAR_BELIAL == TearFlags.TEAR_BELIAL) then return end
     local redGhostRef = ghostData.RedGhost and ghostData.RedGhost.Ref 
     local exists = redGhostRef and redGhostRef:Exists()
@@ -29,7 +29,7 @@ end)
 ---@param tearParams TearParams
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, tearParams)
     local player = fam.Player 
-    local ghostData = fam:GetData()
+    local ghostData = BeckyMod.GetEntData(fam)
 
     local redGhostRef = ghostData.RedGhost and ghostData.RedGhost.Ref 
     local exists = redGhostRef and redGhostRef:Exists()

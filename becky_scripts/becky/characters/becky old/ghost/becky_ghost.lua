@@ -111,7 +111,7 @@ end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
     local player = familiar.Player
     if player and isNormalRender() then
-        local familiarData, playerData = familiar:GetData(), player:GetData()
+        local familiarData, playerData = BeckyMod.GetEntData(familiar), BeckyMod.GetEntData(player)
         familiarData.BeckyGhostDamageCooldown = math.max((familiarData.BeckyGhostDamageCooldown or 0) - 1, 0)
 
         -- Original Chargebar code that I'm copying over
@@ -161,7 +161,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_RENDER, function(_, familiar)
         if isFiring then
             familiar.Velocity = (familiarData.fireDirection 
                 * (familiar.Player.ShotSpeed * BECKY_GHOST.GHOST_SHOT_SPEED_MULT) 
-                + familiar:GetData().fireInheritance)
+                + BeckyMod.GetEntData(familiar).fireInheritance)
             playGhostAnimation(familiar, "Release", familiarData.fireDirection:GetAngleDegrees())
             Isaac.RunCallback(synergyCallbacks.BECKY_GHOST_UPDATE, familiar, familiarData)
             if playerData.BeckyGhostReturn then
@@ -249,7 +249,7 @@ end, BECKY_GHOST.BECKY_GHOST_VARIANT)
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_FAMILIAR_COLLISION, function(_, familiar, entity, low)
     if familiar.Variant == BECKY_GHOST.BECKY_GHOST_VARIANT then
         if entity and entity:IsEnemy() then
-            local familiarData = familiar:GetData()
+            local familiarData = BeckyMod.GetEntData(familiar)
             if not familiarData.BeckyGhostDamageCooldown then 
                 familiarData.BeckyGhostDamageCooldown = 0 
             end

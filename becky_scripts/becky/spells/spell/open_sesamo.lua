@@ -18,7 +18,7 @@ local function fun(player)
     laser.Color = Color.LaserAlmond
 
     laser:Update()
-    --laser:GetData().OpenSesamo_LaserInfo = { Angle = angle, }
+    
     local hitPos = laser.EndPoint - (JOHN_ANGLE * 20):Rotated(angle)
     local room = BeckyMod.Game:GetRoom()
     local gridEnt = room:GetGridEntityFromPos(hitPos)

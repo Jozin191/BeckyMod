@@ -7,7 +7,7 @@ end
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function (_, fam, tearParams)
     local player = fam.Player
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_FLAT_STONE) then return end
-    local data = fam:GetData()
+    local data = BeckyMod.GetEntData(fam)
     data.GTVeloH = data.GTVeloH or 0
     data.GTH = data.GTH or 0
     local bounce = getBounce(player)
@@ -37,7 +37,7 @@ end)
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function (_, fam)
     if Game():IsPaused() then return end
     local player = fam.Player
-    local data = fam:GetData()
+    local data = BeckyMod.GetEntData(fam)
     data.GTVeloH = data.GTVeloH or 0
     data.GTH = data.GTH or 0
     if player:HasCollectible(CollectibleType.COLLECTIBLE_FLAT_STONE) then

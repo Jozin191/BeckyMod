@@ -10,7 +10,7 @@ BlendMode.AlphaDestinationFactor = BlendFactor.ONE_MINUS_SRC_ALPHA
 ---@param offset Vector
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, familiar, offset)
     local player = familiar.Player
-    local ghostData = familiar:GetData()
+    local ghostData = BeckyMod.GetEntData(familiar)
     if true then
         local info = ghostData.DeadEyeMulti
         if info and info.Multi > 0 then
@@ -28,7 +28,7 @@ end)
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, familiar)
     local player = familiar.Player
-    local ghostData = familiar:GetData()
+    local ghostData = BeckyMod.GetEntData(familiar)
 
     local info = ghostData.DeadEyeMulti or {
             Multi = 0,
@@ -45,7 +45,7 @@ end)
 ---@param familiar EntityFamiliar
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, familiar)
     local player = familiar.Player
-    local ghostData = familiar:GetData()
+    local ghostData = BeckyMod.GetEntData(familiar)
     local info = ghostData.DeadEyeMulti
     if info and player:HasCollectible(CollectibleType.COLLECTIBLE_DEAD_EYE) then
         info.Multi = math.min(info.Multi + .075, 1)

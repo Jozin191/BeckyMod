@@ -46,7 +46,7 @@ end
 ---@param fam EntityFamiliar
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function (_, fam)
     local player = fam.Player
-    local data = fam:GetData()
+    local data = BeckyMod.GetEntData(fam)
 
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) then return end
     local sprite = fam:GetSprite()
@@ -68,7 +68,7 @@ end)
 ---@param npc EntityNPC
 BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, npc)
     local player = fam.Player
-    local data = fam:GetData()
+    local data = BeckyMod.GetEntData(fam)
     if player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) then 
         if data.LUNGCHARGE >= 1 then
             FireMonstroBurst(player, player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG), fam.Position, (npc.Position-fam.Position):Normalized(), 14, 35)
@@ -95,7 +95,7 @@ end)
 ---@param fam EntityFamiliar
 BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function (_, fam, offset)
     local player = fam.Player
-    local data = fam:GetData()
+    local data = BeckyMod.GetEntData(fam)
 
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) then return end
     local lungcharge = data.LUNGCHARGE or 0
