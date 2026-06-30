@@ -4,12 +4,16 @@
         <Item Name="Scarecrow" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Night of the Slasher" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Butcher's Cookbook" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Poul" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Magic Staff" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Undead Hand" Weight="0.5" DecreaseBy="0.5" RemoveOn="0.05" />
     </Pool>
     <Pool Name="greedTreasure">
         <Item Name="Sinner" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Scarecrow" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Night of the Slasher" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Butcher's Cookbook" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Magic Staff" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
     </Pool>
 
 
@@ -26,17 +30,22 @@
         <Item Name="Dead Socket" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Night of the Slasher" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
     </Pool>
-
+    <Pool Name="greedShop">
+        <Item Name="Poul" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Magic Staff" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
 
     <Pool Name="devil">
         <Item Name="Sinner" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Defiled Chalice" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Null Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Undead Hand" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
     </Pool>
     <Pool Name="greedDevil">
         <Item Name="Sinner" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Defiled Chalice" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
         <Item Name="Null Bombs" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Undead Hand" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
     </Pool>
 
 
@@ -49,14 +58,20 @@
 
     <Pool Name="secret">
         <Item Name="Dead Socket" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Magic Staff" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
     </Pool>
 
+    <Pool Name="curse">
+        <Item Name="Undead Hand" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+    </Pool>
+    
     <Pool Name="demonBeggar">
         <Item Name="Defiled Chalice" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
     </Pool>
 
     <Pool Name="babyShop">
         <Item Name="Sinner" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+        <Item Name="Poul" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
     </Pool>
 
     <Pool Name="library">

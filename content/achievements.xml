@@ -19,7 +19,17 @@
 	<!-- Sofia Challenge -->
 	<achievement name="Sanguine Feather" text='Sofia Challenge' gfx="achievement_sanguine_feather.png" />
 	
-	<!-- Tainted shit so it's locked -->
-	<achievement name="Tainted Becky" text='' gfx="achievement_placeholder.png" hidden="true"/>
+	<!-- Tainted Becky -->
+	<achievement name="Tainted Becky" text='???' gfx="achievement_beckyb.png" />
+	<achievement name="Ripped Card" text='???' gfx="achievement_ripped_card.png" />
+	<achievement name="Soul of Becky" text='???' gfx="achievement_soulofbecky.png" />
+	<achievement name="Alarm Clock" text='???' gfx="achievement_alarm_clock.png" />
+	<achievement name="Bug Spray" text='???' gfx="achievement_bug_spray.png" />
+	<achievement name="Undead Hand" text='???' gfx="achievement_undead_hand.png" />
+	<achievement name="Magic Staff" text='???' gfx="achievement_magic_staff.png" />
+	<achievement name="Sketchy Beggar" text='???' gfx="achievement_sketchy_beggar.png" />
 	
+	<!-- Poltergeist Challenge -->
+	<achievement name="Poltergeist Challenge" text='You unlocked Becky Challenge #2 Poltergeist' gfx="achievement_poltergeist_challenge.png" />
+	<achievement name="Poul" text='Beat the Challenge Poltergeist' gfx="achievement_poul_item.png" />
 </achievements>

@@ -1,18 +1,27 @@
 <costumes anm2root="gfx/characters/">
 
-    <costume id="1" anm2path="becky_hair.anm2" type="none" priority="99" />
+    <costume anm2path="becky_hair.anm2" id="0" type="none" priority="99" />
     <costume anm2path="becky_body.anm2" type="none" priority="0" />
-    <costume id="2" anm2path="ghostheadstuff.anm2" type="none" priority="100"/>
-    <costume anm2path="sofia_hair.anm2" type="none" priority="99" />
+    <costume anm2path="ghostheadstuff.anm2" type="none" priority="100"/>
+    <costume anm2path="sofia_hair.anm2" id="5" type="none" priority="99" />
     <costume anm2path="sofia_belt.anm2" type="none" priority="0" />
+    <costume anm2path="becky_b_hair.anm2" id="7" type="none" priority="99" />
+    <costume anm2path="becky_b_scarf.anm2" type="none" priority="0" />
 
-    <costume anm2path="night_of_the_slasher.anm2" type="none" priority="100" />
-    <costume anm2path="scarecrow.anm2" type="passive" id="5" />
-    <costume anm2path="dead_socket.anm2" type="passive" id="6" />
+    <costume anm2path="night_of_the_slasher.anm2" type="none" id="10" priority="100" />
 
-    <costume anm2path="coxinha.anm2" type="passive" id="3"/>
+    <costume anm2path="coxinha.anm2" type="passive" id="1" />
+    <costume anm2path="costume_chalice.anm2" type="passive" id="2" hasSkinAlt="true" />
+    <costume anm2path="scarecrow.anm2" type="passive" id="3" />
+    <costume anm2path="dead_socket.anm2" type="passive" id="4" />
+    <costume anm2path="ghost_amulate_costume.anm2" type="passive" id="8" />
+    
+    <costume anm2path="229_monstros lung.anm2" type="none" id="11" hasSkinAlt="true" priority="22" />
+    <costume anm2path="069_Chocolate Milk.anm2" type="none" id="12" priority="21"  hasSkinAlt="true" />
+    <costume anm2path="044x_Neptunus.anm2" type="none" id="13" priority="22" skinColor="2" overwriteColor="true" />
+    <costume anm2path="052_Dr Fetus.anm2"  type="none" id="14" />
+    <costume anm2path="168_Epic Fetus.anm2" type="none" id="15" />
 
-    <costume anm2path="costume_chalice.anm2" type="passive" id="4" hasOverlay="true" hasSkinAlt="true" />
 
     <costume anm2path="costumes/pog/becky_pog.anm2" isFlying="true" priority="969" type="none"/>
     <costume anm2path="costumes/pog/sofia_pog.anm2" isFlying="true" priority="969" type="none"/>

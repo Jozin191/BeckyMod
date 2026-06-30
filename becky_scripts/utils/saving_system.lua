@@ -48,7 +48,7 @@ end
 ---@return table
 ---@function
 function BeckyMod:RoomSave(ent, noHourglass, listIndex)
-	return Mod.SaveManager.GetRoomFloorSave(ent, noHourglass, listIndex)
+	return Mod.SaveManager.GetRoomSave(ent, noHourglass, listIndex)
 end
 
 ---@param ent? Entity | Vector  @If an entity is provided, returns an entity specific save within the room save. If a Vector is provided, returns a grid index specific save. Otherwise, returns arbitrary data in the save not attached to an entity.
@@ -56,7 +56,7 @@ end
 ---@return table
 ---@function
 function BeckyMod:TempSave(ent, noHourglass)
-	return Mod.SaveManager.GetRoomSave(ent, noHourglass)
+	return Mod.SaveManager.GetTempSave(ent, noHourglass)
 end
 
 --#endregion

@@ -4,6 +4,7 @@ BeckyMod.Pickup.DEAD_BATTERY = t
 
 t.SUBTYPE = Isaac.GetEntitySubTypeByName("Dead Battery")
 t.REPLACE_CHANCE = 0.1
+t.ACHIEVEMENT = Isaac.GetAchievementIdByName("Dead Battery")
 
 ---@param pickup EntityPickup
 ---@param collider Entity
@@ -16,9 +17,9 @@ end, PickupVariant.PICKUP_LIL_BATTERY)
 ---@param variant PickupVariant
 ---@param subtype BatterySubType
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PICKUP_SELECTION, function (_, _, variant, subtype)
-    if not Isaac.GetPersistentGameData():Unlocked(Isaac.GetAchievementIdByName("Dead Battery")) then return end
     if variant ~= PickupVariant.PICKUP_LIL_BATTERY or subtype == t.SUBTYPE then return end
-    local room = BeckyMod.Game:GetRoom() if not (room:IsFirstVisit() and room:GetFrameCount() == -1)
-    or Isaac.GetPlayer():GetCollectibleRNG(BeckyMod.Item.DEAD_SOCKET.ID):RandomFloat() > t.REPLACE_CHANCE then return end
+    if not Isaac.GetPersistentGameData():Unlocked(t.ACHIEVEMENT) then return end
+    local room = BeckyMod.Game:GetRoom()
+    if not (room:IsFirstVisit() and room:GetFrameCount() == -1) or Isaac.GetPlayer():GetCollectibleRNG(BeckyMod.Item.DEAD_SOCKET.ID):RandomFloat() > t.REPLACE_CHANCE then return end
     return {variant, t.SUBTYPE}
 end)

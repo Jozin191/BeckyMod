@@ -1,7 +1,7 @@
 <items gfxroot="gfx/items/" version="1" deathanm2="gfx/death items.anm2">
         <!--ACTIVE ITEMS-->
 
-        <active id="2"
+        <active id="0"
         name="Night of the Slasher"
         gfx="night_of_the_slasher.png"
         description="Bloody shower"
@@ -10,20 +10,61 @@
         chargetype="normal"
 
         tags="nolostbr nocantrip"
+        achievement="Night of the Slasher"
         />
 
-        <active id="11"
+        <active id="9"
         name="Butcher's Cookbook"
         gfx="butchers_cookbook.png"
         description="I'm the butcher and this is my cookbook!"
         quality="2"
         maxcharges="1"
         chargetype="normal"
+        achievement="Butcher's Cookbook"
+        />
+
+        <active id="10"
+        name="Magic Staff"
+        gfx="magic staff.png"
+        description="Power Soul"
+        quality="2"
+        maxcharges="2"
+        chargetype="normal"
+
+        tags="nocantrip"
+        achievement="Magic Staff"
+        />
+        <!-- v T. Becky's unique magic staff -->
+        <active id="10"
+        name="​Magic Staff"
+        gfx="magic staff.png"
+        description="Power Soul"
+        quality="2"
+        craftquality="-1"
+        maxcharges="0"
+        chargetype="normal"
+
+        tags="nocantrip noeden"
+        hidden="true"
+        achievement="Magic Staff"
+        />
+
+        <active id="11"
+        name="Undead Hand"
+        gfx="undead_hand.png"
+        description="Unkillable servant"
+        quality="3"
+        maxcharges="5"
+        chargetype="normal"
+        cache="familiars"
+
+        tags="nocantrip"
+        achievement="Undead Hand"
         />
 
         <!--PASSIVE ITEMS-->
 
-        <passive id="3"
+        <passive id="1"
         name="Coxinha"
         gfx="coxinha.png"
         description="HP up + speed up"
@@ -34,9 +75,10 @@
         hearts="6"
 
         tags="nolostbr"
+        achievement="Coxinha"
         />
 
-        <passive id="4"
+        <passive id="2"
         name="Defiled Chalice"
         gfx="chalice.png"
         description="Spill their blood"
@@ -44,18 +86,20 @@
         cache=""
         hearts="2"
         devilprice="1"
+        achievement="Defiled Chalice"
         />
 
-        <passive id="5"
+        <passive id="3"
         name="Scarecrow"
         gfx="scarecrow.png"
         description="Bonus murder"
         quality="2"
 
         tags="offensive summonable"
+        achievement="Scarecrow"
         />
 
-        <passive id="6"
+        <passive id="4"
         name="Dead Socket"
         gfx="dead_socket.png"
         description="Soul-sucking charge"
@@ -63,67 +107,94 @@
 		persistent="true"
 
         tags="offensive summonable nocantrip battery"
+        achievement="Dead Socket"
         />
 
-        <passive id="7"
+        <passive id="5"
         name="Null Bombs"
         gfx="null_bombs.png"
         description="Abyssal blast +5 bombs"
         quality="3"
         devilprice="2"
         bombs="5"
+        achievement="Null Bombs"
         />
 
-        <passive id="8"
+        <passive id="6"
         name="Dream Banisher"
         gfx="dream_banisher.png"
         description="Curse the cursed"
         quality="2"
+        achievement="Dream Banisher"
         />
 
-        <familiar id="9"
+        <familiar id="7"
         name="Sinner"
         gfx="sinner.png"
         description="Sinful buddy"
         quality="2"
         tags="offensive summonable monstermanual"
         devilprice="1"
+        achievement="Sinner"
         />
 
-        <familiar id="10"
+        <familiar id="8"
         name="Ghost Amulet"
         gfx="ghost_amulet.png"
         description="Bouncy buddy!!!"
         quality="4"
         cache="familiars"
         tags="offensive summonable"
+        achievement="Ghost Amulet"
+        />
+
+        <familiar id="12"
+        name="Poul"
+        gfx="poul.png"
+        description="Haunting friend"
+        quality="2"
+        tags="offensive summonable monstermanual"
+        devilprice="1"
+        achievement="Poul"
+        />
+
+        <passive
+        name="Spelling"
+        gfx="spelling.png"
+        description="How you got this?!"
+        quality="0"
+        craftquality="-1"
+        hidden="true"
         />
 
         <!--TRINKETS-->
 
-        <trinket id="2"
+        <trinket id="0"
         name="Holy Bookmark"
         description="With lightness comes luck"
         gfx="holy_bookmark.png"
         cache="luck"
         passivecache="true"
+        achievement="Holy Bookmark"
         />
 
-        <trinket id="3"
+        <trinket id="1"
         name="Devilzon Prime"
         description="Premium subscription… at a price"
         gfx="devilzon_prime.png"
         cache=""
+        achievement="Devilzon Prime"
         />
 
-        <trinket id="4"
+        <trinket id="2"
         name="Corpse Tag"
         description="A bone to pick"
         gfx="corpse_tag.png"
         cache=""
+        achievement="Corpse Tag"
         />
 
-        <trinket id="12"
+        <trinket id="3"
         name="Sanguine Feather"
         description="Find solace in pain"
         gfx="sanguine_feather.png"
@@ -131,11 +202,122 @@
         achievement="Sanguine Feather"
         />
 
+        <trinket id="4"
+        name="Alarm Clock"
+        description="Time is ticking"
+        gfx="alarm_clock.png"
+        cache=""
+        achievement="Alarm Clock"
+        />
+
+        <trinket id="5"
+        name="Bug Spray"
+        description="Super effective on flies and spider"
+        gfx="bug_spray.png"
+        achievement="Bug Spray"
+        />
+
+        <!-- T. Becky Fake Items -->
+        <null id="11"
+        name="Monstro's Lung Blocker" 
+        persistent="true" 
+        cache="firedelay" 
+        />
+        <null id="12"
+        name="Chocolate Milk Blocker" 
+        persistent="true" 
+        cache="tearcolor" 
+        />
+        <null id="13"
+        name="Neptunus Blocker" 
+        persistent="true" 
+        cache="" 
+        />
+        <null id="14"
+        name="Epic Fetus Blocker" 
+        persistent="true" 
+        cache="firedelay" 
+        />
+        <null id="15"
+        name="Dr Fetus Blocker" 
+        persistent="true" 
+        cache="firedelay" 
+        />
+        <null
+        name="Spirit Sword Stat up" 
+        persistent="true" 
+        cache="damage firedelay" 
+        />
+
         <!-- Null Items -->
 
-        <null id="1" 
+        <null
         name="NULL_BECKY_GHOST" 
         persistent="true" 
         cache="familiars" 
         />
+        <null id="10"
+        name="Night of the Slasher_Costume handler"
+        persistent="true" 
+        cache="" />
+        <null
+        name="Undead Hand_Zombie Counter"
+        persistent="false" 
+        cache="" />
+
+        <null 
+        name="RIPPED_CARD_The_Magician" />
+        <null
+        name="RIPPED_CARD_The_Devil"
+        cache="damage" />
+        <null
+        name="RIPPED_CARD_The_Empress"
+        cache="damage speed" />
+        <null
+        name="RIPPED_CARD_Strength"
+        cache="damage speed range" />
+        <null
+        name="RIPPED_CARD_The_Hanged_Man"
+        cache="tearflag" />
+
+        <null
+        name="SPELL_Summon_BroberBobby"
+        cache="familiars" />
+        <null
+        name="SPELL_Summon_2"
+        cache="familiars" />
+        <null
+        name="SPELL_Summon_3"
+        cache="familiars" />
+        <null
+        name="SPELL_Summon_4"
+        cache="familiars" />
+
+        <null
+        name="SPELL_Shield"
+        cache="" />
+        <null
+        name="SPELL_SacrificialBuff"
+        cache="damage range firedelay" />
+        <null
+        name="SPELL_FirePower"
+        cache="" />
+        <null
+        name="SPELL_Devil"
+        cache="" />
+        <null
+        name="SPELL_WeakEnemies"
+        cooldown="300"
+        cache="" />
+        <null
+        name="SPELL_Multishot"
+        cache="firedelay" />
+        <null
+        name="SPELL_FlyHoming"
+        cooldown="360"
+        cache="speed flying tearflag tearcolor" />
+
+        <null
+        name="SOUL_OF_BECKY_SELECT_STATE"
+        cache="" />
 </items>

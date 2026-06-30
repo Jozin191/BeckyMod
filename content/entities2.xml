@@ -2,19 +2,104 @@
     <!-- FAMILIAR -->
     <entity id="3" name="Becky Ghost" collisionRadius="10" friction="1" shadowSize="11" anm2path="familiar/BeckyGhostSheet.anm2"/>
     <entity id="3" name="Tainted Becky" collisionRadius="10" friction="1" shadowSize="16" anm2path="familiar/TBecky.anm2"/>
+    <entity id="3" name="Becky Sinner" anm2path="familiar/SinBat.anm2" collisionInterval="2" collisionMass="3" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="8" tags="cansacrifice"/>
+    <entity id="3" name="Becky Zombie" anm2path="familiar/zombie.anm2" baseHP="10" boss="0" champion="0" collisionDamage="1.36" collisionMass="5" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="16" stageHP="0" customtags="nocharm familiarblockprojectiles familiarcantakedamage familiarignorebffs">
+        <gibs amount="6" blood="1" bone="1" eye="1" gut="1" large="0" />
+    </entity>
+    <entity id="3" name="Polty (Familiar)" anm2path="beckyMagic/polty_familiar.anm2" friction="1" numGridCollisionPoints="8" shadowSize="12" collisionDamage="0" collisionMass="8" collisionRadius="7" baseHP="0" boss="0" champion="0" />
+    <!--Ghost Ball-->
+    <entity name = "Ghost Ball" id = "3" anm2path = "items/GHOST_BALL.anm2" shadowSize="10" collisionRadius="17" friction = "0.8"/>
 
+    <!--Pick ups-->
     <entity anm2path="items/pick ups/bombs/null_copper0.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" id="4" variant="1510" name="Null Bomb" numGridCollisionPoints="12" shadowSize="18" stageHP="0">
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
     </entity>
     <entity name="Dead Battery" id="5" variant="90" subtype="145" anm2path="pickup_becky_deadbattery.anm2" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17"/>
-    <entity id="3" name="Becky Sinner" anm2path="familiar/SinBat.anm2" collisionInterval="2" collisionMass="3" collisionRadius="13" friction="1" numGridCollisionPoints="12" shadowSize="8" tags="cansacrifice"/>
-
-    <!--Ghost Ball-->
-    <entity name = "Ghost Ball" id = "3" anm2path = "items/GHOST_BALL.anm2" shadowSize="15" collisionRadius="17" friction = "0.8"/>
+    <entity name="Soul of Becky" id="5" variant="300" subtype="230" anm2path="Soul_of_Becky.anm2" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17"/>
+    <entity name="Ripped Card" id="5" variant="300" subtype="231" anm2path="Ripped_card.anm2" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17"/>
+    <entity name="Patched Card" id="5" variant="300" subtype="232" anm2path="Patched_card.anm2" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="17"/>
+    
+    <!-- Slot -->
+    <entity id="6" variant="427" name="Sketchy Beggar" anm2path="sketchy_beggar.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" numGridCollisionPoints="24" shadowSize="15" stageHP="0">
+        <gibs amount="6" blood="1" bone="1" eye="1" gut="1" large="0"/>
+    </entity>
 
     <!--Effect entities-->
     <entity name="Butcher's Cookbook Sawblade" id="1000" anm2path="familiar/sawblade.anm2"/>
     <entity name="Knife (Ghost Ball Synergy)" id="1000" anm2path="ghost amulet moms knife.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="8" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0">
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0"/>
     </entity>
+    <entity name="John Becky - Spell EID" id="1000" friction="1" anm2path="beckyMagic/null.anm2"/>
+
+
+    <!-- Spells stuff -->
+    <entity name="Mana Tear"
+        anm2path="beckyMagic/mana_tear 1.anm2"
+        id ="2" friction="1"
+        numGridCollisionPoints="8" shadowSize="8" collisionDamage="0" collisionMass="8" collisionRadius="7"
+        baseHP="0" boss="0" champion="0"
+    />
+    <entity name="Big Mana Tear"
+        anm2path="beckyMagic/mana_tear 1.anm2"
+        id ="2" friction="1"
+        numGridCollisionPoints="8" shadowSize="12" collisionDamage="0" collisionMass="8" collisionRadius="7"
+        baseHP="0" boss="0" champion="0"
+    />
+    <entity name="Mana Shield"
+        anm2path="beckyMagic/spell_shield.anm2"
+        id="1000" friction="1"
+        numGridCollisionPoints="8" shadowSize="14" collisionDamage="0" collisionMass="0" collisionRadius="10" baseHP="0"
+    />
+    <entity name="Spell Devil Laser"
+        anm2path="beckyMagic/devillaser.anm2"
+        id="1000" friction="1"
+        numGridCollisionPoints="1" shadowSize="0" stageHP="0" collisionDamage="0" collisionMass="0" collisionRadius="30" baseHP="0">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0"/>
+    </entity>
+    <entity name="Spell Knight Attack"
+        anm2path="beckyMagic/knight_slash.anm2"
+        id="1000" friction="0"
+        numGridCollisionPoints="0" shadowSize="0" collisionDamage="0" collisionMass="0" collisionRadius="0" baseHP="0"
+    />
+    <entity name="Spell (The) Knight"
+        anm2path="beckyMagic/knight.anm2"
+        id="1000" friction="0"
+        numGridCollisionPoints="0" shadowSize="0" collisionDamage="0" collisionMass="0" collisionRadius="0" baseHP="0"
+    />
+    <entity name="Spell Boomerang"
+        anm2path="beckyMagic/boomerang.anm2"
+        id="1000" friction="1"
+        numGridCollisionPoints="0" shadowSize="0" collisionDamage="0" collisionMass="0" collisionRadius="0" baseHP="0"
+    />
+    <entity name="Spell Boomerang Alt"
+        anm2path="beckyMagic/sawblade.anm2"
+        id="1000" friction="1"
+        numGridCollisionPoints="0" shadowSize="0" collisionDamage="0" collisionMass="0" collisionRadius="0" baseHP="0"
+    />
+    <entity name="Becky Summon Spell Ghost"
+        anm2path="beckyMagic/summon_ghost.anm2"
+        id ="3" friction="1"
+        numGridCollisionPoints="8" shadowSize="12" collisionDamage="0" collisionMass="8" collisionRadius="7"
+        baseHP="0" boss="0" champion="0"
+    />
+    <entity name="Spell Vine"
+        anm2path="beckyMagic/vine.anm2"
+        id="1000" friction="0"
+        baseHP="0" boss="0" champion="0" collisionDamage="1.15" collisionMass="100"
+        collisionRadius="12"  numGridCollisionPoints="12" shadowSize="0" stageHP="0">
+    </entity>
+    <entity name="Spell Gilded Spear Spear"
+        anm2path="beckyMagic/gilded_spear.anm2"
+        id="1000" friction="1"
+        baseHP="0" boss="0" champion="0" collisionDamage="3.5" collisionMass="0"
+        collisionRadius="14"  numGridCollisionPoints="12" shadowSize="0" stageHP="0">
+    </entity>
+    <entity name="Spell Bottle With Water"
+        anm2path="beckyMagic/flask.anm2"
+        id ="2" friction="1"
+        numGridCollisionPoints="8" shadowSize="8" collisionDamage="0" collisionMass="8" collisionRadius="7"
+        baseHP="0" boss="0" champion="0"
+    />
+    <entity name="Spell Haunt Helper" id="1000" friction="1" anm2path="beckyMagic/null.anm2"/>
+
 </entities>

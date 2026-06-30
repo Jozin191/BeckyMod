@@ -1,7 +1,9 @@
 local NOTS = {}
 
 NOTS.ID = Isaac.GetItemIdByName("Night of the Slasher")
+NOTS.NULL_ITEM_ID = Isaac.GetNullItemIdByName("Night of the Slasher_Costume handler")
 NOTS.Costume = Isaac.GetCostumeIdByPath("gfx/characters/night_of_the_slasher.anm2")
+local NullItemConfig = Isaac.GetItemConfig():GetNullItem(NOTS.NULL_ITEM_ID)
 
 BeckyMod.Item.NIGHT_OF_THE_SLASHER = NOTS
 
@@ -86,6 +88,20 @@ end
 
 BeckyMod:AddCallback(ModCallbacks.MC_USE_ITEM, NOTS.UseItem, NOTS.ID)
 
+
+function NOTS:AddCollectible(itemID, charge, firstTime, slot, varData, player)
+    player:AddNullItemEffect(NOTS.NULL_ITEM_ID, true)
+    --player:AddNullCostume(NOTS.NULL_ITEM_ID)
+end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, NOTS.AddCollectible, NOTS.ID)
+
+
+function NOTS:RemoveCollectible(player, itemID, removePlayerForm, wispOrInnate)
+    player:GetEffects():RemoveNullEffect(NOTS.NULL_ITEM_ID, 1)
+    --player:RemoveCostume(NullItemConfig)
+end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, NOTS.RemoveCollectible, NOTS.ID)
+--[[
 function NOTS:HandleCostume(player)
     local save = BeckyMod:RunSave(player)
     if player:HasCollectible(NOTS.ID) then
@@ -101,4 +117,4 @@ function NOTS:HandleCostume(player)
 	end
 end
 
-BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, NOTS.HandleCostume)
+BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, NOTS.HandleCostume)]]

@@ -1,0 +1,25 @@
+<pocketitems>
+	<card type="tarot"
+		pickup="231"
+		description="???"
+		name="Ripped Card"
+		hud="Ripped Card_BeckyMod"
+		mimiccharge="2"
+		achievement="Ripped Card" />
+
+	<card type="tarot"
+		pickup="232"
+		description="???"
+		name="Patched Card"
+		hud="Ripped Card (Complete)_BeckyMod"
+		mimiccharge="4"
+		hidden="true" />
+
+	<card type="rune"
+		pickup="230"
+		description="Soul magic!"
+		name="Soul of Becky"
+		hud="Soul of Becky_BeckyMod"
+		mimiccharge="2"
+		achievement="Soul of Becky" />
+</pocketitems>

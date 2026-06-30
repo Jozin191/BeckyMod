@@ -1,51 +1,6 @@
 local loader = BeckyMod.PatchesLoader
 
 local function EpiphanyPatch()
-    --TrJudas' deal thingy
-
-    --[[
-    BeckyMod.Character.BECKY.AddDealModifiers({
-        ["TARNISHED JUDAS"] = {
-            priority = -200,
-            condition = function(_)
-                print("hello. this judas code")
-                local fyoujudaslol = PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS1) or
-                PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS2) or
-                PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS) or
-                PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS4) or
-                PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS5)
-                return fyoujudaslol
-            end,
-            modification = function(pickup)
-                print("mod judas")
-                local newPickup = pickup
-                newPickup.Price = Epiphany.PickupPrice.PRICE_TWO_BLUE_BROKEN_HEARTS
-                return newPickup
-            end,
-        }
-    })]]
-
-    --[[
-    BeckyMod.Character.BECKY.AddDealModifiers({
-        {
-            identificator = "TARNISHED JUDAS",
-            priority = -200,
-            condition = function(_)
-                local fyoujudaslol = Epiphany and (PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS1) or
-                PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS2) or
-                PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS) or
-                PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS4) or
-                PlayerManager.AnyoneIsPlayerType(Epiphany.PlayerType.JUDAS5))
-                return fyoujudaslol
-            end,
-            modification = function(pickup)
-                local newPickup = pickup
-                newPickup.Price = Epiphany.PickupPrice.PRICE_TWO_BLUE_BROKEN_HEARTS
-                return newPickup
-            end,
-        },
-    })
-    ]]
 
     --mother's shadow curse of darkness thing
 
