@@ -491,7 +491,7 @@ local function EIDPatch()
 					function(descObj) return EID_Collectibles[Item.POUL.ID]._BFFSMod(descObj, "The familiar can pick up various rocks at the same time") end,
 				},
 			},
-			en_us = {
+			spa = {
 				Name = "Poul",
 				Description = {
 					"Genera un familiar que se mueve por el cuarto agarrando piedras y lanzándolas a los enemigos",
