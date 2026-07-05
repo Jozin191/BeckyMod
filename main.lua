@@ -38,6 +38,7 @@ BeckyMod.Item = {}
 BeckyMod.Trinket = {}
 BeckyMod.Character = {}
 BeckyMod.Pickup = {}
+BeckyMod.Slot = {}
 
 if not REPENTOGON then
     local f = Font()
