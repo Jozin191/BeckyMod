@@ -271,4 +271,4 @@ function BeckyMod.GetEntData(ent)
 	return cache_GetData[ptr]
 end
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, 10000, function(_, ent) cache_GetData[ GetPtrHash(ent) ] = nil end) -- clears the table of an entity when is remove
-BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function() cache_GetData = {} end) -- the table get clear when the game starts (this is just in case as "entity remove" should be called when exiting a run)
+BeckyMod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function() cache_GetData = {} end) -- the table get clear when the game starts (this is just in case as "entity remove" should be called when exiting a run)
