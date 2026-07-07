@@ -359,12 +359,19 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local ghosts = playerData.GhostBalls
 
     if not ghosts then return end
-
+    
+    local room = BeckyMod.Game:GetRoom()
     local isShooting = IsPlayerShooting(player)
     local ForceTargetPos = nil
     
     if Options.MouseControl and player.ControllerIndex == 0 then
-        if Input.IsMouseBtnPressed(0) then ForceTargetPos = Input.GetMousePosition(true)
+        if Input.IsMouseBtnPressed(0) then
+            ForceTargetPos = Input.GetMousePosition(true)
+
+            if room:IsMirrorWorld() then -- probably there is a better way to do this. but for now it will be this one.
+                local roomHalf = room:GetCenterPos().X*2
+                ForceTargetPos.X = roomHalf + (ForceTargetPos.X *-1)
+            end
         end
     end
     local marked = player:GetMarkedTarget()
@@ -373,7 +380,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local shotSpeed = player.ShotSpeed
     local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
     local maxDistIdle = 40
-    local room = BeckyMod.Game:GetRoom()
 
     -- epic fetus increases range so you dont kill yourself so easily
     if player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then
@@ -751,6 +757,7 @@ local DestroyableFireplaces = {
 ---@param collider Entity
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, familiar, collider)
     local npc = collider and collider:ToNPC()
+    
     local player = familiar.Player
     local ghostData = BeckyMod.GetEntData(familiar)
     local sprite = familiar:GetSprite()
@@ -774,7 +781,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
 
     if not npc then return end
     if not IsValidEnemy(npc) then return end
-
+    
     sprite:Play("Hit",true)
     TriggerPush(npc, familiar, 20 * GHOST_AMULET:GetGhostTearMult(player)*multi)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
@@ -785,7 +792,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     end
     
     BeckyMod.SFX:Play(SoundEffect.SOUND_MEATY_DEATHS, 0.6, 0, false, 1.5)
-
+    
+    if npc:IsBoss() and npc:HasEntityFlags(EntityFlag.FLAG_AMBUSH) and npc.FrameCount < 29 then baseDamage = baseDamage /3 -- bosses that are spawning on an ambush (challenge and greed waves) takes less damage
+    end
     Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider, tearParams)
 
     if player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then ghostData.ChocolateMilkMult = 0.75 end
