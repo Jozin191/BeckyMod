@@ -141,7 +141,7 @@ for i, name in pairs({
     "Trisagion",
     "Worms" -- dunno
 }) do
-    --include("becky_scripts.becky.items.passives.GhostAmuletSynergies." .. name)
+    include("becky_scripts.becky.items.passives.GhostAmuletSynergies." .. name)
 end
 
 --challenges
