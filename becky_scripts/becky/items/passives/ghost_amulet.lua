@@ -34,7 +34,67 @@ local RoomLimits = {
     X2 = 0,
     Y2 = 0,
 }
+local FamState = {
+    IDLE = 0,
+    ATTACKING = 1,
+    AUTO_ATTACK = 2,
+    DISABLE_IDLE = 3,
+    DISABLE_MOVE = 4
+}
+local FamSubType = {
+    NORMAL = 0,
+    HOMING = 1,
+    BOOKWORM = 2,
+}
 
+
+local function MinGhostAmountCalculation(player)
+    local innerNum = player:GetCollectibleNum(CollectibleType.COLLECTIBLE_INNER_EYE)
+    local mutantNum = player:GetCollectibleNum(CollectibleType.COLLECTIBLE_MUTANT_SPIDER)
+    local _2020Num = player:GetCollectibleNum(CollectibleType.COLLECTIBLE_20_20)
+    local wizNum = math.min(player:GetCollectibleNum(CollectibleType.COLLECTIBLE_THE_WIZ), 8)
+
+    local pType = player:GetPlayerType()
+    local isKeeper = pType == PlayerType.PLAYER_KEEPER or pType == PlayerType.PLAYER_KEEPER_B
+    local isWeaponKnife = false
+    local isWeaponTech = false
+    local maxTears = 16
+
+    local tearNum = 1
+
+    tearNum = tearNum + 5 * player:GetCollectibleNum(CollectibleType.COLLECTIBLE_MONSTROS_LUNG)
+
+    if pType == PlayerType.PLAYER_KEEPER then
+        tearNum = tearNum + 2
+    elseif pType == PlayerType.PLAYER_KEEPER_B then
+        tearNum = tearNum + 3
+    end
+    if _2020Num >0 then
+        tearNum = tearNum + _2020Num
+        if isKeeper or mutantNum >0 or innerNum >0 then tearNum = tearNum -1 end
+    end
+    if innerNum >0 then
+        tearNum = tearNum + innerNum
+        if not isKeeper then tearNum = tearNum +1 end
+    end
+    if mutantNum >0 then
+        tearNum = tearNum + mutantNum *2
+        if not isKeeper and innerNum ==0 then tearNum = tearNum +1 end
+    end
+
+
+    if wizNum > 0 then
+        if isKeeper or _2020Num >1 then tearNum = tearNum -1 end
+        if innerNum >1 then tearNum = tearNum -1 end
+        if mutantNum >1 then tearNum = tearNum - mutantNum end
+
+        tearNum = tearNum * (wizNum +1)
+
+        if isKeeper then maxTears = maxTears -1 end
+    end
+    if tearNum >maxTears then tearNum = maxTears end
+    return tearNum
+end
 
 ---@param npc EntityNPC
 ---@return boolean
@@ -92,8 +152,12 @@ function GHOST_AMULET:GetGhostTearMult(player)
 end
 
 function GHOST_AMULET:GetGhostAmount(player)
-    local BookWormExtra = player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) and 1 or 0
-    return player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears() + (player:GetCollectibleNum(GHOST_AMULET.ID)-1) + BookWormExtra
+    local ghostAmount = player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears()
+    if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) and ghostAmount - MinGhostAmountCalculation(player) == 1 then
+        ghostAmount = ghostAmount -1
+    end
+
+    return ghostAmount + (player:GetCollectibleNum(GHOST_AMULET.ID)-1)
 end
 
 ---@param player EntityPlayer
@@ -155,6 +219,8 @@ local function RemoveTrail(entity)
     entData.GhostTrail = nil
 end
 
+
+
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_PLAYER_INIT_POST_LEVEL_INIT_STATS, function(_, player)
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
@@ -193,9 +259,14 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
     data.HomingFlag = data.HomingFlag or false 
 
     local updateFamCache = false
-    if not data.BookWormFlag and player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
+    if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
+        if not data.BookWormFlag then
+            updateFamCache = true
+            data.BookWormFlag = true
+        end
+    elseif data.BookWormFlag then
         updateFamCache = true
-        data.BookWormFlag = true
+        data.BookWormFlag = false
     end
 
     if player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING then
@@ -295,17 +366,23 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     BeckyMod.GetEntData(player).LAST_GHOST_CHECK = BeckyMod.GetEntData(player).LAST_GHOST_CHECK or 0
     local num = GHOST_AMULET:GetGhostAmount(player)
     if BeckyMod.GetEntData(player).LAST_GHOST_CHECK ~= num then
-        player:CheckFamiliar(GHOST_BALL_VAR,0,rng)
+        player:CheckFamiliar(GHOST_BALL_VAR, 0, rng)
     end
     BeckyMod.GetEntData(player).LAST_GHOST_CHECK = num
     
     local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, num, rng)
-    for i, ghost in pairs(fams) do
+    for i, ghost in ipairs(fams) do
         BeckyMod.GetEntData(ghost).GHOST_IDX = i
     end
     if player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING then
-        local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, 1)
-        for _, ghost in pairs(fams) do
+        local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, FamSubType.HOMING)
+        for _, ghost in ipairs(fams) do
+            BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
+        end
+    end
+    if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
+        local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, FamSubType.BOOKWORM)
+        for _, ghost in ipairs(fams) do
             BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
         end
     end
@@ -319,6 +396,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
     local player = familiar.Player
     
     ghostData.BounceMomentum = 0
+    ghostData.ChocolateMilkMult = 1
     ghostData.TEARPARAMS = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     if player then
         local playerData = BeckyMod.GetEntData(player)
@@ -332,10 +410,17 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_INIT, function (_, familiar)
         familiar.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS 
     end
 
-    if familiar.SubType == 1 then
+    if familiar.SubType == FamSubType.HOMING then
         familiar.Color = Color(0.4, 0.15, 0.38, 1, 0.27843, 0, 0.4549)
     end
-    ghostData.ChocolateMilkMult = 1
+
+    if familiar.SubType == FamSubType.BOOKWORM then
+        if Random() % 2 == 1 then
+            familiar.State = FamState.DISABLE_IDLE
+            familiar:GetSprite().Color.A = 0.33
+        end
+        familiar.FireCooldown = 150
+    end
 end, GHOST_BALL_VAR)
 
 ---Expontential function
@@ -412,7 +497,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         
         local color = ghostTrail.Color
 
-        if ghost.State >= 1 then
+        if ghost.State > FamState.IDLE and ghost.State ~= FamState.DISABLE_IDLE then
            color.A = math.min(color.A + .05, 1)
         else
            color.A = math.max(color.A - .05, 0)
@@ -421,7 +506,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         
         ghostTrail:GetSprite().Scale = Vector(2,2)+Vector.One*momentum*.5
         ghostTrail.Color = Color(testColor.R, testColor.G, testColor.B, color.A, testColor.RO, testColor.GO, testColor.BO)
-        if ghost.SubType == 1 then
+        if ghost.SubType == FamSubType.HOMING then
             local target = ghost.Target
             local ghostPos = ghost.Position
             if target and not IsValidEnemy(target) then
@@ -439,12 +524,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                         end
                     end
                     if target then
-                        ghost.State = 2
+                        ghost.State = FamState.AUTO_ATTACK
                         ghost.Target = target
                     end
                 end
             else
-                ghost.State = 2
+                ghost.State = FamState.AUTO_ATTACK
                 if ghost.FrameCount % 6 == 0 then
                     local dis = 40
                     for _, ent in ipairs(Isaac.FindInRadius(ghostPos, 40, EntityPartition.ENEMY)) do
@@ -459,16 +544,16 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                     end
                 elseif ghost.FrameCount % 3 == 0 and target.Position:Distance(ghostPos) >= 120 then
                     target = nil
-                    ghost.State = 0
+                    ghost.State = FamState.IDLE
                 end
             end
         end
 
-        if ghost.State == 2 then
+        if ghost.State == FamState.AUTO_ATTACK then
             local target = ghost.Target
             if target == nil or target:IsDead() or not target:Exists() then
                 target = nil
-                ghost.State = 0
+                ghost.State = FamState.IDLE
                 return
             end
             local resizer = 1.5 * shotSpeed
@@ -479,7 +564,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             end
         elseif ForceTargetPos or isShooting then
             if ForceTargetPos or not player:AreOpposingShootDirectionsPressed() then
-                ghost.State = 1
+                if ghost.State == FamState.DISABLE_IDLE or ghost.State == FamState.DISABLE_MOVE then
+                    ghost.State = FamState.DISABLE_MOVE
+                else
+                    ghost.State = FamState.ATTACKING
+                end
                 local targetPos
                 if ForceTargetPos then
                     targetPos = ForceTargetPos - ghost.Position
@@ -596,7 +685,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             ghostData.Continuum_Y = false
             ghostData.Continuum_BottomLoop = false
 
-            ghost.State = 0    
+            if ghost.State == FamState.DISABLE_MOVE or ghost.State == FamState.DISABLE_IDLE then
+                ghost.State = FamState.DISABLE_IDLE
+            else
+                ghost.State = FamState.IDLE
+            end
             if posDifLenght > maxDistIdle then
                 ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) *uc
             end
@@ -670,26 +763,51 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         GhostSprite:Play("RegularTear1")
     end
 
-    if gridFromPos and (familiar.FrameCount % 5 == 0 or (tearParams.TearFlags & TearFlags.TEAR_ROCK == TearFlags.TEAR_ROCK)) then
-        local hurtVal = 1
-
-        if gridFromPos:ToPoop() and gridFromPos:GetVariant() == 3 then
-            hurtVal = gridFromPos:GetRNG():RandomInt(3) + 1 
+    if familiar.SubType == FamSubType.HOMING then
+        familiar.Color = Color(0.4, 0.15, 0.38, 1, 0.27843, 0, 0.4549)
+    elseif familiar.SubType == FamSubType.BOOKWORM then
+        if familiar.FireCooldown > 0 then
+            familiar.FireCooldown = familiar.FireCooldown -1
+        else
+            if Random() % 2 == 0 then
+                familiar.State = FamState.IDLE
+                familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_ENEMIES
+                familiar:GetSprite().Color.A = 1
+            else
+                familiar.State = FamState.DISABLE_IDLE
+                familiar.EntityCollisionClass = EntityCollisionClass.ENTCOLL_NONE
+                familiar:GetSprite().Color.A = 0.33
+            end
+            familiar.FireCooldown = 150
         end
+    end
 
-        gridFromPos:Hurt(hurtVal)
-        if (math.random()<=.45 and (tearParams.TearFlags & TearFlags.TEAR_ACID == TearFlags.TEAR_ACID)) or (tearParams.TearFlags & TearFlags.TEAR_ROCK == TearFlags.TEAR_ROCK) then
-            gridFromPos:Destroy()
+    if familiar.State == FamState.DISABLE_IDLE or familiar.State == FamState.DISABLE_MOVE then
+        familiar:GetSprite().Color.A = 0.33
+        
+    else
+        if gridFromPos and (familiar.FrameCount % 5 == 0 or (tearParams.TearFlags & TearFlags.TEAR_ROCK == TearFlags.TEAR_ROCK)) then
+            local hurtVal = 1
+    
+            if gridFromPos:ToPoop() and gridFromPos:GetVariant() == 3 then
+                hurtVal = gridFromPos:GetRNG():RandomInt(3) + 1 
+            end
+    
+            gridFromPos:Hurt(hurtVal)
+            if (math.random()<=.45 and (tearParams.TearFlags & TearFlags.TEAR_ACID == TearFlags.TEAR_ACID)) or (tearParams.TearFlags & TearFlags.TEAR_ROCK == TearFlags.TEAR_ROCK) then
+                gridFromPos:Destroy()
+            end
         end
     end
     ghostData.ANGELICCD = math.max((ghostData.ANGELICCD or 0)-1, 0)
+
     for _, gh in ipairs(Isaac.FindInCapsule(familiar:GetCollisionCapsule())) do
         if gh.Type == EntityType.ENTITY_FAMILIAR then
             local vel = (familiar.Position - gh.Position):Resized(1)
             if vel:Length() < 1 then vel = Vector(1,0):Rotated(vel:GetAngleDegrees()) end
 
             familiar.Velocity = familiar.Velocity + vel
-            if gh.Variant == familiar.Variant  then
+            if gh.Variant == familiar.Variant then
                 gh.Velocity = gh.Velocity - vel
             elseif gh.Variant == FamiliarVariant.ANGELIC_PRISM and (ghostData.ANGELICCD == 0) then
                 ghostData.ANGELICCD = (player.MaxFireDelay+1)*.67
@@ -726,9 +844,19 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         ghostData.ProptosisMulti = 1
     end
     
-    ghostData.BounceMomentum = math.max((ghostData.BounceMomentum * .997) - .02, 0)
+    if ghostData.BounceMomentum > 0 then
+        if ghostData.PrevBounceMomentum == 0 then ghostData.PreBounceColor = familiar.Color end
+        ghostData.BounceMomentum = math.max((ghostData.BounceMomentum * .997) - .02, 0)
+        local ogColor = ghostData.PreBounceColor
+        familiar.Color = Color.Lerp(
+            ghostData.PreBounceColor,
+            Color(
+                ogColor.R, math.max(ogColor.G-ghostData.BounceMomentum/30, 0), math.max(ogColor.B-ghostData.BounceMomentum/6, 0), 1,
+                ogColor.RO, math.max(ogColor.GO -ghostData.BounceMomentum/30, 0), math.max(ogColor.BO -ghostData.BounceMomentum/6, 0)
+            ), 1)
 
-    familiar:SetColor(Color(1,1-ghostData.BounceMomentum/30,1-ghostData.BounceMomentum/6, 1), 2, 10000, false, false)
+    end
+    ghostData.PrevBounceMomentum = ghostData.BounceMomentum
     familiar.SpriteScale = (familiar.SpriteScale + grow + Vector.Zero*ghostData.BounceMomentum) * shrink
     familiar.SizeMulti = (familiar.SizeMulti + grow + Vector.Zero*ghostData.BounceMomentum) * shrink
 
@@ -756,6 +884,7 @@ local DestroyableFireplaces = {
 ---@param familiar EntityFamiliar
 ---@param collider Entity
 BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, familiar, collider)
+    if familiar.State == FamState.DISABLE_IDLE or familiar.State == FamState.DISABLE_MOVE then return false end
     local npc = collider and collider:ToNPC()
     
     local player = familiar.Player
@@ -773,7 +902,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
     end
 
-    if familiar.State == 0 then return true end
+    if familiar.State == FamState.IDLE then return true end
 
     if collider.Type == EntityType.ENTITY_BOMB then
         TriggerPush(collider, familiar, 8*multi)
@@ -819,3 +948,4 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
     RoomLimits.Y2 = center.Y + height
 
 end)
+
