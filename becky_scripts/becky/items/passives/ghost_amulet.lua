@@ -765,7 +765,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 
     if familiar.SubType == FamSubType.HOMING then
         familiar.Color = Color(0.4, 0.15, 0.38, 1, 0.27843, 0, 0.4549)
-    elseif familiar.SubType == FamSubType.BOOKWORM then
+    else
+        familiar.Color = Color.Default
+    end
+    if familiar.SubType == FamSubType.BOOKWORM then
         if familiar.FireCooldown > 0 then
             familiar.FireCooldown = familiar.FireCooldown -1
         else
@@ -845,18 +848,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     end
     
     if ghostData.BounceMomentum > 0 then
-        if ghostData.PrevBounceMomentum == 0 then ghostData.PreBounceColor = familiar.Color end
         ghostData.BounceMomentum = math.max((ghostData.BounceMomentum * .997) - .02, 0)
-        local ogColor = ghostData.PreBounceColor
-        familiar.Color = Color.Lerp(
-            ghostData.PreBounceColor,
-            Color(
-                ogColor.R, math.max(ogColor.G-ghostData.BounceMomentum/30, 0), math.max(ogColor.B-ghostData.BounceMomentum/6, 0), 1,
-                ogColor.RO, math.max(ogColor.GO -ghostData.BounceMomentum/30, 0), math.max(ogColor.BO -ghostData.BounceMomentum/6, 0)
-            ), 1)
-
+        familiar.Color = familiar.Color * Color( 1,  math.max(1- ghostData.BounceMomentum/30, 0), math.max(1- ghostData.BounceMomentum/6, 0), 1, 0, 0, 0)
     end
-    ghostData.PrevBounceMomentum = ghostData.BounceMomentum
     familiar.SpriteScale = (familiar.SpriteScale + grow + Vector.Zero*ghostData.BounceMomentum) * shrink
     familiar.SizeMulti = (familiar.SizeMulti + grow + Vector.Zero*ghostData.BounceMomentum) * shrink
 
