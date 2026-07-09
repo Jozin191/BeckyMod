@@ -17,4 +17,7 @@
     <sound name="saw_loop">
         <sample weight="1" path="items/butcher/saw_loop.wav" />
     </sound>
+    <sound name="SoulOfBeckyVoice">
+        <sample weight="1" path="items/soul of becky/Soul of Becky.wav" />
+    </sound>
 </sounds>

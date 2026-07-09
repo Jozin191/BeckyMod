@@ -16,6 +16,8 @@
     <costume anm2path="dead_socket.anm2" type="passive" id="4" />
     <costume anm2path="ghost_amulate_costume.anm2" type="passive" id="8" />
     
+	<costume anm2path="179_Fate.anm2" id="30"  type="none" isFlying="true" hasSkinAlt="true" /> <!-- Fly and homing spell consutme-->
+
     <costume anm2path="229_monstros lung.anm2" type="none" id="11" hasSkinAlt="true" priority="22" />
     <costume anm2path="069_Chocolate Milk.anm2" type="none" id="12" priority="21"  hasSkinAlt="true" />
     <costume anm2path="044x_Neptunus.anm2" type="none" id="13" priority="22" skinColor="2" overwriteColor="true" />

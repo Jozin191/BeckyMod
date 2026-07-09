@@ -24,10 +24,12 @@ end)
 
 
 local function fun(player)
+    local save = BeckyMod:RunSave(player)
     local effects = player:GetEffects()
     if effects:HasNullEffect(nullItem) then
         effects:RemoveNullEffect(nullItem, -1)
     else
+        if save.ManaCharge then save.ManaCharge = save.ManaCharge - SPELL_COST end
         effects:AddNullEffect(nullItem)
     end
 end
@@ -54,6 +56,6 @@ return {
     BeckyMod.Spells.SpellType.FLY_N_HOMING,
     Func = fun,
     CanSelect = canSelectFun,
-    Cost = SPELL_COST,
+    Cost = 0,
     Frame = 6
 }

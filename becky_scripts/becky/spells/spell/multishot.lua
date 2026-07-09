@@ -49,7 +49,7 @@ local function fun(player)
     if hasEffect then
         effects:RemoveNullEffect(nullItem, -1)
     else
-        save.ManaCharge = save.ManaCharge - SPELL_COST
+        if save.ManaCharge then save.ManaCharge = save.ManaCharge - SPELL_COST end
         effects:AddNullEffect(nullItem)
     end
 end

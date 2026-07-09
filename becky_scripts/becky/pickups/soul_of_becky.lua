@@ -5,8 +5,14 @@ BeckyMod.Pickup.SOUL_OF_BECKY = SOUL_OF_BECKY
 SOUL_OF_BECKY.ID = Isaac.GetCardIdByName("Soul of Becky_BeckyMod")
 SOUL_OF_BECKY.NULL_ITEM_ID = Isaac.GetNullItemIdByName("SOUL_OF_BECKY_SELECT_STATE")
 
+local itemConfig = Isaac.GetItemConfig():GetCard(SOUL_OF_BECKY.ID)
+-- i didn't see in the documentation that you could set the announcer in other way than the sound id. and, as we wont known what id our sound will have, this was the best way i could think of doing it :P
+itemConfig.AnnouncerVoice = Isaac.GetSoundIdByName("SoulOfBeckyVoice")
+
 function SOUL_OF_BECKY:PreUseCard(CardId, player, useFlags)
-    if BeckyMod.Spells:IsPlayerSelectingSpell(player) then return true end
+    if BeckyMod.Spells:IsPlayerSelectingSpell(player) then
+        BeckyMod.Spells:SetPlayerSelectSpell(player, BeckyMod.Spells.SpellSelectType.NONE)
+    end
 end
 function SOUL_OF_BECKY:UseCard(CardId, player, useFlags)
     player:AddNullItemEffect(SOUL_OF_BECKY.NULL_ITEM_ID)
