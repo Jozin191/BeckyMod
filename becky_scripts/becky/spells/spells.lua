@@ -670,6 +670,7 @@ local function resetPlayerSelection(player)
     --    data.Spell_Sacrificial_Buff = 0
     --    player:AddCacheFlags(CacheFlag.CACHE_ALL, true)
     --end
+    data.ReplaceSpell = -1
 end
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_ROOM_EXIT, function()
     BeckyMod:ForEachPlayer(resetPlayerSelection)

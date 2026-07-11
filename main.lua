@@ -19,6 +19,7 @@ include("becky_scripts.utils.hud_helper")
 include("becky_scripts.utils.BombLib")
 include("becky_scripts.utils.player_anim_lib")
 include("becky_scripts.utils.deadseascrolls.dssmain")
+include("becky_scripts.utils.deadseascrolls.changelogs")
 
 Scheduler = include("becky_scripts.utils.schedule_data")
 

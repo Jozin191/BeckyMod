@@ -15,6 +15,12 @@ local function futurePatch()
 			"you might need several ones tho...",
 			"maybe you'll find some in here..."
 	}
+	TheFuture.ModdedTaintedCharacterDialogue["Becky"] = {
+			"what are you?...",
+			"a wizard? oh, i see i see",
+			"i know a place you surely like",
+			"is pretty magical if i say so"
+	}
 end
 
 loader:RegisterPatch("TheFuture", futurePatch)
