@@ -72,7 +72,10 @@ function NOTS:UseItem(type, rng, player, useflags, activeslot)
             if destroyLater then
                 local pos = pickup.Position
 
-                --Spawn gore and shit
+		        BeckyMod.SFX:Play(SoundEffect.SOUND_DEATH_BURST_SMALL, 0.8, 1, false)
+                for i=1, Random() % 3 + 3 do
+                    Isaac.Spawn( 1000, EffectVariant.BLOOD_PARTICLE, Random() % 3, pos, RandomVector() * 1.33, nil)
+                end
 
                 pickup:Remove()
             end

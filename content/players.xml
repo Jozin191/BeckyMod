@@ -10,6 +10,8 @@
         costumeSuffix="becky"
         modcostume="0"
 		birthright="Freedom!!!"
+
+        rangemodifier="1.5"
     />
     <player name="Becky" bSkinParent="Becky"
 		damagemodifier="0.5"
@@ -21,7 +23,7 @@
         hp="2"
         costumeSuffix="becky_b"
         modcostume="7"
-		birthright="Spell swap"
+		birthright="Spell shoping"
         pocketActive="​Magic Staff"
         achievement="Tainted Becky"
         noshake="true"

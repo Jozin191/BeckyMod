@@ -3,6 +3,8 @@ local SPELLS = {}
 SPELLS.SpellType = {}
 SPELLS.SpellType.NULL = 0
 
+local font = Font("font/pftempestasevencondensed.fnt")
+
 local SPELLS_NAMES = {
     -- normal spells
     "SPREAD",
@@ -221,6 +223,11 @@ function SPELLS:GetDealSpellFromPlayer(player)
             data.CachedDealPool = BeckyMod:ShuffleTable(DevilSpellsPool, DEAL_SPELL_RNG)
         elseif dealSpell == 1 then -- angel statue
             data.CachedDealPool = BeckyMod:ShuffleTable(AngelSpellsPool, DEAL_SPELL_RNG)
+        elseif dealSpell == 2 then -- shop keepers
+            local spellPool = {}
+            for i=1, SPELLS.SpellType.SPELLS_NUM -1 do spellPool[i] = i end
+            data.CachedDealPool = BeckyMod:ShuffleTable(spellPool, DEAL_SPELL_RNG)
+            
         else data.CachedDealPool = {} end
     end
     local spellPool= data.CachedDealPool
@@ -290,14 +297,28 @@ local function renderPlayerSpellSelection(player)
         local dealSpell = data.ReplaceSpell
         if dealSpell and dealSpell >= 0 then
             local room = game:GetRoom()
-            local pos = (player:GetFlyingOffset() *1.5) + player.Position + (SELECTION_POS.POS * player.SpriteScale.Y)
+            local pos = room:WorldToScreenPosition( (player:GetFlyingOffset() *1.5) + player.Position + (SELECTION_POS.POS * player.SpriteScale.Y) )
             local spell = SPELLS:GetDealSpellFromPlayer(player)
     
             if game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND >0 then
                 spell = SPELLS.SpellType.NULL
             end
+            if dealSpell == 2 then
+                local kColor = KColor(1, 1, 1, 1)
+                local price = 12
+                if PlayerManager.AnyoneHasCollectible(CollectibleType.COLLECTIBLE_STEAM_SALE) then price = 6 end
+
+                if player:GetNumCoins() < price then kColor = KColor(1, 0.33, 0.33, 1) end
+
+                if PlayerManager.AnyoneHasCollectible(CollectibleType.COLLECTIBLE_STEAM_SALE) then
+                    font:DrawString("6", pos.X-2.25, pos.Y- 20, kColor, 0, false)
+                else
+                    font:DrawString("12", pos.X-4.5, pos.Y- 20, kColor, 0, false)
+                end
+            end
+
             SPELLS_SPRITE:SetFrame("Spells", SPELLS_FRAME[spell])
-            SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos))
+            SPELLS_SPRITE:Render(pos)
         end
         return
     end
@@ -338,23 +359,34 @@ local function renderPlayerSpellSelection(player)
         end
 
     else]] if data.ReplaceSpell and data.ReplaceSpell >= 0 then
-        local playerSpells = SPELLS:GetSpells(player)
+        local doDeal = true
+        if data.ReplaceSpell == 2 then
+            local price = 12
+            if PlayerManager.AnyoneHasCollectible(CollectibleType.COLLECTIBLE_STEAM_SALE) then price = 6 end
 
-        local spell = SPELLS:GetDealSpellFromPlayer(player)
-
-        if game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND >0 then
-            spell = SPELLS.SpellType.NULL
+            doDeal = player:GetNumCoins() >= price
         end
-        SPELLS_SPRITE:SetFrame("Spells", SPELLS_FRAME[spell])
-        SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos))
+        if doDeal then
+            local playerSpells = SPELLS:GetSpells(player)
 
-        for i=1, 4 do
-            local spell = playerSpells[i]
-            
-            SPELLS_SPRITE:SetFrame("SpellsGreen", SPELLS_FRAME[spell])
-            SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos + SELECTION_POS.OFFSETS[i]))
+            local spell = SPELLS:GetDealSpellFromPlayer(player)
+
+            if game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND >0 then
+                spell = SPELLS.SpellType.NULL
+            end
+            SPELLS_SPRITE:SetFrame("Spells", SPELLS_FRAME[spell])
+            SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos))
+
+            for i=1, 4 do
+                local spell = playerSpells[i]
+                
+                SPELLS_SPRITE:SetFrame("SpellsGreen", SPELLS_FRAME[spell])
+                SPELLS_SPRITE:Render(room:WorldToScreenPosition(pos + SELECTION_POS.OFFSETS[i]))
+            end
+            return
         end
-    elseif data.MagicStaff_SelectSpellDir == nil then
+    end
+    if data.MagicStaff_SelectSpellDir == nil then
         local playerSpells = SPELLS:GetSpells(player)
 
         if selectType == SPELLS.SpellSelectType.RANDOM_SPELLS then
@@ -425,53 +457,6 @@ end
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ROOM_RENDER_ENTITIES, -300, function()
     BeckyMod:ForEachPlayer(renderPlayerSpellSelection)
 end)
-
----- TAINTED BECKY BIRTHRIGHT HERE BECAUSE IM LAZYYYY
-BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, itemID, charge, firstTime, slot, varData, player)
-    if player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then
-        local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
-
-        local isInDevilPool = BeckyMod:Set(DevilSpellsPool)
-        local isInAngelPool = BeckyMod:Set(AngelSpellsPool)
-        local playerSpells = BeckyMod:CopyTable(SPELLS:GetSpells(player))
-        
-        for slot=0, 3 do SPELLS:SetSpellType(player, slot, SPELLS.SpellType.NULL) end--- clears t. becky spell slots
-
-        for slot=0, 3 do
-            local spell = playerSpells[slot +1]
-            if spell == SPELLS.SpellType.SPREAD then -- spread spell is in both devil and angel pools
-                local shuffleSpells = BeckyMod:ShuffleTable( BeckyMod:CombineTables(DevilSpellsPool, AngelSpellsPool) , rng)
-                for idx=1, #shuffleSpells do
-                    local newSpell = shuffleSpells[idx]
-                    if not SPELLS:HasSpell(player, newSpell) then
-                        SPELLS:SetSpellType(player, slot, newSpell)
-                    end
-                end
-
-            elseif isInDevilPool[spell] then
-                local shuffleSpells = BeckyMod:ShuffleTable(DevilSpellsPool, rng)
-                for idx=1, #shuffleSpells do
-                    local newSpell = shuffleSpells[idx]
-                    if not SPELLS:HasSpell(player, newSpell) then
-                        SPELLS:SetSpellType(player, slot, newSpell)
-                    end
-                end
-
-            elseif isInAngelPool[spell] then
-                local shuffleSpells = BeckyMod:ShuffleTable(AngelSpellsPool, rng)
-                for idx=1, #shuffleSpells do
-                    local newSpell = shuffleSpells[idx]
-                    if not SPELLS:HasSpell(player, newSpell) then
-                        SPELLS:SetSpellType(player, slot, newSpell)
-                    end
-                end
-
-            else
-                SPELLS:SetSpellType(player, slot, SPELLS.SpellType.NULL)
-            end
-        end
-    end
-end, CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 
 
 --BeckyMod:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, function(_, tear)
@@ -571,50 +556,30 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         dir = Direction.UP
     end
 
-    --[[
-    if selectType == SPELLS.SpellSelectType.RUN_INIT_SELECT then
-        DEAL_SPELL_RNG:SetSeed(game:GetLevel():GetDungeonPlacementSeed() + player.InitSeed, 20 - (save.ForceSelectSpells or 2))
-        local spellPool = BeckyMod:ShuffleTable(StartingSpellsPool, DEAL_SPELL_RNG)
-        
-        local selectionPool = {}
-        local slot = ((save.ForceSelectSpells or 2) == 2 and Direction.LEFT) or Direction.RIGHT
-        for i=1, #spellPool do
-            if #selectionPool == 4 then break end
-            if not SPELLS:HasSpell(player, spellPool[i]) then
-                selectionPool[#selectionPool+1] = spellPool[i]
-            end
-        end
-        
-        --print("-- Spell Select")
-        --BeckyMod:PrintTable(selectionPool)
-        --print("------")
-        --print(selectionPool[dir+1])
-        --data.HasShowTable = false
-
-        SPELLS:SetSpellType(player, slot, selectionPool[dir+1])
-
-        data.SpellNoSelect = true
-        save.ForceSelectSpells = (save.ForceSelectSpells or 2) -1
-        if save.ForceSelectSpells <=0 then
-            save.SelectedSpells = true
-            data.MagicStaff_SelectingSpell = SPELLS.SpellSelectType.NONE
-        end
-        return
-    end]]
-
 
     if data.ReplaceSpell and data.ReplaceSpell >= 0 and player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then
-        SPELLS:SetSpellType(player, dir, SPELLS:GetDealSpellFromPlayer(player))
-
-        if player:GetItemState() == BeckyMod.Item.MAGIC_STAFF.TAINTED_BECKY_ID then
-            player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.SPELLING_ID, "HideItem")
-            player:ResetItemState()
+        local giveSpell = true
+        if data.ReplaceSpell == 2 then
+            local price = 12
+            if PlayerManager.AnyoneHasCollectible(CollectibleType.COLLECTIBLE_STEAM_SALE) then price = 6 end
+            if player:GetNumCoins() >= price then
+                player:AddCoins(-price)
+            else giveSpell = false
+            end
         end
-        SPELLS:SetPlayerSelectSpell(player, SPELLS.SpellSelectType.NONE)
-        BeckyMod:FloorSave(player).DealSpell = true
+        if giveSpell then
+            if player:GetItemState() == BeckyMod.Item.MAGIC_STAFF.TAINTED_BECKY_ID then
+                player:AnimateCollectible(BeckyMod.Item.MAGIC_STAFF.SPELLING_ID, "HideItem")
+                player:ResetItemState()
+            end
 
-        data.ReplaceSpell = -1
-        return
+            SPELLS:SetSpellType(player, dir, SPELLS:GetDealSpellFromPlayer(player))
+            SPELLS:SetPlayerSelectSpell(player, SPELLS.SpellSelectType.NONE)
+            BeckyMod:FloorSave(player).DealSpell = true
+
+            data.ReplaceSpell = -1
+            return
+        end
     else data.ReplaceSpell  =-1 end
 
     local spell
@@ -734,6 +699,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, statue)
     local statuePos = statue.Position
 
     local room = game:GetRoom()
+    if not room:IsClear() then return end
     for i, player in ipairs(PlayerManager.GetPlayers()) do
         local save = BeckyMod:FloorSave(player)
         if not save.DealSpell and player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE then
@@ -749,12 +715,44 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, statue)
                 data.ReplaceSpell = -1
                 return
             end
+            if data.ReplaceSpell >= 0 then return end
             data.ReplaceSpell = var
             local eff = Isaac.Spawn(SPELLS.ENTITIES.EID_ENT.Type, SPELLS.ENTITIES.EID_ENT.Variant, 0, player.Position, Vector.Zero, player):ToEffect()
             eff:FollowParent(player)
         end
 	end
 end)
+BeckyMod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function(_, keeper)
+    if not PlayerManager.AnyoneIsPlayerType(BeckyMod.Character.BECKY_B.PLAYERTYPE) then return end
+    local level = game:GetLevel()
+
+    local statuePos = keeper.Position
+    local room = game:GetRoom()
+    if not room:IsClear() then return end
+    for i, player in ipairs(PlayerManager.GetPlayers()) do
+        local save = BeckyMod:FloorSave(player)
+        if not save.DealSpell and player:GetPlayerType() == BeckyMod.Character.BECKY_B.PLAYERTYPE and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) then
+            local data = BeckyMod.GetEntData(player)
+            if data.MagicStaff_SelectingSpell and data.MagicStaff_SelectingSpell > SPELLS.SpellSelectType.NONE then
+                if data.MagicStaff_SelectingSpell ~= SPELLS.SpellSelectType.NORMAL then
+                    data.ReplaceSpell = -1
+                end
+                return
+            end
+            local playerDis = statuePos:Distance(player.Position)
+            if playerDis >= STATUE_MAX_DISTANCE then
+                data.ReplaceSpell = -1
+                return
+            end
+            if data.ReplaceSpell >= 0 then return end
+            data.ReplaceSpell = 2
+            local eff = Isaac.Spawn(SPELLS.ENTITIES.EID_ENT.Type, SPELLS.ENTITIES.EID_ENT.Variant, 0, player.Position, Vector.Zero, player):ToEffect()
+            eff:FollowParent(player)
+        end
+	end
+end, EntityType.ENTITY_SHOPKEEPER)
+
+
 BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, eidEnt)
     local player = eidEnt.Parent and eidEnt.Parent:ToPlayer()
     if player == nil then

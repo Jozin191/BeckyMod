@@ -980,8 +980,8 @@ local function EIDPatch()
 
 	EID:addBirthright(Character.BECKY.PLAYERTYPE, "The Ghost's range becomes unlimited", "Becky", "en_us")
 	EID:addBirthright(Character.BECKY.PLAYERTYPE, "El Fantasma tiene rango ilimitado", "Becky", "spa")
-	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Rerolls all of Becky's spells to others of the same pool", "Tainted Becky", "en_us")
-	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Cambia todos los hechizos de Becky por otros del mismo grupo", "Becky Corrupta", "spa")
+	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Shopkeepers will now sell spells to Tainted Becky", "Tainted Becky", "en_us")
+	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Tenderos ahora le venderan hechizos a Becky Corrupta", "Becky Corrupta", "spa")
 
 	local BeckyDeals = {
 		{
