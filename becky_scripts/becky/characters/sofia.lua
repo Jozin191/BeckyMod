@@ -5,6 +5,9 @@ SOFIA.PLAYERTYPE = Isaac.GetPlayerTypeByName("Sofia", false)
 SOFIA.HAIR_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/sofia_hair.anm2")
 SOFIA.BODY_COSTUME = Isaac.GetCostumeIdByPath("gfx/characters/sofia_belt.anm2")
 
+BeckyMod.Character.SOFIA = SOFIA
+
+
 local game = BeckyMod.Game
 
 ---@param player EntityPlayer

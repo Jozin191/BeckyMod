@@ -219,6 +219,34 @@ local function RemoveTrail(entity)
     entData.GhostTrail = nil
 end
 
+local shouldPogCache = false
+local function ShouldGhostPog()
+    if Poglite == nil then return false end
+    if BeckyMod.Game:GetFrameCount() % 5 > 0 then return shouldPogCache end
+
+    if BeckyMod.Game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND == 0 then
+        local itemConfig = Isaac.GetItemConfig()
+
+        for _, item in ipairs(Isaac.FindByType(5, 100)) do
+            local id = item.SubType
+            local pick = item:ToPickup()
+            if id > 0 and not pick:IsBlind() then
+                --Weird exceptions go first
+                if id == 120 or id == 121 then --thin and large odd mushrooms
+                    shouldPogCache = true
+                    return true
+                end
+                if itemConfig:GetCollectible(id).Quality >= 3 then
+                    shouldPogCache = true
+                    return true
+                end	
+            end
+        end
+    end
+    shouldPogCache = false
+    
+    return false
+end
 
 
 ---@param player EntityPlayer
@@ -448,6 +476,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local room = BeckyMod.Game:GetRoom()
     local isShooting = IsPlayerShooting(player)
     local ForceTargetPos = nil
+    local playerAppear = player:GetSprite():GetAnimation() == "Appear"
     
     if Options.MouseControl and player.ControllerIndex == 0 then
         if Input.IsMouseBtnPressed(0) then
@@ -695,9 +724,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             end
         end
 
-        local sprite = player:GetSprite()
+        
 
-        if sprite:GetAnimation() == "Appear" then
+        if playerAppear then
             ghost.Velocity = Vector.Zero
         end
         ::continue::
@@ -750,17 +779,24 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         ghostData.ChocolateMilkMult = 1
     end
 
-    if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then
-        local rng = player:GetCollectibleRNG(GHOST_AMULET.ID)
-        local randomNum = rng:RandomInt(1, 4)
 
-        if randomNum ~= 4 then
-            GhostSprite:Play(Anims[randomNum])
+    if ShouldGhostPog() then
+        if not GhostSprite:IsPlaying("Pog") then
+            GhostSprite:Play("Pog")
         end
-    end
+    else
+        if familiar.FrameCount % 90 == 0 and IsPlayingRegTear1 then
+            local rng = player:GetCollectibleRNG(GHOST_AMULET.ID)
+            local randomNum = rng:RandomInt(1, 4)
 
-    if not IsPlayingRegTear1 and GhostSprite:IsFinished(currentAnim) then
-        GhostSprite:Play("RegularTear1")
+            if randomNum ~= 4 then
+                GhostSprite:Play(Anims[randomNum])
+            end
+        end
+
+        if not IsPlayingRegTear1 and GhostSprite:IsFinished(currentAnim) then
+            GhostSprite:Play("RegularTear1")
+        end
     end
 
     if familiar.SubType == FamSubType.HOMING then
