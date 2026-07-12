@@ -14,7 +14,6 @@
         rangemodifier="1.5"
     />
     <player name="Becky" bSkinParent="Becky"
-		damagemodifier="0.5"
         skin="character_beckyb.png"
         skinColor = "1"
         nameimage="playername_becky.png"
@@ -27,6 +26,8 @@
         pocketActive="​Magic Staff"
         achievement="Tainted Becky"
         noshake="true"
+
+		damagemodifier="1.5"
     />
         <!--canShoot="false"-->
     
