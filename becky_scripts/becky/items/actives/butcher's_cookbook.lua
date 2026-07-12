@@ -13,15 +13,10 @@ local function butchersUse(_, collectibleID, rngObj, player, useFlags, activeSlo
     local gridIndex = room:GetGridIndex(player.Position)
     local pos = room:GetGridPosition(gridIndex)
 
-    local saw = BeckyMod.Game:Spawn(EntityType.ENTITY_EFFECT, SAW_VARIANT, pos, Vector.Zero, player, 0, 1)
-    BeckyMod.GetEntData(saw).player = player
+    local saw = BeckyMod.Game:Spawn(EntityType.ENTITY_EFFECT, SAW_VARIANT, pos, Vector.Zero, player, 0, 1):ToEffect()
+    saw:SetTimeout(SAW_LIFETIME * 30)
 
     BeckyMod.SFX:Play(START_SOUND)
-
-    Isaac.CreateTimer(function ()
-        BeckyMod.SFX:Stop(LOOP_SOUND)
-        saw:Remove()
-    end, SAW_LIFETIME * 30, 0, false)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_USE_ITEM, butchersUse, BUTCHERS_ID)
 
@@ -35,6 +30,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, sawInit, SAW_VARIANT)
 
 ---@param effect EntityEffect
 local function sawUpdate(_, effect)
+    if effect.Timeout == 0 then
+        BeckyMod.SFX:Stop(LOOP_SOUND)
+        effect:Remove()
+        return
+    end
+
     local sprite = effect:GetSprite()
 
     if sprite:IsFinished("Spawn") then
@@ -45,9 +46,11 @@ local function sawUpdate(_, effect)
         BeckyMod.SFX:Play(LOOP_SOUND, 10, 2, true)
     end
 
+    local dmgSource = effect.SpawnerEntity or effect
+    local entRef = EntityRef(dmgSource)
     for _, entity in ipairs(Isaac.GetRoomEntities()) do
         if entity:IsVulnerableEnemy() and entity.Position:Distance(effect.Position) < 40 then
-            entity:TakeDamage(SAW_DPS/30, DamageFlag.DAMAGE_CLONES, EntityRef(BeckyMod.GetEntData(effect).player), 0)
+            entity:TakeDamage(SAW_DPS/30, DamageFlag.DAMAGE_CLONES, entRef, 0)
         end
     end
 end

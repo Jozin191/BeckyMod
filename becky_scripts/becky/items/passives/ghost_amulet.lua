@@ -781,7 +781,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 
 
     if ShouldGhostPog() then
-        if not GhostSprite:IsPlaying("Pog") then
+        if not GhostSprite:IsPlaying("Pog") or GhostSprite:IsFinished("Pog") then
             GhostSprite:Play("Pog")
         end
     else
