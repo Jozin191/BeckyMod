@@ -139,7 +139,9 @@ for i, name in pairs({
     "EyeOfBelial",
     "DeadEye",
     -- Wip
-    "Trisagion",
+    "PiercingTrisagBelial",
+    "Lachgraphagy",
+    
     "Worms" -- dunno
 }) do
     include("becky_scripts.becky.items.passives.GhostAmuletSynergies." .. name)

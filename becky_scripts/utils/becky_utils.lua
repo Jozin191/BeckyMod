@@ -262,10 +262,29 @@ function BeckyMod.RandomFloat(min, max, rng)
 	return min + rng:RandomFloat() * (max - min)
 end
 
+--- This isn't mine and I cant remember where i got it from
+local bloodTearTable = {
+    [TearVariant.BLUE] = TearVariant.BLOOD,
+    [TearVariant.CUPID_BLUE] = TearVariant.CUPID_BLOOD,
+    [TearVariant.NAIL] = TearVariant.NAIL_BLOOD,
+    [TearVariant.PUPULA] = TearVariant.PUPULA_BLOOD,
+    [TearVariant.GODS_FLESH] = TearVariant.GODS_FLESH_BLOOD,
+    [TearVariant.GLAUCOMA] = TearVariant.GLAUCOMA_BLOOD,
+    [TearVariant.EYE] = TearVariant.EYE_BLOOD,
+}
+
+---@param tear EntityTear
+function BeckyMod.TryChangeTearToBloodVariant(tear)
+    if bloodTearTable[tear.Variant] then
+        tear:ChangeVariant(bloodTearTable[tear.Variant])
+    end
+end
 
 local cache_GetData = {} --- this is a lua version of GetData
+---@param ent Entity
+---@return table
 function BeckyMod.GetEntData(ent)
-	if not ent then return end
+	if not ent then return {} end
 	local ptr = GetPtrHash(ent)
 	if not cache_GetData[ptr] then cache_GetData[ptr] = {} end
 	return cache_GetData[ptr]

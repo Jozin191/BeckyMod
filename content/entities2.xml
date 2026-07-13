@@ -29,6 +29,9 @@
     <entity name="Knife (Ghost Ball Synergy)" id="1000" anm2path="ghost amulet moms knife.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="8" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0">
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0"/>
     </entity>
+    <entity name="Lachgraphagy Ghost (Ghost Ball Synergy)" id="1000" anm2path="familiar/LachGhost.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="8" friction="1" numGridCollisionPoints="0" shadowSize="0" stageHP="0">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0"/>
+    </entity>
     <entity name="John Becky - Spell EID" id="1000" friction="1" anm2path="beckyMagic/null.anm2"/>
 
 

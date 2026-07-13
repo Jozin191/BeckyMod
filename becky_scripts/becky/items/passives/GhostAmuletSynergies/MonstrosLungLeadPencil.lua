@@ -1,19 +1,3 @@
-local bloodTearTable = {
-    [TearVariant.BLUE] = TearVariant.BLOOD,
-    [TearVariant.CUPID_BLUE] = TearVariant.CUPID_BLOOD,
-    [TearVariant.NAIL] = TearVariant.NAIL_BLOOD,
-    [TearVariant.PUPULA] = TearVariant.PUPULA_BLOOD,
-    [TearVariant.GODS_FLESH] = TearVariant.GODS_FLESH_BLOOD,
-    [TearVariant.GLAUCOMA] = TearVariant.GLAUCOMA_BLOOD,
-    [TearVariant.EYE] = TearVariant.EYE_BLOOD,
-}
-
----@param tear EntityTear
-local function tryChangeTearToBloodVariant(tear)
-    if bloodTearTable[tear.Variant] then
-        tear:ChangeVariant(bloodTearTable[tear.Variant])
-    end
-end
 --[[ measured a bunch of lead pencil bursts
 --- -20, 20 angle spread
 --- .5 falling accel
@@ -32,7 +16,7 @@ local function FireMonstroBurst(player, rng, pos, velocity, amount, spread)
     for i =  1, amount do
         local velo = (velocity*((rng:RandomFloat()*7)+7)):Rotated((rng:RandomFloat()*spread*2)-spread)
         local tear = player:FireTear(pos or player.Position, velo, true, false, false, player, 1)
-        tryChangeTearToBloodVariant(tear)
+        BeckyMod.TryChangeTearToBloodVariant(tear)
 
         tear.Scale = tear.Scale*(.9+(rng:RandomFloat()*.45))
         tear.FallingSpeed = (rng:RandomFloat()*16)-8

@@ -366,8 +366,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, id, _, _
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
 
-BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(player, ID)
-    if ID ~= GHOST_AMULET.ID then return end
+BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(_, player, ID)
     if ID == CollectibleType.COLLECTIBLE_CONTINUUM then
         local playerData = BeckyMod.GetEntData(player)
         local ghosts = playerData.GhostBalls
@@ -379,7 +378,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(
             ::continue::
         end
     end
-    player:SetCanShoot(true)
+    if ID == GHOST_AMULET.ID then player:SetCanShoot(true) end
+    if not MultiShotItems[ID] then return end
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
 
