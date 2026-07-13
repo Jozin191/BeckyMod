@@ -983,7 +983,7 @@ local function EIDPatch()
 	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Shopkeepers will now sell spells to Tainted Becky", "Tainted Becky", "en_us")
 	EID:addBirthright(Character.BECKY_B.PLAYERTYPE, "Tenderos ahora le venderan hechizos a Becky Corrupta", "Becky Corrupta", "spa")
 
-	local BeckyDeals = {
+	local BeckyDeals = {--[[
 		{
 			Ids = "5.350."..TrinketType.TRINKET_DEVILS_CROWN,
 			Desc = {
@@ -997,7 +997,7 @@ local function EIDPatch()
 				en_us = "{{ColorSilver}}The deals in the boss room cost money instead of health{{CR}}",
 				spa = "{{ColorSilver}}Los tratos en la sala del jefe costara dinero envez de vida{{CR}}",
 			}
-		},
+		},]]
 		{
 			Ids = CollectibleType.COLLECTIBLE_STAIRWAY,
 			Desc = {

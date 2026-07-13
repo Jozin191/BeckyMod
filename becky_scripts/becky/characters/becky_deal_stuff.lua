@@ -142,7 +142,7 @@ end
 local function ShouldBeDevilPrice(roomDesc)
     local roomData = roomDesc.Data
     if roomData == nil then return false end
-    if roomData.Type == RoomType.ROOM_DEVIL or roomDesc.Flags & RoomDescriptor.FLAG_DEVIL_TREASURE > 0 then return false end
+    if roomData.Type == RoomType.ROOM_DEVIL --[[or roomDesc.Flags & RoomDescriptor.FLAG_DEVIL_TREASURE > 0]] then return false end
     if roomData.Type == RoomType.ROOM_ANGEL then return true end
     return false
 end
@@ -228,10 +228,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_GET_SHOP_ITEM_PRICE, DEVIL_DEAL.ShopPrice)
 
 local function UpdateRoomSaveData()
     local level = game:GetLevel()
-    if BeckyMod:RoomSave().BeckyPrices == nil and not (
+    if BeckyMod:RoomSave().BeckyPrices == nil --[[and not (
         (game:GetRoom():GetType() == RoomType.ROOM_BOSS and level:GetStateFlag(LevelStateFlag.STATE_SATANIC_BIBLE_USED)) or -- checking if it is the boss room and isaac has used the satanic bible
         (level:GetStage() == LevelStage.STAGE6 and level:GetStageType() == StageType.STAGETYPE_ORIGINAL and level:GetCurrentRoomIndex() == level:GetStartingRoomIndex()) -- sets the dark room chest prices :)
-    ) then
+    )]] then
         return
     end
     SetRoomSaveData()
@@ -239,8 +239,8 @@ end
 
 
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_NEW_ROOM, 200, UpdateRoomSaveData)
-BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ROOM_TRIGGER_CLEAR, 200, UpdateRoomSaveData)
-BeckyMod:AddPriorityCallback(ModCallbacks.MC_USE_ITEM, 200, UpdateRoomSaveData, CollectibleType.COLLECTIBLE_SATANIC_BIBLE)
+--BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ROOM_TRIGGER_CLEAR, 200, UpdateRoomSaveData)
+--BeckyMod:AddPriorityCallback(ModCallbacks.MC_USE_ITEM, 200, UpdateRoomSaveData, CollectibleType.COLLECTIBLE_SATANIC_BIBLE)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_PICKUP_SHOP_PURCHASE, 200, UpdateRoomSaveData, 100)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, 200, UpdateRoomSaveData)
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, 200, UpdateRoomSaveData)
