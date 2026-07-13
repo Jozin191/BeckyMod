@@ -1,6 +1,6 @@
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams, position)
     local player = fam.Player
 
     if not player then return end
@@ -10,7 +10,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
 
     if rng:RandomFloat() > 0.15 then return end
 
-    local tear = player:FireTear(fam.Position, (enemy.Position - fam.Position):Normalized():Resized(10))
+    local tear = player:FireTear(position, (enemy.Position - position):Normalized():Resized(10))
     tear:ChangeVariant(TearVariant.FETUS)
     tear:AddTearFlags(TearFlags.TEAR_PIERCING | TearFlags.TEAR_FETUS)
 end)

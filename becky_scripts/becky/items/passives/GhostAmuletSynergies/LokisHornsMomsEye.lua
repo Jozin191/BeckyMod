@@ -1,6 +1,6 @@
 ---@param fam EntityFamiliar
 ---@param npc EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, npc)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, npc, tearParams, position)
     local player = fam.Player
     local horns, eye = player:HasCollectible(CollectibleType.COLLECTIBLE_LOKIS_HORNS), player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_EYE)
    
@@ -13,10 +13,10 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, np
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MOMS_EYE)
     if rng:RandomFloat() < 1-formula then return end
     if not horns then
-        player:FireTear(fam.Position, -player:GetAimDirection() * (player.ShotSpeed * 10))
+        player:FireTear(position, -player:GetAimDirection() * (player.ShotSpeed * 10))
     else
         for i = 1, 4 do
-            player:FireTear(fam.Position, Vector(1, 0):Rotated((i/4)*360) * (player.ShotSpeed * 10))
+            player:FireTear(position, Vector(1, 0):Rotated((i/4)*360) * (player.ShotSpeed * 10))
         end
     end
 

@@ -295,12 +295,6 @@ local SYNERGY_LIST = {
         }
     },
    {
-        Items = CollectibleType.COLLECTIBLE_EYE_OF_BELIAL,
-        Desc = {
-            en_us = "Ghost turns {{ColorRed}}red{{BlinkGray}} and can be exorcised by hitting an enemy",
-        }
-    },
-   {
         Items = CollectibleType.COLLECTIBLE_RUBBER_CEMENT,
         Desc = {
             en_us = "Hitting enemies builds up momentum#{{BlinkGray}}Momentum increases the range and speed of the ghost and is slowly lost while not hitting enemies",
@@ -313,9 +307,33 @@ local SYNERGY_LIST = {
         }
     },
    {
+        Items = CollectibleType.COLLECTIBLE_LACHRYPHAGY,
+        Desc = {
+            en_us = "Hitting enemies spawns temporary mini ghosts that burst into 2-5 tears when the main ghost touches them",
+        }
+    },
+   {
         Items = {CollectibleType.COLLECTIBLE_GODHEAD, CollectibleType.COLLECTIBLE_SPOON_BENDER, CollectibleType.COLLECTIBLE_SACRED_HEART, CollectibleType.COLLECTIBLE_TELEPATHY_BOOK},
         Desc = {
-            en_us = "Homing! Spawns a secondary purple ghost that automatically attacks enemies.",
+            en_us = "Homing! Spawns a secondary purple ghost that automatically attacks enemies",
+        }
+    },
+    {
+        Items = {CollectibleType.COLLECTIBLE_CUPIDS_ARROW, CollectibleType.COLLECTIBLE_DEAD_ONION, CollectibleType.COLLECTIBLE_DEATHS_TOUCH, CollectibleType.COLLECTIBLE_SAGITTARIUS, CollectibleType.COLLECTIBLE_EYE_OF_BELIAL, CollectibleType.COLLECTIBLE_TRISAGION, "5.350."..TrinketType.TRINKET_PUSH_PIN},
+        Desc = {
+            en_us = "Piercing! Hitting an enemy shoots a temporary ghost that deals half damage and pierces towards it",
+        }
+    },
+    {
+        Items = CollectibleType.COLLECTIBLE_EYE_OF_BELIAL,
+        Desc = {
+            en_us = "The temporary ghosts home in on enemies and deal normal damage",
+        }
+    },
+    {
+        Items = CollectibleType.COLLECTIBLE_TRISAGION,
+        Desc = {
+            en_us = "The temporary ghosts can hit enemies multiple times but only deal a sixth of the damage",
         }
     },
 }

@@ -1,7 +1,7 @@
 ---@param fam EntityFamiliar
 ---@param npc EntityNPC
 ---@param tearParams TearParams
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, npc, tearParams)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, npc, tearParams, position)
     local player = fam.Player
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LARGE_ZIT) then return end
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_LARGE_ZIT)
@@ -14,7 +14,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, np
         zit:AddTearFlags(TearFlags.TEAR_SLOW)
         zit.CollisionDamage = tearParams.TearDamage*2
         for i = 1, rng:RandomInt(1, 3) do
-            local creep = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_WHITE, 0, fam.Position+zit.Velocity*(i*2), Vector.Zero, player):ToEffect() ---@cast creep EntityEffect
+            local creep = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_WHITE, 0, position+zit.Velocity*(i*2), Vector.Zero, player):ToEffect() ---@cast creep EntityEffect
             creep.Timeout = 120
             creep:Update()
         end

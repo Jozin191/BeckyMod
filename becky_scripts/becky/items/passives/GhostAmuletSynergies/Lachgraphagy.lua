@@ -6,7 +6,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, ghost)
     if ghost.FrameCount == 1 then
         ghost.State = 0
         sprite:Play("Appear")
-    elseif ghost.FrameCount >= 90 then
+    elseif ghost.FrameCount >= 70 then
         ghost.State = 2
         if sprite:IsFinished("Death") then
             ghost:Remove()
@@ -21,7 +21,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, ghost)
         sprite:Play("Idle")
     end
 
-    if ghost.FrameCount >= 15 and ghost.FrameCount <= 100 then 
+    if ghost.FrameCount >= 15 and ghost.FrameCount <= 85 then 
         local function check() --- probably a better way to check if the ghost is touching the main one
             local foes = Isaac.FindInRadius(ghost.Position, 15, EntityPartition.FAMILIAR)
             for i, v in ipairs(foes) do
@@ -35,7 +35,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, ghost)
         if familiar then
             local player = familiar.Player
             local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_LACHRYPHAGY)
-            local amount, rotation = rng:RandomInt(3,8), rng:RandomFloat()*90
+            local amount, rotation = rng:RandomInt(2,5), rng:RandomFloat()*90
             familiar:GetSprite():Play("Hit",true)
             for i = 0, amount-1 do
                 local tear = familiar.Player:FireTear(ghost.Position, Vector(1,0):Rotated((i*(360/(amount)))+rotation)*player.ShotSpeed*7, false, true, false, familiar, .75)
@@ -55,10 +55,10 @@ end, LittleGhost)
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
 ---@param tearParams TearParams
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams, position)
     local player = fam.Player
     if not (tearParams.TearFlags & TearFlags.TEAR_ABSORB == TearFlags.TEAR_ABSORB) then return end
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_LACHRYPHAGY)
-    if rng:RandomFloat() <= .5 then return end
-    Isaac.Spawn(EntityType.ENTITY_EFFECT, LittleGhost, 0, fam.Position, rng:RandomVector()*(2+(player.ShotSpeed/2))*(rng:RandomInt(270, 450)/100), fam)
+    local baby = Isaac.Spawn(EntityType.ENTITY_EFFECT, LittleGhost, 0, position, rng:RandomVector()*(2+(player.ShotSpeed/2))*(rng:RandomInt(230, 450)/100), fam)
+    if rng:RandomFloat() >= .5 then baby.FlipX = true end
 end)

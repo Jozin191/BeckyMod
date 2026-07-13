@@ -23,11 +23,11 @@ end
 ---@param ent EntityFamiliar
 ---@param rng RNG
 ---@param tearParams TearParams
-local function ShootHaemolacriaTear(ent, rng, tearParams)
+local function ShootHaemolacriaTear(ent, pos, rng, tearParams)
 	local tear
 	local fallSpeedVar
     local player = ent.Player
-        tear = player:FireTear(ent.Position, rng:RandomVector():Resized(20), false, true, false, ent, .5)--Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.BALLOON, 0, ent.Position, rng:RandomVector():Resized(20), ent):ToTear()
+        tear = player:FireTear(pos, rng:RandomVector():Resized(20), false, true, false, ent, .5)--Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.BALLOON, 0, ent.Position, rng:RandomVector():Resized(20), ent):ToTear()
         if not tear then return end
         fallSpeedVar = RandomFloat(rng, 1.2, 1.4)
         tear.Color = tearParams.TearColor
@@ -44,7 +44,7 @@ end
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
 ---@param tearParams TearParams
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams, position)
     local player = fam.Player
 
     if not player then return end
@@ -54,5 +54,5 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
 
     if rng:RandomFloat() > 0.5 then return end
 
-    ShootHaemolacriaTear(fam, rng, tearParams)
+    ShootHaemolacriaTear(fam, position, rng, tearParams)
 end)

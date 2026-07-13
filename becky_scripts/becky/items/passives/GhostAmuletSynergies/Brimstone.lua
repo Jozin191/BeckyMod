@@ -1,6 +1,6 @@
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams, position)
     local player = fam.Player
 
     if not player then return end
@@ -14,7 +14,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
 
     if ghostData.BrimHits == 0 then
         SFXManager():Play(SoundEffect.SOUND_BLOOD_LASER, .67)
-        local bale = player:FireBrimstoneBall(fam.Position, RandomVector()*5)
+        local bale = player:FireBrimstoneBall(position, RandomVector()*5)
         ghostData.BrimHits = 3
     end
 end)

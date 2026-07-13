@@ -1,6 +1,6 @@
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams, position)
     local player = fam.Player
     if not player then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then return end
@@ -14,7 +14,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
         local rocket = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SMALL_ROCKET, 0, player.Position, Vector.Zero,player):ToEffect()
         rocket.State = 1
         local target = (enemy.Position+fam.Position)/2 -- midway point
-        local dist = (target - player.Position)
+        local dist = (position - player.Position)
         rocket:Update()
         rocket.Velocity = (dist) * math.cos(math.rad(45)) * (1 / 7)
         rocket.CollisionDamage = 0

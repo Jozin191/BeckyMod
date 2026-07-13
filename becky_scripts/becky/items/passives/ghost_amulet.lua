@@ -13,6 +13,8 @@ BeckyMod.Callbacks = {}
 --- * Familiar: The ghost entity
 --- * Entity: The entity hit by the ghost
 --- * TearParam: TearParams
+--- * Position: The position of the ghost when it hits
+--- * GhostCopy: If the collision comes from a ghost copy created through the piercing synergies
 BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY = "BeckyMod_ON_GHOST_HIT_ENEMY"
 --- Called every time the ghost kills an enemy
 --- * Familiar: The ghost entity
@@ -763,7 +765,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
     local GhostSize = Vector.One * exp((player.Damage / 5) * ghostData.ChocolateMilkMult, 1, 1.2)
     local gridFromPos = room:GetGridEntityFromPos(familiar.Position+familiar.Velocity/2)
 
-    if (not ghostData.TEARPARAMS) or (ghostData.TEARPARAMS and familiar.FrameCount % 12 == 0) then
+    if (not ghostData.TEARPARAMS) or (ghostData.TEARPARAMS and familiar.FrameCount % 6 == 0) then
         ghostData.TEARPARAMS = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     end
     local tearParams = ghostData.TEARPARAMS or player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
@@ -911,17 +913,23 @@ local DestroyableFireplaces = {
     [11] = true,
 }
 
+--- its public so the piercing copies can force a collision with custom properties
 ---@param familiar EntityFamiliar
 ---@param collider Entity
-BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, familiar, collider)
-    if familiar.State == FamState.DISABLE_IDLE or familiar.State == FamState.DISABLE_MOVE then return false end
+---@param low boolean
+---@param position Vector?
+---@param params TearParams?
+---@param damage number?
+---@param ghostCopy boolean?
+function BeckyMod:GhostBallCollide(familiar, collider, low, position, params, damage, ghostCopy)
+    if (familiar.State == FamState.DISABLE_IDLE or familiar.State == FamState.DISABLE_MOVE)  and not ghostCopy then return false end
     local npc = collider and collider:ToNPC()
     
     local player = familiar.Player
     local ghostData = BeckyMod.GetEntData(familiar)
     local sprite = familiar:GetSprite()
-    local tearParams = ghostData.TEARPARAMS or player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
-    local baseDamage = (GHOST_AMULET:GetGhostDamage(player, tearParams.TearDamage) + (ghostData.CoalBonus or 0)) * ghostData.ChocolateMilkMult * (ghostData.ProptosisMulti or 1)
+    local tearParams = params or ghostData.TEARPARAMS or player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
+    local baseDamage = (GHOST_AMULET:GetGhostDamage(player, damage or tearParams.TearDamage) + (ghostData.CoalBonus or 0)) * ghostData.ChocolateMilkMult * (ghostData.ProptosisMulti or 1)
     baseDamage = baseDamage*(1+((ghostData.DeadEyeMulti and ghostData.DeadEyeMulti.Multi) or 0)) -- Dead Eye
     local multi = 1
 
@@ -932,7 +940,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
     end
 
-    if familiar.State == FamState.IDLE then return true end
+    if familiar.State == FamState.IDLE and not ghostCopy then return true end
 
     if collider.Type == EntityType.ENTITY_BOMB then
         TriggerPush(collider, familiar, 8*multi)
@@ -941,20 +949,26 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
     if not npc then return end
     if not IsValidEnemy(npc) then return end
     
-    sprite:Play("Hit",true)
-    TriggerPush(npc, familiar, 20 * GHOST_AMULET:GetGhostTearMult(player)*multi)
-    if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
-        TriggerPush(familiar, npc, 10+ghostData.BounceMomentum*2)
+    if not ghostCopy then
+        sprite:Play("Hit",true)
+        TriggerPush(npc, familiar, 20 * GHOST_AMULET:GetGhostTearMult(player)*multi)
+        if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
+            TriggerPush(familiar, npc, 10+ghostData.BounceMomentum*2)
+        end
+        if tearParams.TearFlags & TearFlags.TEAR_BOUNCE == TearFlags.TEAR_BOUNCE then
+            ghostData.BounceMomentum = math.min(ghostData.BounceMomentum + .7, 6)
+        end
+        BeckyMod.SFX:Play(SoundEffect.SOUND_MEATY_DEATHS, 0.7, 0, false, 1.5)
+    else
+        BeckyMod.SFX:Play(SoundEffect.SOUND_MEAT_IMPACTS_OLD, 0.4, 0, false, 1)
     end
-    if tearParams.TearFlags & TearFlags.TEAR_BOUNCE == TearFlags.TEAR_BOUNCE then
-        ghostData.BounceMomentum = math.min(ghostData.BounceMomentum + .7, 6)
-    end
+
     
-    BeckyMod.SFX:Play(SoundEffect.SOUND_MEATY_DEATHS, 0.6, 0, false, 1.5)
+    
     
     if npc:IsBoss() and npc:HasEntityFlags(EntityFlag.FLAG_AMBUSH) and npc.FrameCount < 29 then baseDamage = baseDamage /3 -- bosses that are spawning on an ambush (challenge and greed waves) takes less damage
     end
-    Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider, tearParams)
+    Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, familiar, collider, tearParams, position or familiar.Position, ghostCopy)
 
     if player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then ghostData.ChocolateMilkMult = 0.75 end
 
@@ -964,7 +978,9 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, function (_, famil
         --print("Triggered kill enemy callback")
         Isaac.RunCallback(BeckyMod.Callbacks.ON_GHOST_KILL_ENEMY, familiar, collider, tearParams)
     end
-end, GHOST_BALL_VAR)
+end
+
+BeckyMod:AddCallback(ModCallbacks.MC_POST_FAMILIAR_COLLISION, BeckyMod.GhostBallCollide, GHOST_BALL_VAR)
 
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()

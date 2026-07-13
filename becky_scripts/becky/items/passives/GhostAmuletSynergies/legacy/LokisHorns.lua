@@ -1,6 +1,6 @@
 ---@param fam EntityFamiliar
 ---@param npc EntityNPC
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, npc)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, npc, position)
     local player = fam.Player
 
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LOKIS_HORNS) then return end
