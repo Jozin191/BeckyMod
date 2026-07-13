@@ -26,6 +26,7 @@
 
 
     <costume anm2path="costumes/pog/becky_pog.anm2" isFlying="true" priority="969" type="none"/>
+    <costume anm2path="costumes/pog/becky_pogb.anm2" isFlying="true" priority="969" type="none"/>
     <costume anm2path="costumes/pog/sofia_pog.anm2" isFlying="true" priority="969" type="none"/>
     <costume anm2path="truecoop/costumes/ghost/ghost_becky.anm2" priority="999" type="none" isFlying="true" />
 
