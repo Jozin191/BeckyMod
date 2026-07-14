@@ -101,7 +101,7 @@ end
 ---@param npc EntityNPC
 ---@return boolean
 local function IsValidEnemy(npc)
-    return (npc:IsEnemy() and npc:IsActiveEnemy() and npc:IsVulnerableEnemy() and not npc:IsInvincible())
+    return (npc and npc:IsEnemy() and npc:IsActiveEnemy() and npc:IsVulnerableEnemy() and not npc:IsInvincible())
 end
 
 ---@param player EntityPlayer
@@ -549,7 +549,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                     local dis = 80
                     for _, ent in ipairs(Isaac.FindInRadius(ghostPos, 80, EntityPartition.ENEMY)) do
                         local ent = ent:ToNPC()
-                        if IsValidEnemy(ent) and dis == nil or ent.Position:Distance(ghostPos) < dis then
+                        if ent and IsValidEnemy(ent) and dis == nil or ent.Position:Distance(ghostPos) < dis then
                             target = ent
                             dis = ent.Position:Distance(ghostPos)
                         end

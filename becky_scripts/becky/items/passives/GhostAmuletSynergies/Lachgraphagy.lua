@@ -40,6 +40,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, ghost)
             for i = 0, amount-1 do
                 local tear = familiar.Player:FireTear(ghost.Position, Vector(1,0):Rotated((i*(360/(amount)))+rotation)*player.ShotSpeed*7, false, true, false, familiar, .75)
                 tear.Scale=tear.Scale*.8
+                tear.Height = -13
                 tear:ClearTearFlags(TearFlags.TEAR_ABSORB)
                 if tear.Variant == TearVariant.HUNGRY then
                     tear:ChangeVariant(TearVariant.BLUE)
