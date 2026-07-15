@@ -344,6 +344,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
         end
     end
 
+
     if not updateFamCache then return end
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
@@ -549,7 +550,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                     local dis = 80
                     for _, ent in ipairs(Isaac.FindInRadius(ghostPos, 80, EntityPartition.ENEMY)) do
                         local ent = ent:ToNPC()
-                        if ent and IsValidEnemy(ent) and dis == nil or ent.Position:Distance(ghostPos) < dis then
+                        if ent and IsValidEnemy(ent) and (dis == nil or ent.Position:Distance(ghostPos) < dis) then
                             target = ent
                             dis = ent.Position:Distance(ghostPos)
                         end
@@ -565,7 +566,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                     local dis = 40
                     for _, ent in ipairs(Isaac.FindInRadius(ghostPos, 40, EntityPartition.ENEMY)) do
                         local ent = ent:ToNPC()
-                        if IsValidEnemy(ent) and dis == nil or ent.Position:Distance(ghostPos) < dis then
+                        if ent and IsValidEnemy(ent) and (dis == nil or ent.Position:Distance(ghostPos) < dis) then
                             target = ent
                             dis = ent.Position:Distance(ghostPos)
                         end
