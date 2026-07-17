@@ -11,7 +11,8 @@ local Fadeout = 30
 ---@field Damage number
 ---@field FrameCount integer
 ---@field Scale Vector
----@field Updated boolean
+---@field Updated integer
+---@field Rendered integer
 ---@field Sprite Sprite
 
 ---@param fam EntityFamiliar
@@ -50,7 +51,8 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
             FrameCount = 0,
             Scale = Vector(fam.SpriteScale.X, fam.SpriteScale.Y),
             Sprite = ghoul,
-            Updated = false
+            Updated = Isaac.GetTime(),
+            Rendered = Isaac.GetTime()
         }
         table.insert(clones, clone)
     end
@@ -66,7 +68,6 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam)
             local trisag, belial = clone.TearParams.TearFlags & TearFlags.TEAR_LASERSHOT == TearFlags.TEAR_LASERSHOT,clone.TearParams.TearFlags & TearFlags.TEAR_BELIAL == TearFlags.TEAR_BELIAL
             clone.Position = clone.Position+clone.Velocity
             clone.FrameCount = clone.FrameCount + 1
-            clone.Updated = true
             if belial then
                 local target, closest = nil, 125
                 local targets = Isaac.FindInRadius(clone.Position, closest, EntityPartition.ENEMY)
@@ -90,6 +91,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam)
                     BeckyMod:GhostBallCollide(fam, npc, false, clone.Position, clone.TearParams, clone.Damage, true)
                 end
             end
+            clone.Updated = Isaac.GetTime()
         else
             clone.Hitlist = nil
             table.remove(clones, i)
@@ -105,10 +107,10 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, fam, of
     for i, clone in ipairs(clones) do
         if clone then
             local trisag, belial = clone.TearParams.TearFlags & TearFlags.TEAR_LASERSHOT == TearFlags.TEAR_LASERSHOT,clone.TearParams.TearFlags & TearFlags.TEAR_BELIAL == TearFlags.TEAR_BELIAL
-            local pos = clone.Position
-            if not clone.Updated then
-                pos = pos + clone.Velocity*.5
-            end
+            clone.Rendered = Isaac.GetTime() 
+            local dt = math.abs((clone.Updated-clone.Rendered)/30)
+
+            local pos = clone.Position+clone.Velocity*dt
             local trans = 1
             if clone.FrameCount >= Fadeout then
                 trans = 1-((clone.FrameCount-Fadeout)/(Lifetime-Fadeout))
@@ -124,7 +126,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, fam, of
             end
 
             clone.Sprite:Render(Isaac.WorldToRenderPosition(pos) + offset)
-            if not Game():IsPaused() then clone.Updated = false clone.Sprite:Update() end
+            if not Game():IsPaused() then clone.Sprite:Update() end
         end
     end
 end)
