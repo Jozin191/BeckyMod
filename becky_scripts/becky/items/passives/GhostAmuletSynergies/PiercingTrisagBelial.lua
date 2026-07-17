@@ -1,4 +1,6 @@
 --- oh my god
+local GHOSTBALL = Isaac.GetEntityVariantByName("Ghost Ball")
+
 local Lifetime = 40
 local Fadeout = 30
 ---@class GhostClone
@@ -125,6 +127,15 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, fam, of
             if not Game():IsPaused() then clone.Updated = false clone.Sprite:Update() end
         end
     end
-    
-    
+end)
+--- Clear the ghosts when a new room is entered
+BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function(_)
+    local ghosts = Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOSTBALL, 0, false)
+    for _, v in pairs(ghosts) do
+        local ghost = v and v:ToFamiliar()
+        if ghost then
+            local data = BeckyMod.GetEntData(ghost)
+            if data then data.PIERCINGCLONES = {} end
+        end
+    end
 end)
