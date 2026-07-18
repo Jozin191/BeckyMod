@@ -299,7 +299,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
         data.BookWormFlag = false
     end
 
-    if player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING then
+    if (player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING) or player:HasTrinket(TrinketType.TRINKET_BABY_BENDER) then
         if not data.HomingFlag then
             updateFamCache = true
             data.HomingFlag = true
@@ -405,7 +405,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     for i, ghost in ipairs(fams) do
         BeckyMod.GetEntData(ghost).GHOST_IDX = i
     end
-    if player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING then
+    if (player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING) or player:HasTrinket(TrinketType.TRINKET_BABY_BENDER) then
         local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, FamSubType.HOMING)
         for _, ghost in ipairs(fams) do
             BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
@@ -770,10 +770,19 @@ BeckyMod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
         ghostData.TEARPARAMS = player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     end
     local tearParams = ghostData.TEARPARAMS or player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
-    
-    local wide = (player:GetTrinketMultiplier(TrinketType.TRINKET_FLAT_WORM)+player:GetCollectibleNum(CollectibleType.COLLECTIBLE_PUPULA_DUPLEX))*.5
-    familiar.SizeMulti = GhostSize*Vector(1+wide, 1+wide) -- making it an oval would probably mess some other stuff up
-    familiar.SpriteScale = GhostSize*Vector(1+wide, 1)
+    local flat = 0
+    if tearParams.TearFlags & TearFlags.TEAR_FLAT == TearFlags.TEAR_FLAT then
+        flat = math.max(player:GetTrinketMultiplier(TrinketType.TRINKET_FLAT_WORM), 1)
+    end
+    local wide = (flat+player:GetCollectibleNum(CollectibleType.COLLECTIBLE_PUPULA_DUPLEX))*.5
+
+    local pulse = 0
+    if tearParams.TearFlags & TearFlags.TEAR_PULSE == TearFlags.TEAR_PULSE then
+        local base = .4*math.max(player:GetTrinketMultiplier(TrinketType.TRINKET_PULSE_WORM), 1)
+        pulse = (base/2)+math.sin(familiar.FrameCount/3)*(base/2)
+    end
+    familiar.SizeMulti = (GhostSize*Vector(1+wide, 1+wide))*(pulse+1) -- making it an oval would probably mess some other stuff up
+    familiar.SpriteScale = (GhostSize*Vector(1+wide, 1))*(pulse+1)
 
 
     if player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then

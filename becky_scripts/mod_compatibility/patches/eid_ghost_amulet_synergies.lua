@@ -313,7 +313,7 @@ local SYNERGY_LIST = {
         }
     },
    {
-        Items = {CollectibleType.COLLECTIBLE_GODHEAD, CollectibleType.COLLECTIBLE_SPOON_BENDER, CollectibleType.COLLECTIBLE_SACRED_HEART, CollectibleType.COLLECTIBLE_TELEPATHY_BOOK},
+        Items = {CollectibleType.COLLECTIBLE_GODHEAD, CollectibleType.COLLECTIBLE_SPOON_BENDER, CollectibleType.COLLECTIBLE_SACRED_HEART, CollectibleType.COLLECTIBLE_TELEPATHY_BOOK, "5.350."..TrinketType.TRINKET_BABY_BENDER},
         Desc = {
             en_us = "Homing! Spawns a secondary purple ghost that automatically attacks enemies",
         }
@@ -334,6 +334,42 @@ local SYNERGY_LIST = {
         Items = CollectibleType.COLLECTIBLE_TRISAGION,
         Desc = {
             en_us = "The temporary ghosts can hit enemies multiple times but only deal a sixth of the damage",
+        }
+    },
+    {
+        Items = "5.350."..TrinketType.TRINKET_WIGGLE_WORM,
+        Desc = {
+            en_us = "Ghost moves in a wave pattern",
+        }
+    },
+    {
+        Items = "5.350."..TrinketType.TRINKET_RING_WORM,
+        Desc = {
+            en_us = "Ghost moves in a spiral pattern",
+        }
+    },
+    {
+        Items = "5.350."..TrinketType.TRINKET_OUROBOROS_WORM,
+        Desc = {
+            en_us = "Ghost moves in a large spiral pattern",
+        }
+    },
+    {
+        Items = "5.350."..TrinketType.TRINKET_HOOK_WORM,
+        Desc = {
+            en_us = "Ghost moves in an angular pattern",
+        }
+    },
+    {
+        Items = "5.350."..TrinketType.TRINKET_PULSE_WORM,
+        Desc = {
+            en_us = "Ghost pulsates",
+        }
+    },
+    {
+        Items = "5.350."..TrinketType.TRINKET_BRAIN_WORM,
+        Desc = {
+            en_us = "Ghost occasionally lunges towards enemies 90 degrees from it",
         }
     },
 }

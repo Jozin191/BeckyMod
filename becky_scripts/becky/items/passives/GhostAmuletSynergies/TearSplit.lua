@@ -1,9 +1,9 @@
 ---@param fam EntityFamiliar
 ---@param enemy EntityNPC
 ---@param tearParams TearParams
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams, position)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, enemy, tearParams, position, copy)
     local player = fam.Player
-
+    if copy then return end
     if not player then return end
 
     if tearParams.TearFlags & TearFlags.TEAR_SPLIT == TearFlags.TEAR_SPLIT then

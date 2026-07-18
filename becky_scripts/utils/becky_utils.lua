@@ -294,3 +294,30 @@ BeckyMod:AddPriorityCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, 10000, function
 -- it can't use "Post Game Starts" because some entities init before this function calls like the player or familiars (aparently)
 BeckyMod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function() cache_GetData = {} end)
 BeckyMod:AddCallback(ModCallbacks.MC_POST_GAME_END, function() cache_GetData = {} end)
+
+
+--[[
+if not BeckyMod_refreshBallz then
+	BeckyMod_refreshBallz = false
+end
+---@param mod ModReference
+---@param refreshBallz boolean
+BeckyMod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, function(_, mod, refreshBallz)
+	if mod.Name == "Becky" then
+		BeckyMod_refreshBallz = true
+	end
+end)
+local GHOSTBALL = Isaac.GetEntityVariantByName("Ghost Ball")
+BeckyMod:AddCallback(ModCallbacks.MC_PRE_UPDATE, function(_)
+	if BeckyMod_refreshBallz then
+		BeckyMod_refreshBallz = false
+		local ghosts = Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOSTBALL, nil, false)
+		for _, v in pairs(ghosts) do
+			local ghost = v and v:ToFamiliar()
+			if ghost then
+				Isaac.RunCallbackWithParam(ModCallbacks.MC_FAMILIAR_INIT, GHOSTBALL, ghost)
+			end
+		end
+	end
+end)
+]]

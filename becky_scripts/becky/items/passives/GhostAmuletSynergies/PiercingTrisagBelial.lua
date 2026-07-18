@@ -107,10 +107,11 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, fam, of
     for i, clone in ipairs(clones) do
         if clone then
             local trisag, belial = clone.TearParams.TearFlags & TearFlags.TEAR_LASERSHOT == TearFlags.TEAR_LASERSHOT,clone.TearParams.TearFlags & TearFlags.TEAR_BELIAL == TearFlags.TEAR_BELIAL
-            clone.Rendered = Isaac.GetTime() 
+            if not Game():IsPaused() then clone.Sprite:Update() clone.Rendered = Isaac.GetTime()  end
+            
             local dt = math.abs((clone.Updated-clone.Rendered)/30)
 
-            local pos = clone.Position+clone.Velocity*dt
+            local pos = clone.Position+clone.Velocity*math.min(dt, .5)
             local trans = 1
             if clone.FrameCount >= Fadeout then
                 trans = 1-((clone.FrameCount-Fadeout)/(Lifetime-Fadeout))
@@ -118,7 +119,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, fam, of
             clone.Sprite.Scale = clone.Scale
             clone.Sprite.Color = Color(.7,.7,.7,trans*.75)
             if belial then
-                clone.Sprite.Color = Color(.5,-.4,-.4,trans)
+                clone.Sprite.Color = Color(.6,-.26,-.26,trans*1.2)
                 clone.Sprite.PlaybackSpeed = 2
             elseif trisag then
                 clone.Sprite.Color = Color(.8,.8,.9, trans*.6, 0.5, 0.8, 0.9)
@@ -126,13 +127,13 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_RENDER_HELPER, function(_, fam, of
             end
 
             clone.Sprite:Render(Isaac.WorldToRenderPosition(pos) + offset)
-            if not Game():IsPaused() then clone.Sprite:Update() end
+            
         end
     end
 end)
 --- Clear the ghosts when a new room is entered
 BeckyMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function(_)
-    local ghosts = Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOSTBALL, 0, false)
+    local ghosts = Isaac.FindByType(EntityType.ENTITY_FAMILIAR, GHOSTBALL, nil, false)
     for _, v in pairs(ghosts) do
         local ghost = v and v:ToFamiliar()
         if ghost then
