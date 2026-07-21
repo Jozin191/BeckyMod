@@ -18,7 +18,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function (_, fam, t
         splash.SpriteScale = fam.SpriteScale*1.25
         splash.Color = fam:GetColor()
         splash:GetSprite():ReplaceSpritesheet(0, "gfx/effect_ripplepoof_ghost.png", true)
-        SFXManager():Play(SoundEffect.SOUND_TEARIMPACTS, .3, 0, false, 1.2)
+        BeckyMod.SFX:Play(SoundEffect.SOUND_TEARIMPACTS, .3, 0, false, 1.2)
         local enemies = Isaac.FindInRadius(fam.Position, fam.SizeMulti:Length()*37.5, EntityPartition.ENEMY)
         for i, v in pairs(enemies) do
             local npc = v:ToNPC()

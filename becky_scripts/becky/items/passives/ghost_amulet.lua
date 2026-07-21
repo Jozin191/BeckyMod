@@ -394,28 +394,28 @@ BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     rng:SetSeed(seed, 35)
 
     -- respawning ghosts
-    BeckyMod.GetEntData(player).LAST_GHOST_CHECK = BeckyMod.GetEntData(player).LAST_GHOST_CHECK or 0
     local num = GHOST_AMULET:GetGhostAmount(player)
-    if BeckyMod.GetEntData(player).LAST_GHOST_CHECK ~= num then
-        player:CheckFamiliar(GHOST_BALL_VAR, 0, rng)
-    end
-    BeckyMod.GetEntData(player).LAST_GHOST_CHECK = num
+    --BeckyMod.GetEntData(player).LAST_GHOST_CHECK = BeckyMod.GetEntData(player).LAST_GHOST_CHECK or 0
+    --if BeckyMod.GetEntData(player).LAST_GHOST_CHECK ~= num then
+    --    player:CheckFamiliar(GHOST_BALL_VAR, 0, rng)
+    --end
+    --BeckyMod.GetEntData(player).LAST_GHOST_CHECK = num
     
     local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, num, rng)
-    for i, ghost in ipairs(fams) do
-        BeckyMod.GetEntData(ghost).GHOST_IDX = i
-    end
+    --for i, ghost in ipairs(fams) do
+    --    BeckyMod.GetEntData(ghost).GHOST_IDX = i
+    --end
     if (player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING) or player:HasTrinket(TrinketType.TRINKET_BABY_BENDER) then
         local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, FamSubType.HOMING)
-        for _, ghost in ipairs(fams) do
-            BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
-        end
+        --for _, ghost in ipairs(fams) do
+        --    BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
+        --end
     end
     if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
         local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, FamSubType.BOOKWORM)
-        for _, ghost in ipairs(fams) do
-            BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
-        end
+        --for _, ghost in ipairs(fams) do
+        --    BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
+        --end
     end
 end, CacheFlag.CACHE_FAMILIARS)
 
@@ -474,12 +474,13 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local playerData = BeckyMod.GetEntData(player)
     local ghosts = playerData.GhostBalls
 
-    if not ghosts then return end
+    if not ghosts or #ghosts <= 0 then return end
     
     local room = BeckyMod.Game:GetRoom()
     local isShooting = IsPlayerShooting(player)
     local ForceTargetPos = nil
     local playerAppear = player:GetSprite():GetAnimation() == "Appear"
+    local playerPos = player.Position
     
     if Options.MouseControl and player.ControllerIndex == 0 then
         if Input.IsMouseBtnPressed(0) then
@@ -497,14 +498,23 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local shotSpeed = player.ShotSpeed
     local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
     local maxDistIdle = 40
+    
+    if not ForceTargetPos and isShooting then
+        local dir = (ghosts[1].Position - playerPos):Normalized()
+        player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
+    end
 
     -- epic fetus increases range so you dont kill yourself so easily
     if player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then
         maxDistMove = maxDistMove+30
     end
 
-    for _, ghost in ipairs(ghosts) do ---@cast ghost EntityFamiliar
-        if not ghost then goto continue end
+    for idx= #ghosts, 1, -1 do
+        local ghost = ghosts[idx] ---@cast ghost EntityFamiliar
+        if not ghost or not ghost:Exists() then
+            table.remove(ghosts, idx)
+            goto continue
+        end
 
         local ghostData = BeckyMod.GetEntData(ghost)
         local momentum = ghostData.BounceMomentum or 0
@@ -523,7 +533,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
         end
 
         local famPos = ghost.Position
-        local playerPos = player.Position
         local posDif = famPos - playerPos
         local posDifLenght = posDif:Length()
         
@@ -672,7 +681,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
                     if removeTrail then
                         ghost.Position = famPos
-                        ghostTrail:Remove()
+                        ghostTrail:Remove() -- we remove the trail so it doesn't appear throu the middle of the screen
                     end
                     
                     if ghostData.Continuum_X then
@@ -696,19 +705,14 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 local resizer = 1.5 * shotSpeed
                 local final = targetPos:Normalized():Resized(resizer)
                 if player:HasCollectible(CollectibleType.COLLECTIBLE_THE_WIZ) or (player:GetRUAWizardTimer() > 0) then
-                    local angle = 45*(((ghostData.GHOST_IDX or 1) % 2)*2+-1)
+                    --local angle = 45*(((ghostData.GHOST_IDX or 1) % 2)*2+-1)
+                    local angle = 90*(idx % 2) -45
                     final = final:Rotated(angle)
                 end
                 ghost.Velocity = ghost.Velocity + final*uc
                 
                 if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
                     ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove))*uc
-                end
-
-
-                if not ForceTargetPos then
-                    local dir = (famPos - playerPos):Normalized()
-                    player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
                 end
             end
         else
@@ -726,7 +730,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistIdle)) *uc
             end
         end
-
         
 
         if playerAppear then

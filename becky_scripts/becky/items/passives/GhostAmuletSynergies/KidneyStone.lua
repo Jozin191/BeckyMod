@@ -58,7 +58,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, np
     if urethracharge >= 1 and not blasting then
         local ukiddin = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.STONE, 0, fam.Position, (npc.Position-fam.Position):Normalized()*20, fam):ToTear()
         ukiddin:SetInitSound(SoundEffect.SOUND_STONE_IMPACT)
-        SFXManager():Play(SoundEffect.SOUND_BLOODSHOOT)
+        BeckyMod.SFX:Play(SoundEffect.SOUND_BLOODSHOOT)
         ukiddin:AddTearFlags(TearFlags.TEAR_EXTRA_GORE | TearFlags.TEAR_PIERCING | TearFlags.TEAR_SPECTRAL)
         ukiddin.FallingAcceleration = 0
         ukiddin.Scale = 1.2

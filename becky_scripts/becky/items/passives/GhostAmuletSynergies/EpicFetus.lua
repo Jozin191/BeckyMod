@@ -20,8 +20,8 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
         rocket.CollisionDamage = 0
         rocket.m_Height = 0
         
-        SFXManager():Play(SoundEffect.SOUND_FETUS_FEET)
-        SFXManager():Play(SoundEffect.SOUND_ROCKET_LAUNCH_SHORT, .8)
+        BeckyMod.SFX:Play(SoundEffect.SOUND_FETUS_FEET)
+        BeckyMod.SFX:Play(SoundEffect.SOUND_ROCKET_LAUNCH_SHORT, .8)
     end
 end)
 

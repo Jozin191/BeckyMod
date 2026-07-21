@@ -16,7 +16,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, te
         ghostData.TechXRing = EntityPtr(laser)
         -- hack to stop the annoying laser sound every room
         laser:Update()
-        SFXManager():Stop(SoundEffect.SOUND_REDLIGHTNING_ZAP)
+        BeckyMod.SFX:Stop(SoundEffect.SOUND_REDLIGHTNING_ZAP)
     elseif exists  then
         if not teching then
             if exists then

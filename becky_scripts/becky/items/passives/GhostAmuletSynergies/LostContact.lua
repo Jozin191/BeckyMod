@@ -10,7 +10,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function(_, fam, te
             local proj = proj:ToProjectile()
             if proj and not (proj.ProjectileFlags & ProjectileFlags.CANT_HIT_PLAYER == ProjectileFlags.CANT_HIT_PLAYER)  then
                 if bounce then --  rubber cement synergy: causes projectiles to bounce off and deal damage to enemies
-                    SFXManager():Play(SoundEffect.SOUND_SLIPPED_RIB_DEFLECT)
+                    BeckyMod.SFX:Play(SoundEffect.SOUND_SLIPPED_RIB_DEFLECT)
                     local angle = (proj.Position-fam.Position):GetAngleDegrees()
                     proj:Deflect(proj.Velocity:Rotated(angle-proj.Velocity:GetAngleDegrees()))
                     proj.Velocity = proj.Velocity*1.3

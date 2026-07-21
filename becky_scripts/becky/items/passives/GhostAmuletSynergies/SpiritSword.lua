@@ -16,8 +16,8 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
     if fam.SpriteScale:Length() > 2 then
         pitch = .6
     end
-    SFXManager():Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, pitch)
-    SFXManager():Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, pitch)
+    BeckyMod.SFX:Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, pitch)
+    BeckyMod.SFX:Play(SoundEffect.SOUND_SWORD_SPIN, .7, 2, false, pitch)
 
     ghostData.Sword = player:FireKnife(
         fam,

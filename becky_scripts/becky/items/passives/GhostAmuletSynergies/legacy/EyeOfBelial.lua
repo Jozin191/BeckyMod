@@ -17,7 +17,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, ene
         ghost.Target = enemy
         ghost.DepthOffset = 7
         ghostData.RedGhost = EntityPtr(ghost)
-        SFXManager():Play(SoundEffect.SOUND_FLOATY_BABY_ROAR, .6, 0, false, 2)
+        BeckyMod.SFX:Play(SoundEffect.SOUND_FLOATY_BABY_ROAR, .6, 0, false, 2)
         BeckyMod.SFX:Play(SoundEffect.SOUND_SUMMON_POOF, 1, 0, false, 1.3)
         local poof = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 2, fam.Position, Vector.Zero, player)
         poof.Color = Color(.5,0,0, .8)

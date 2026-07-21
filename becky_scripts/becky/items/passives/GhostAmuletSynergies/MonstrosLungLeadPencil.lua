@@ -37,7 +37,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.GHOST_UPDATE_HELPER, function (_, fam)
     local lungcharge = data.LUNGCHARGE or 0
     lungcharge = math.min(lungcharge+BeckyMod:toTearsPerSecond(player.MaxFireDelay)/40, 1)
     if lungcharge == 0 then
-        SFXManager():Play(SoundEffect.SOUND_MONSTROS_LUG_CHARGE, 1.5)
+        BeckyMod.SFX:Play(SoundEffect.SOUND_MONSTROS_LUG_CHARGE, 1.5)
     end
     if lungcharge < 1 then
         sprite:SetAnimation("Charge", true)
@@ -56,7 +56,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function (_, fam, np
     if player:HasCollectible(CollectibleType.COLLECTIBLE_MONSTROS_LUNG) then 
         if data.LUNGCHARGE >= 1 then
             FireMonstroBurst(player, player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_MONSTROS_LUNG), fam.Position, (npc.Position-fam.Position):Normalized(), 14, 35)
-            SFXManager():Play(SoundEffect.SOUND_MONSTROS_LUNG_BARF, 1.5)
+            BeckyMod.SFX:Play(SoundEffect.SOUND_MONSTROS_LUNG_BARF, 1.5)
             data.LUNGCHARGE = 0
         else
             data.LUNGCHARGE = math.max(data.LUNGCHARGE-.075, 0)
