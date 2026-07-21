@@ -1,6 +1,6 @@
 ---@param fam EntityFamiliar
 ---@param enemy Entity
-BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, tearParams, position)
+BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, npc, tearParams, position)
     local player = fam.Player 
 
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_POP) then return end
@@ -10,5 +10,7 @@ BeckyMod:AddCallback(BeckyMod.Callbacks.ON_GHOST_HIT_ENEMY, function(_, fam, tea
     if rng:RandomFloat() > 0.2 then return end
 
     local tear = player:FireTear(position, rng:RandomVector() * (player.ShotSpeed * 10))
-    tear:ChangeVariant(TearVariant.EYE_BLOOD)
+    if tear.Variant ~= TearVariant.EYE then
+        tear:ChangeVariant(TearVariant.EYE)
+    end
 end)
