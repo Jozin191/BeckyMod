@@ -481,6 +481,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local ForceTargetPos = nil
     local playerAppear = player:GetSprite():GetAnimation() == "Appear"
     local playerPos = player.Position
+    local totalGhostPosition = nil
     
     if Options.MouseControl and player.ControllerIndex == 0 then
         if Input.IsMouseBtnPressed(0) then
@@ -498,11 +499,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local shotSpeed = player.ShotSpeed
     local maxDistMove = ((player.TearRange / 6.5) * 2.5) * (1 / shotSpeed) -- Max distance is affected by shotspeed, by adding that div we stop it from doinf that
     local maxDistIdle = 40
-    
-    if not ForceTargetPos and isShooting then
-        local dir = (ghosts[1].Position - playerPos):Normalized()
-        player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
-    end
 
     -- epic fetus increases range so you dont kill yourself so easily
     if player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then
@@ -714,6 +710,12 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
                 if not BeckyHasBirthright(player) and (posDifLenght >= maxDistMove) then
                     ghost.Velocity = ghost.Velocity - (posDif:Normalized() * (posDifLenght / maxDistMove))*uc
                 end
+
+                if totalGhostPosition then
+                    totalGhostPosition = totalGhostPosition + ghost.Position
+                else
+                    totalGhostPosition = ghost.Position
+                end
             end
         else
             ghostData.Continuum_X = false
@@ -736,6 +738,11 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
             ghost.Velocity = Vector.Zero
         end
         ::continue::
+    end
+    
+    if not ForceTargetPos and isShooting and totalGhostPosition ~= nil then
+        local dir = (totalGhostPosition - (playerPos * #ghosts)):Normalized()
+        player:SetHeadDirection(VectorToDirection(dir) or Direction.DOWN, 4, true)
     end
 end)
 
