@@ -256,12 +256,6 @@ BeckyMod:AddCallback(ModCallbacks.MC_PLAYER_INIT_POST_LEVEL_INIT_STATS, function
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
 
----@param ID CollectibleType
----@param player EntityPlayer
-local function StopShooting(ID, player)
-    if ID ~= GHOST_AMULET.ID then return end
-    player:SetCanShoot(false)
-end 
 
 local MultiShotItems = {
     [CollectibleType.COLLECTIBLE_20_20] = true,
@@ -352,7 +346,10 @@ end)
 ---@param id CollectibleType
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, id, _, _, _, _, player)
-    StopShooting(id, player)
+    if id == GHOST_AMULET.ID then
+        player:SetCanShoot(false)
+        return
+    end
     if not HasGhostAmulet(player) then return end
     if id == CollectibleType.COLLECTIBLE_CONTINUUM then
         local playerData = BeckyMod.GetEntData(player)
@@ -369,8 +366,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, id, _, _
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
 
-BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(_, player, ID)
-    if ID == CollectibleType.COLLECTIBLE_CONTINUUM then
+BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(_, player, id)
+    if id == CollectibleType.COLLECTIBLE_CONTINUUM then
         local playerData = BeckyMod.GetEntData(player)
         local ghosts = playerData.GhostBalls
 
@@ -381,41 +378,32 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(
             ::continue::
         end
     end
-    if ID == GHOST_AMULET.ID then player:SetCanShoot(true) end
-    if not MultiShotItems[ID] then return end
+    if id == GHOST_AMULET.ID and not HasGhostAmulet(player) then
+        player:SetCanShoot(true)
+        return
+    end
+    if not MultiShotItems[id] then return end
     player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
 end)
 
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
-    if not HasGhostAmulet(player) then return end
     local rng = RNG()
     local seed = math.max(Random(), 1)
     rng:SetSeed(seed, 35)
-
-    -- respawning ghosts
-    local num = GHOST_AMULET:GetGhostAmount(player)
-    --BeckyMod.GetEntData(player).LAST_GHOST_CHECK = BeckyMod.GetEntData(player).LAST_GHOST_CHECK or 0
-    --if BeckyMod.GetEntData(player).LAST_GHOST_CHECK ~= num then
-    --    player:CheckFamiliar(GHOST_BALL_VAR, 0, rng)
-    --end
-    --BeckyMod.GetEntData(player).LAST_GHOST_CHECK = num
     
-    local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, num, rng)
-    --for i, ghost in ipairs(fams) do
-    --    BeckyMod.GetEntData(ghost).GHOST_IDX = i
-    --end
+    if not HasGhostAmulet(player) then
+        player:CheckFamiliar(GHOST_BALL_VAR, 0, rng)
+        return
+    end
+    
+    local num = GHOST_AMULET:GetGhostAmount(player)
+    player:CheckFamiliar(GHOST_BALL_VAR, num, rng)
     if (player.TearFlags & TearFlags.TEAR_HOMING == TearFlags.TEAR_HOMING) or player:HasTrinket(TrinketType.TRINKET_BABY_BENDER) then
-        local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, FamSubType.HOMING)
-        --for _, ghost in ipairs(fams) do
-        --    BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
-        --end
+        player:CheckFamiliar(GHOST_BALL_VAR, 1, rng, nil, FamSubType.HOMING)
     end
     if player:HasPlayerForm(PlayerForm.PLAYERFORM_BOOK_WORM) then
-        local fams = player:CheckFamiliarEx(GHOST_BALL_VAR, 1, rng, nil, FamSubType.BOOKWORM)
-        --for _, ghost in ipairs(fams) do
-        --    BeckyMod.GetEntData(ghost).GHOST_IDX = num+1
-        --end
+        player:CheckFamiliar(GHOST_BALL_VAR, 1, rng, nil, FamSubType.BOOKWORM)
     end
 end, CacheFlag.CACHE_FAMILIARS)
 

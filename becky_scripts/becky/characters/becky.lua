@@ -15,7 +15,7 @@ function BECKY:OnInit(player)
     PlayerAnimLib:SetDefaultAnm2(player, "gfx/player_becky.anm2")
     player:AddNullCostume(BECKY.HAIR_COSTUME)
     player:AddNullCostume(BECKY.BODY_COSTUME)
-    player:AddCollectible(BeckyMod.Item.GHOST_AMULET.ID)
+    --player:AddCollectible(BeckyMod.Item.GHOST_AMULET.ID)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit, 0)
 

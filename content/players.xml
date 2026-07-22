@@ -10,7 +10,8 @@
         costumeSuffix="becky"
         modcostume="0"
 		birthright="Freedom!!!"
-
+        
+        innateitems="Ghost Amulet"
         rangemodifier="1.5"
     />
     <player name="Becky" bSkinParent="Becky"
