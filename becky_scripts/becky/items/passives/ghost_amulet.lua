@@ -270,6 +270,13 @@ local MultiShotItems = {
     [CollectibleType.COLLECTIBLE_THE_WIZ] = true,
 }
 
+local function HasLudo(player)
+    local save = BeckyMod.SaveManager.GetRunSave(player)
+    if save.BECKY_LUDO and save.BECKY_LUDO > 0 then
+        return true
+    end
+    return false
+end
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
     if not HasGhostAmulet(player) then return end
@@ -353,7 +360,12 @@ end)
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, id, _, _, _, _, player)
     StopShooting(id, player)
+    if id == CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE then
+        local save = BeckyMod.SaveManager.GetRunSave(player)
+        save.BECKY_LUDO = (save.BECKY_LUDO and save.BECKY_LUDO+1) or 1
+    end
     if not HasGhostAmulet(player) then return end
+    player:BlockCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE)
     if id == CollectibleType.COLLECTIBLE_CONTINUUM then
         local playerData = BeckyMod.GetEntData(player)
         local ghosts = playerData.GhostBalls
@@ -370,6 +382,10 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, id, _, _
 end)
 
 BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(_, player, ID)
+    if ID == CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE then
+        local save = BeckyMod.SaveManager.GetRunSave(player)
+        save.BECKY_LUDO = (save.BECKY_LUDO and save.BECKY_LUDO-1) or 0
+    end
     if ID == CollectibleType.COLLECTIBLE_CONTINUUM then
         local playerData = BeckyMod.GetEntData(player)
         local ghosts = playerData.GhostBalls
@@ -381,14 +397,20 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(
             ::continue::
         end
     end
-    if ID == GHOST_AMULET.ID then player:SetCanShoot(true) end
+
+    if ID == GHOST_AMULET.ID and (not HasGhostAmulet(player)) then 
+        player:SetCanShoot(true)
+        player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
+        
+        player:UnblockCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE)
+    end
     if not MultiShotItems[ID] then return end
-    player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)
+    
 end)
 
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
-    if not HasGhostAmulet(player) then return end
+    if not HasGhostAmulet(player) then player:CheckFamiliarEx(GHOST_BALL_VAR, 0, player:GetCollectibleRNG(GHOST_AMULET.ID)) return end
     local rng = RNG()
     local seed = math.max(Random(), 1)
     rng:SetSeed(seed, 35)
@@ -475,7 +497,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local ghosts = playerData.GhostBalls
 
     if not ghosts or #ghosts <= 0 then return end
-    
+    player:SetUrethraBlock(false) -- "clog" kidney stone to prevent it firing from the player
     local room = BeckyMod.Game:GetRoom()
     local isShooting = IsPlayerShooting(player)
     local ForceTargetPos = nil
@@ -950,11 +972,16 @@ function BeckyMod:GhostBallCollide(familiar, collider, low, position, params, da
     local sprite = familiar:GetSprite()
     local tearParams = params or ghostData.TEARPARAMS or player:GetTearHitParams(WeaponType.WEAPON_TEARS, 4/3, 1, familiar)
     local baseDamage = (GHOST_AMULET:GetGhostDamage(player, damage or tearParams.TearDamage) + (ghostData.CoalBonus or 0)) * ghostData.ChocolateMilkMult * (ghostData.ProptosisMulti or 1)
+    local hasLudo = HasLudo(player)
+    
     baseDamage = baseDamage*(1+((ghostData.DeadEyeMulti and ghostData.DeadEyeMulti.Multi) or 0)) -- Dead Eye
     local multi = 1
-
+    if hasLudo then 
+        baseDamage=baseDamage*(1/3)
+        multi =  multi*.5
+    end
     if tearParams.TearFlags & TearFlags.TEAR_KNOCKBACK == TearFlags.TEAR_KNOCKBACK then
-        multi = 1.5
+        multi = multi*1.5
     end
     if collider.Type == EntityType.ENTITY_MOVABLE_TNT or (collider.Type == EntityType.ENTITY_FIREPLACE and DestroyableFireplaces[collider.Variant]) then
         collider:TakeDamage(baseDamage, 0, EntityRef(familiar), 1)
@@ -972,7 +999,7 @@ function BeckyMod:GhostBallCollide(familiar, collider, low, position, params, da
     if not ghostCopy then
         sprite:Play("Hit",true)
         TriggerPush(npc, familiar, 20 * GHOST_AMULET:GetGhostTearMult(player)*multi)
-        if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then
+        if not hasLudo then
             TriggerPush(familiar, npc, 10+ghostData.BounceMomentum*2)
         end
         if tearParams.TearFlags & TearFlags.TEAR_BOUNCE == TearFlags.TEAR_BOUNCE then

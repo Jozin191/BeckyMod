@@ -331,6 +331,12 @@ local SYNERGY_LIST = {
         }
     },
     {
+        Items = CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE,
+        Desc = {
+            en_us = "The ghost no longer gets pushed back when attacking an enemy but only deals a 1/3rd of it's regular damage",
+        }
+    },
+    {
         Items = CollectibleType.COLLECTIBLE_TRISAGION,
         Desc = {
             en_us = "The temporary ghosts can hit enemies multiple times but only deal a sixth of the damage",

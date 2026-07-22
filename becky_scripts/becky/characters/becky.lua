@@ -19,14 +19,15 @@ function BECKY:OnInit(player)
 end
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, BECKY.OnInit, 0)
 
+--[[ -- moved this cuz kidney stone should be "clogged" for everyone with the amulet
 ---@param player EntityPlayer
 function BECKY:PostPlayerUpdate(player) -- "clog" kidney stone to prevent it firing from becky
     if player:GetPlayerType() == BECKY.PLAYERTYPE then
         player:SetUrethraBlock(false)
     end
 end
-
 BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, BECKY.PostPlayerUpdate)
+]]
 
 function BECKY:BeckyStats(player, flag)
     if player:GetPlayerType() ~= BECKY.PLAYERTYPE then return end
