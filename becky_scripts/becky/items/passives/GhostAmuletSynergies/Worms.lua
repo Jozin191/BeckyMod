@@ -29,15 +29,15 @@ local worms = {
             fam.Position = fam.Position + calc(time/2.5) - (calc((time-1)/2.5))
         end
     },
-    [TearFlags.TEAR_SQUARE] = {
+    [TearFlags.TEAR_SQUARE] = { --- help me
         id = TrinketType.TRINKET_HOOK_WORM,
         func = function (player, fam, time, power)
             local function calc(time)
-                local durr = math.sin(time%(math.pi/2))
+                local vec = math.sin(time%(math.pi/2))
                 if math.sin(time*2) > 0 then
-                    durr = -durr
+                    vec = -vec
                 end
-                return player:GetLastDirection():Rotated(90)*(durr)*(40)*power
+                return player:GetLastDirection():Rotated(90)*(vec)*(40)*power
             end
             fam.Position = fam.Position+calc(time/8) - (calc((time-1)/8))
         end
