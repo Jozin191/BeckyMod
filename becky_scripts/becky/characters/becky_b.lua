@@ -93,6 +93,7 @@ end
 
 
 local function HasShouldDoCursedEye(player)
+    if player:HasCurseMistEffect() then return false end
     local effects = player:GetEffects()
     if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) or
     player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) or
@@ -107,6 +108,7 @@ local function HasShouldDoCursedEye(player)
 end
 
 local function HasShouldDoNeptunus(player)
+    if player:HasCurseMistEffect() then return false end
     local effects = player:GetEffects()
     if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) or
     player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) or
@@ -122,6 +124,7 @@ end
 local DoNeptunusCluster = function() print("didn't load") end
 
 local function ShouldDoChocolateMilk(player)
+    if player:HasCurseMistEffect() then return false end
     local effects = player:GetEffects()
     if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) or
     effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) or
@@ -132,6 +135,7 @@ local function ShouldDoChocolateMilk(player)
 end
 
 local function ShouldDoBrimstone(player)
+    if player:HasCurseMistEffect() then return false end
     local effects = player:GetEffects()
     if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) or
     player:HasCollectible(CollectibleType.COLLECTIBLE_HAEMOLACRIA) or
@@ -144,6 +148,7 @@ local function ShouldDoBrimstone(player)
 end
 
 local function ShouldDoTechX(player)
+    if player:HasCurseMistEffect() then return false end
     local effects = player:GetEffects()
     if player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) or
     effects:HasNullEffect(BECKY_B.BlockItems.DrFetus) or
@@ -154,6 +159,7 @@ local function ShouldDoTechX(player)
 end
 
 local function ShouldDoMonstrosLung(player)
+    if player:HasCurseMistEffect() then return false end
     local effects = player:GetEffects()
     if (not effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION)) or
     player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
@@ -359,7 +365,7 @@ local function ProcessStaffSwing(entShooting, player)
             return
         end
         if CountForgotenLullaby then playerMaxFireDelay = playerMaxFireDelay /2 end
-        local C_SectionIsMainWeapon = not player:GetEffects():HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION)
+        local C_SectionIsMainWeapon = not player:GetEffects():HasNullEffect(BECKY_B.BlockItems.EpicFetus) and player:HasCollectible(CollectibleType.COLLECTIBLE_C_SECTION) and not player:HasCurseMistEffect()
         
         if playerMaxFireDelay <= 3.2 then
             if C_SectionIsMainWeapon then
@@ -926,6 +932,7 @@ end)
 
 
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_CACHE, -400000, function(_, player, cacheFlag)
+    if player:HasCurseMistEffect() then return end
     local effects = player:GetEffects()
     if cacheFlag & CacheFlag.CACHE_FIREDELAY == CacheFlag.CACHE_FIREDELAY then
         local tps = BeckyMod:toTearsPerSecond(player.MaxFireDelay)
@@ -1010,7 +1017,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player,
     if player:GetPlayerType() ~= BECKY_B.PLAYERTYPE then return end
     local effects = player:GetEffects()
     local data = BeckyMod.GetEntData(player)
-    if effects:HasNullEffect(BECKY_B.BlockItems.MonstrosLung) and player:IsItemCostumeVisible(itemConfig:GetNullItem(BECKY_B.BlockItems.MonstrosLung), PlayerSpriteLayer.SPRITE_HEAD) then
+    if effects:HasNullEffect(BECKY_B.BlockItems.MonstrosLung) and not player:HasCurseMistEffect() and player:IsItemCostumeVisible(itemConfig:GetNullItem(BECKY_B.BlockItems.MonstrosLung), PlayerSpriteLayer.SPRITE_HEAD) then
         if not data.MagicStaff_ChargeBar then return end
         local spriteData = data.HeadSpriteData
         local sprite
@@ -1023,7 +1030,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player,
             }
             spriteData = data.HeadSpriteData
             sprite = spriteData.Sprite
-            sprite:ReplaceSpritesheet(0, "gfx/characters/costumes_becky/costume_monstros lung.png", true)
+            sprite:ReplaceSpritesheet(0, "gfx/characters/costumes_becky_b/costume_monstros lung.png", true)
         else
             sprite = spriteData.Sprite
         end
@@ -1032,7 +1039,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player,
         local dir = player:GetHeadDirection()
         local charge = data.MagicStaff_ChargeBar.Charge / data.MagicStaff_ChargeBar.MaxCharge
 
-        if effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) then
+        if effects:HasNullEffect(BECKY_B.BlockItems.ChocolateMilk) and not player:HasCurseMistEffect() then
             if charge == 1 then
                 if not sprite:IsPlaying(DirToHeadAnim[dir].."ChargeFull") then
                     sprite:Play(DirToHeadAnim[dir].."ChargeFull", true)
@@ -1090,7 +1097,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player,
                 Update = false,
             }
             spriteData = data.HeadSpriteData
-            spriteData.Sprite:ReplaceSpritesheet(0, "gfx/characters/costumes_becky/costume_019_brimstone.png", true)
+            spriteData.Sprite:ReplaceSpritesheet(0, "gfx/characters/costumes_becky_b/costume_019_brimstone.png", true)
         end
         local sprite = spriteData.Sprite
         
@@ -1129,7 +1136,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player,
             }
             spriteData = data.HeadSpriteData
             sprite = spriteData.Sprite
-            sprite:ReplaceSpritesheet(0, "gfx/characters/costumes_becky/costume_chocolate milk.png", true)
+            sprite:ReplaceSpritesheet(0, "gfx/characters/costumes_becky_b/costume_chocolate milk.png", true)
         else
             sprite = spriteData.Sprite
         end
@@ -1204,6 +1211,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_PRE_RENDER_PLAYER_HEAD, function(_, player,
 end)
 
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_EVALUATE_MULTI_SHOT_PARAMS, -40000, function(_, player, multishotParam, weaponType)
+    if player:HasCurseMistEffect() then return end
     local num = player:GetEffects():GetNullEffectNum(BECKY_B.BlockItems.MonstrosLung) -1
     if num > 0 then
         num = num *5 -1 + multishotParam:GetNumTears()
@@ -1456,7 +1464,7 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
         end
         mult = mult * fam:GetMultiplier()
     end
-    if fireData.ChocoMilk then
+    if fireData.ChocoMilk and not player:HasCurseMistEffect() then
         mult = mult *fireData.ChocoMilk
     end
 
@@ -1470,7 +1478,54 @@ function BECKY_B:FireWeapon(entShooting, player, fireData)
     end
 
     local moveInhe = player:GetTearMovementInheritance(shotDir)
-    if effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
+    if player:HasCurseMistEffect() then
+        local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
+
+        for i=0, multishotParams:GetNumTears()-1 do
+            local posVel = player:GetMultiShotPositionVelocity(i, WeaponType.WEAPON_TEARS, shotDir, shotSpeed, multishotParams)
+            local tear = player:FireTear(
+                shotPos + posVel.Position *scale,
+                posVel.Velocity + moveInhe,
+                fireData.CanBeEye, fireData.TractorBeam, true, entShooting, mult
+            )
+            table.insert(weaponList, tear)
+        end
+
+        if fireData.ExtraTears then
+            fireData.TractorBeam = false
+            if multishotParams:IsShootingBackwards() then
+                local tear = player:FireTear(
+                    shotPos,
+                    shotDir:Resized(shotSpeed):Rotated(180),
+                    fireData.CanBeEye, false, false, entShooting, mult
+                )
+
+                table.insert(weaponList, tear)
+            end
+            if multishotParams:IsShootingSideways() then
+                for angle=-90, 90, 180 do
+                    local tear = player:FireTear(
+                        shotPos,
+                        shotDir:Resized(shotSpeed):Rotated(angle),
+                        fireData.CanBeEye, false, false, entShooting, mult
+                    )
+                
+                    table.insert(weaponList, tear)
+                end
+            end
+
+            for i=1, multishotParams:GetNumRandomDirTears() do
+                local angle = Random() % 360
+                local tear = player:FireTear(
+                    shotPos,
+                    shotDir:Resized(shotSpeed):Rotated(angle),
+                    fireData.CanBeEye, false, false, entShooting, mult
+                )
+                
+                table.insert(weaponList, tear)
+            end
+        end
+    elseif effects:HasNullEffect(BECKY_B.BlockItems.EpicFetus) then
         local multishotParams = player:GetMultiShotParams(WeaponType.WEAPON_BOMBS)
         
         if fireData.MonstroLung then
