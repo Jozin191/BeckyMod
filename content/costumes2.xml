@@ -30,4 +30,9 @@
     <costume anm2path="costumes/pog/sofia_pog.anm2" isFlying="true" priority="969" type="none"/>
     <costume anm2path="truecoop/costumes/ghost/ghost_becky.anm2" priority="999" type="none" isFlying="true" />
 
+    <!-- unique hairs costumes for becky and t becky -->
+    <costume anm2path="becky_051_ouijaboard_hair.anm2" id="16" type="none" priority="110" />
+    <costume anm2path="becky_088_deaddove_hair.anm2" id="17" type="none" priority="110" />
+    <costume anm2path="becky_234_infestation2_hair.anm2" id="18" type="none" priority="110" />
+
 </costumes>

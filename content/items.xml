@@ -217,6 +217,8 @@
         achievement="Bug Spray"
         />
 
+        <!-- Null Items -->
+
         <!-- T. Becky Fake Items -->
         <null id="11"
         name="Monstro's Lung Blocker" 
@@ -249,8 +251,6 @@
         cache="damage firedelay" 
         />
 
-        <!-- Null Items -->
-
         <null
         name="NULL_BECKY_GHOST" 
         persistent="true" 
@@ -265,6 +265,19 @@
         persistent="false" 
         cache="" />
 
+        <null id="16"
+        name="Ouijaboard_Costume handler"
+        persistent="true" 
+        cache="" />
+        <null id="17"
+        name="Dead Dove_Costume handler"
+        persistent="true" 
+        cache="" />
+        <null id="18"
+        name="Infestation2_Costume handler"
+        persistent="true" 
+        cache="" />
+        
         <null 
         name="RIPPED_CARD_The_Magician" />
         <null
