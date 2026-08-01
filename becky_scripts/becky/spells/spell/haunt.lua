@@ -12,13 +12,14 @@ end
 
 BeckyMod:AddPriorityCallback(ModCallbacks.MC_PRE_NPC_UPDATE, -200, function(_, npc)
     if not BeckyMod.GetEntData(npc).IsHaunted then return end
-    local frameCount = npc.FrameCount/30
+    local frameCount = npc.FrameCount/30 + (BeckyMod.GetEntData(npc).HauntFrameOffset or 0)
+    local X_Mult = (BeckyMod.GetEntData(npc).HauntXMult or 1)
     --local colorAmount = (5 * math.sin((360/16) * frameCount) +5) / 10
 
     npc:SetColor(HAUNT_COLOR, 2, 999, false, false)
     
     -- a * sin((360/d)*x - f) + m
-    local X = 2.5 * math.sin((360/12) * frameCount/4) * 5
+    local X = 2.5 * math.sin((360/12) * frameCount/4) * 5 * X_Mult
     local Y = 1.5 * math.sin((360/5) * frameCount/4) * 5 - 8
     npc.PositionOffset = Vector(X, Y)
     ---npc.SpriteRotation = 2.5 * math.sin((360/12) * frameCount/4 + 3) *2.5
@@ -68,6 +69,8 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, function(_, ent)
         local target = ent.Parent
         if target and not target:IsDead() and target:Exists() then
             BeckyMod.GetEntData(target).IsHaunted = nil
+            BeckyMod.GetEntData(target).HauntFrameOffset = nil
+            BeckyMod.GetEntData(taget).HauntXMult = nil
         end
     end
 end)
@@ -83,6 +86,8 @@ local function MakeHauntedEnt(ent, spawner)
         eff:FollowParent(ent)
         eff:SetTimeout(150)
         BeckyMod.GetEntData(ent).IsHaunted = true
+        BeckyMod.GetEntData(ent).HauntFrameOffset = Random() % 30
+        BeckyMod.GetEntData(ent).HauntXMult = BeckyMod.RandomFloat(0.8, 1.25, ent:GetDropRNG() )
     end
     if ent.Parent then
         MakeHauntedEnt(ent.Parent, spawner)
