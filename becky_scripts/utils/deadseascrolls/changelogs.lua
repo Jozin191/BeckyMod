@@ -1,4 +1,4 @@
-DeadSeaScrollsMenu.AddChangelog("Becky MOD", "Becky v2.0", [[{FSIZE2} (date and stuff)
+DeadSeaScrollsMenu.AddChangelog("Becky MOD", "Becky v2.0", [[{FSIZE2} 10/8/2026
 {FSIZE2}TAINTED + SYNERGIES UPDATE!!!
 
 Other changes:
