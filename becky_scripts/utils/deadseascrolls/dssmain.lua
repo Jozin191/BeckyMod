@@ -167,7 +167,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                     {str = 'lunastella', fsize=2, tooltip = GenerateTooltip('part of the ghost code')},
                     {str = 'hellio', fsize=2, tooltip = GenerateTooltip('part of the ghost code')},
                     {str = 'ferpe', fsize=2, tooltip = GenerateTooltip('tainted becky visual design')},
-                    {str = 'pipstarmoth', fsize=2, tooltip = GenerateTooltip('soul of Becky Voiceline')},
+                    {str = 'pipstarmoth', fsize=2, tooltip = GenerateTooltip('soul of becky voiceline')},
 
                     BREAK_LINE,
                     {str = 'playtesters', fsize = 3, nosel = true},
