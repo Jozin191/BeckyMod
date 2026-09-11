@@ -4,7 +4,7 @@ BeckyMod.RECOMMENDED_SHIFT_IDX = 35
 
 --FLAGS!!!
 BeckyMod.FLAGS = {}
-BeckyMod.FLAGS.Debug = true
+BeckyMod.FLAGS.Debug = false
 --End of flags
 
 BeckyMod.SaveManager = include("becky_scripts.utils.save_manager")

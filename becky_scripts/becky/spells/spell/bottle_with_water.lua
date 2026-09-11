@@ -74,6 +74,7 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, function(_, tear)
     creep.Scale = 2
     creep:SetTimeout(150)
     BeckyMod.GetEntData(creep).NoGrantMana = true
+    creep:Update()
 
 end, flaskVar)
 

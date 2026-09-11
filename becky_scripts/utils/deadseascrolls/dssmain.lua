@@ -2,6 +2,39 @@ local mod = BeckyMod
 
 BeckyMod.HasLoadedDSS = true
 
+local achievement = {
+    DEVILZONE_PRIME = Isaac.GetAchievementIdByName("Devilzon Prime"),
+    NIGHT_OF_THE_SLASHER = Isaac.GetAchievementIdByName("Night of the Slasher"),
+    DREAM_BANISHER = Isaac.GetAchievementIdByName("Dream Banisher"),
+    SINNER = Isaac.GetAchievementIdByName("Sinner"),
+    HOLY_BOOKMARK = Isaac.GetAchievementIdByName("Holy Bookmark"),
+    CHALICE = Isaac.GetAchievementIdByName("Defiled Chalice"),
+    COXINHA = Isaac.GetAchievementIdByName("Coxinha"),
+    CORPSE_TAG = Isaac.GetAchievementIdByName("Corpse Tag"),
+    SCARECROW = Isaac.GetAchievementIdByName("Scarecrow"),
+    NULL_BOMBS = Isaac.GetAchievementIdByName("Null Bombs"),
+    GHOST_AMULET = Isaac.GetAchievementIdByName("Ghost Amulet"),
+    DEAD_SOCKET = Isaac.GetAchievementIdByName("Dead Socket"),
+    DEAD_BATTERY = Isaac.GetAchievementIdByName("Dead Battery"),
+    BUTCHERS_COOKBOOK = Isaac.GetAchievementIdByName("Butcher's Cookbook"),
+
+    TAINTED_BECKY = Isaac.GetAchievementIdByName("Tainted Becky"),
+
+    SOUL_OF_BECKY = Isaac.GetAchievementIdByName("Soul of Becky"),
+    MAGIC_STAFF = Isaac.GetAchievementIdByName("Magic Staff"),
+    UNDEAD_HAND = Isaac.GetAchievementIdByName("Undead Hand"),
+    RIPPED_CARD = Isaac.GetAchievementIdByName("Ripped Card"),
+    ALARM_CLOCK = Isaac.GetAchievementIdByName("Alarm Clock"),
+    BUG_SPRAY = Isaac.GetAchievementIdByName("Bug Spray"),
+    SKETCHY_BEGGAR = Isaac.GetAchievementIdByName("Sketchy Beggar"),
+
+    POLTERGEIST_CHALLENGE = Isaac.GetAchievementIdByName("Poltergeist Challenge"),
+    SANGUINE_FEATHER = Isaac.GetAchievementIdByName("Sanguine Feather"),
+    POUL = Isaac.GetAchievementIdByName("Poul"),
+}
+
+
+
 local DSSModName = "becky Mod DSS Menu"
 
 local BREAK_LINE = {str = "", fsize = 1, nosel = true}
@@ -9,6 +42,22 @@ local BREAK_LINE = {str = "", fsize = 1, nosel = true}
 local DSSCoreVersion = 7
 
 local MenuProvider = {}
+
+local MARKS_TO_STRING = {
+    [CompletionType.MOMS_HEART] ="MomsHeart",
+    [CompletionType.BOSS_RUSH] ="BossRush",
+    [CompletionType.SATAN] ="Satan",
+    [CompletionType.ISAAC] ="Isaac",
+    [CompletionType.BLUE_BABY] ="BlueBaby",
+    [CompletionType.LAMB] ="Lamb",
+    [CompletionType.ULTRA_GREED]="UltraGreed",
+    [CompletionType.ULTRA_GREEDIER]="UltraGreed",
+    [CompletionType.MOTHER] ="Mother",
+    [CompletionType.BEAST] ="Beast",
+    [CompletionType.HUSH] ="Hush",
+    [CompletionType.MEGA_SATAN] ="MegaSatan",
+    [CompletionType.DELIRIUM] ="Delirium",
+}
 
 local function GenerateTooltip( ... )
     local endTable = {}
@@ -29,6 +78,119 @@ local function GenerateTooltip( ... )
     end
     return {strset = endTable}
 end
+
+
+local function UpdateUnlock(state, unlockdata, playerId)
+    local pgd = Isaac.GetPersistentGameData()
+
+    if playerId and unlockdata.marks then
+        local val = 1
+        if not state then val = 0
+        elseif unlockdata.marks.hardMode then val = 2
+        end
+
+        for _, mark in ipairs(unlockdata.marks) do
+            Isaac.SetCompletionMark(playerId, mark, val)
+        end
+    end
+
+    if state then
+        Isaac.GetPersistentGameData():Unlock(unlockdata[1], false)
+    else
+        Isaac.ExecuteCommand("lockachievement "..unlockdata[1])
+    end
+end
+
+
+local function GenerateUnlockTable(tab, data)
+    local pgd = Isaac.GetPersistentGameData()
+    tab.buttons = {}
+    table.insert(tab.buttons, {
+        str = "unlock all", fsize = 2,
+        func = function() for _, unlockdata in ipairs(data.unlocks) do UpdateUnlock(true, unlockdata, data.playerId) end end,
+        tooltip = GenerateTooltip("sync the unlocks with the character marks")
+    })
+    table.insert(tab.buttons, {
+        str = "lock all", fsize = 2,
+        func = function() for _, unlockdata in ipairs(data.unlocks) do UpdateUnlock(false, unlockdata, data.playerId) end end,
+        tooltip = GenerateTooltip("sync the unlocks with the character marks")
+    })
+
+    if data.playerId ~= nil then
+        table.insert(tab.buttons, { str = "", nosel = true })
+        table.insert(tab.buttons, {
+            str = "sync unlocks to marks", fsize = 2,
+            func = function()
+                for _, unlockdata in ipairs(data.unlocks) do
+                    if unlockdata.marks then
+                        local unlocked = true
+                        for _, mark in ipairs(unlockdata.marks) do
+                            local minVal = unlockdata.marks.hardMode and 2 or 1
+                            if minVal > Isaac.GetCompletionMark(data.playerId, mark) then
+                                unlocked = false
+                                break
+                            end
+                        end
+                        if unlocked then pgd:Unlock(unlockdata[1], false)
+                        else Isaac.ExecuteCommand("lockachievement "..unlockdata[1])
+                        end
+                    end
+                end
+            end,
+            tooltip = GenerateTooltip("sync the unlocks with the character marks")
+        })
+        table.insert(tab.buttons, {
+            str = "sync marks to unlocks", fsize = 2,
+            func = function()
+                local marks = { PlayerType = data.playerId, UltraGreedier = 0 }
+                for _, unlockdata in ipairs(data.unlocks) do
+                    if unlockdata.marks then
+                        local val = 0
+                        if pgd:Unlocked(unlockdata[1]) then
+                            if unlockdata.marks.hardMode then
+                                val = 2
+                            else val = 1
+                            end
+                        end
+                        for _, mark in ipairs(unlockdata.marks) do
+                            if val == 1 and mark == CompletionType.ULTRA_GREEDIER then
+                                marks[ MARKS_TO_STRING[mark] ] = 2
+                            else marks[ MARKS_TO_STRING[mark] ] = math.max((marks[ MARKS_TO_STRING[mark] ] or 0), val)
+                            end
+                        end
+                    end
+                end
+                
+                Isaac.SetCompletionMarks(marks)
+            end,
+            tooltip = GenerateTooltip("sync the marks with character unlocks")
+        })
+    end
+
+    for _, unlockdata in ipairs(data.unlocks) do
+        table.insert(tab.buttons, { str = "", nosel = true })
+        
+        table.insert(tab.buttons, {
+            str = unlockdata.name, fsize = 2,
+            tooltip = GenerateTooltip(unlockdata.tip),
+            func = function()
+                UpdateUnlock(not pgd:Unlocked(unlockdata[1]), unlockdata, data.playerId)
+            end,
+        })
+
+        table.insert(tab.buttons, { str = "na", nosel = true, fsize = 2,
+            update = function(b, i, t)
+                if pgd:Unlocked(unlockdata[1]) then
+                    b.str = "unlocked"
+                else
+                    b.str = "locked"
+                end
+            end
+        })
+    end
+end
+
+
 
 function MenuProvider.SaveSaveData()
     mod.SaveManager.Save()
@@ -121,6 +283,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 
                 buttons = {
                     {str = 'resume game', action = 'resume'},
+                    {str = 'manage unlocks', dest = 'ManUnlocks'},
                     {str = 'credits', dest = 'Beckycredits',tooltip = {strset = {'---','giving thanks', 'to everyone', 'who helped', '---'}}},         
                     BeckyMod.dssmod.changelogsButton,
                     {str = '', fsize=2, nosel = true},
@@ -129,6 +292,213 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
                 },
                 tooltip = BeckyMod.dssmod.menuOpenToolTip,
             },
+
+            ManUnlocks = {
+                title = 'manage unlocks',
+
+                buttons = {
+                    {
+                        str = "unlock all", fsize = 2,
+                        func = function()
+                            local pgd = Isaac.GetPersistentGameData()
+                            for _, achievId in ipairs(achievement) do pgd:Unlock(achievId, false) end
+                            Isaac.FillCompletionMarks(mod.Character.BECKY.PLAYERTYPE)
+                            Isaac.FillCompletionMarks(mod.Character.BECKY_B.PLAYERTYPE)
+                        end,
+                    },
+                    {
+                        str = "lock all", fsize = 2,
+                        func = function()
+                            for _, achievId in ipairs(achievement) do Isaac.ExecuteCommand("lockachievement "..achievId) end
+                            Isaac.ClearCompletionMarks(mod.Character.BECKY.PLAYERTYPE)
+                            Isaac.ClearCompletionMarks(mod.Character.BECKY_B.PLAYERTYPE)
+                        end,
+                    },
+                    BREAK_LINE,
+                    {str = 'becky unlocks', fsize = 2, dest = 'BeckyUnlocks'},
+                    {str = 'tainted becky unlocks', fsize = 2, displayif = function() return not Isaac.GetPersistentGameData():Unlocked(achievement.TAINTED_BECKY) end},
+                    {str = 'tainted becky unlocks', fsize = 2, dest = 'tBeckyUnlocks', displayif = function() return Isaac.GetPersistentGameData():Unlocked(achievement.TAINTED_BECKY) end},
+
+                    {str = 'challenge unlocks', fsize = 2, dest = 'ChallengeUnlocks'},
+                },
+            },
+
+
+            BeckyUnlocks = {
+                generate = function(tab)
+                    GenerateUnlockTable(tab, {
+                        playerId = mod.Character.BECKY.PLAYERTYPE,
+                        unlocks = {
+                            {   
+                                name = "devilzone prime",
+                                marks = {CompletionType.MOMS_HEART},
+                                achievement.DEVILZONE_PRIME,
+                                tip="unlocked by deafeating mom's heart"
+                            },
+                            {
+                                name = "night of the slasher",
+                                marks = {CompletionType.BOSS_RUSH},
+                                achievement.NIGHT_OF_THE_SLASHER,
+                                tip="unlocked by completing boss rush"
+                            },
+                            {
+                                name = "dream banisher",
+                                marks = {CompletionType.SATAN},
+                                achievement.DREAM_BANISHER,
+                                tip="unlocked by deafeating satan"
+                            },
+                            {
+                                name = "sinner",
+                                marks = {CompletionType.ISAAC},
+                                achievement.SINNER,
+                                tip="unlocked by deafeating isaac"
+                            },
+                            {
+                                name = "holy bookmark",
+                                marks = {CompletionType.BLUE_BABY},
+                                achievement.HOLY_BOOKMARK,
+                                tip="unlocked by deafeating ???"
+                            },
+                            {
+                                name = "chalice",
+                                marks = {CompletionType.LAMB},
+                                achievement.CHALICE,
+                                tip="unlocked by deafeating the lamb"
+                            },
+                            {
+                                name = "coxinha",
+                                marks = {CompletionType.ULTRA_GREED},
+                                achievement.COXINHA,
+                                tip="unlocked by deafeating ultra greed"
+                            },
+                            {
+                                name = "corpse tag",
+                                marks = {CompletionType.ULTRA_GREEDIER},
+                                achievement.CORPSE_TAG,
+                                tip="unlocked by deafeating ultra greedier"
+                            },
+                            {
+                                name = "scarecrow",
+                                marks = {CompletionType.MOTHER},
+                                achievement.SCARECROW,
+                                tip="unlocked by deafeating mother"
+                            },
+                            {
+                                name = "null bombs",
+                                marks = {CompletionType.BEAST},
+                                achievement.NULL_BOMBS,
+                                tip="unlocked by deafeating the beast"
+                            },
+                            {
+                                name = "ghost amulet",
+                                marks = {hardMode = true, CompletionType.MOMS_HEART,CompletionType.BOSS_RUSH,CompletionType.SATAN,CompletionType.ISAAC,CompletionType.BLUE_BABY,CompletionType.LAMB,CompletionType.ULTRA_GREEDIER,CompletionType.MOTHER,CompletionType.BEAST,CompletionType.HUSH,CompletionType.MEGA_SATAN,CompletionType.DELIRIUM},
+                                achievement.GHOST_AMULET,
+                                tip="unlocked by getting all completion marks on hard mode"
+                            },
+                            {
+                                name = "dead socket",
+                                marks = {CompletionType.HUSH},
+                                achievement.DEAD_SOCKET,
+                                tip="unlocked by deafeating hush"
+                            },
+                            {
+                                name = "dead battery",
+                                marks = {CompletionType.MEGA_SATAN},
+                                achievement.DEAD_BATTERY,
+                                tip="unlocked by deafeating mega satan"
+                            },
+                            {
+                                name = "butcher's cookbook",
+                                marks = {CompletionType.DELIRIUM},
+                                achievement.BUTCHERS_COOKBOOK,
+                                tip="unlocked by deafeating delirium"
+                            },
+                            {
+                                name = "tainted becky",
+                                achievement.TAINTED_BECKY,
+                                tip="unlocked by opening the secret closet"
+                            },
+                        }
+                    })
+                end
+            },
+            tBeckyUnlocks = {
+                generate = function(tab)
+                    
+                    GenerateUnlockTable(tab, {
+                        playerId = mod.Character.BECKY_B.PLAYERTYPE,
+                        unlocks = {
+                            {
+                                name = "soul of becky",
+                                marks = {CompletionType.BOSS_RUSH, CompletionType.HUSH},
+                                achievement.SOUL_OF_BECKY,
+                                tip="unlocked by deafeating hush and completing boss rush"
+                            },
+                            {
+                                name = "bug spray",
+                                marks = {CompletionType.SATAN,CompletionType.ISAAC,CompletionType.BLUE_BABY,CompletionType.LAMB},
+                                achievement.BUG_SPRAY,
+                                tip="unlocked by deafeating sata, isaac, the lamb and ???"
+                            },
+                            {
+                                name = "ripped card",
+                                marks = {CompletionType.ULTRA_GREEDIER},
+                                achievement.RIPPED_CARD,
+                                tip="unlocked by deafeating ultra greedier"
+                            },
+                            {
+                                name = "alarm clock",
+                                marks = {CompletionType.MOTHER},
+                                achievement.ALARM_CLOCK,
+                                tip="unlocked by deafeating mother"
+                            },
+                            {
+                                name = "undead hand",
+                                marks = {CompletionType.BEAST},
+                                achievement.UNDEAD_HAND,
+                                tip="unlocked by deafeating the beast"
+                            },
+                            {
+                                name = "sketchy beggar",
+                                marks = {CompletionType.MEGA_SATAN},
+                                achievement.SKETCHY_BEGGAR,
+                                tip="unlocked by deafeating maga satan"
+                            },
+                            {
+                                name = "magic staff",
+                                marks = {CompletionType.DELIRIUM},
+                                achievement.MAGIC_STAFF,
+                                tip="unlocked by deafeating delirium"
+                            },
+                        }
+                    })
+                end
+            },
+            ChallengeUnlocks = {
+                generate = function(tab)
+                    
+                    GenerateUnlockTable(tab, {
+                        unlocks = {
+                            {
+                                name = "sanguine feather",
+                                achievement.SANGUINE_FEATHER,
+                                tip="unlocked by beating the 'path of pain' challenge"
+                            },
+                            {
+                                name = "poltergeist challenge",
+                                achievement.POLTERGEIST_CHALLENGE,
+                                tip="unlocked by unlocking the 'secret exit'"
+                            },
+                            {
+                                name = "poul",
+                                achievement.POUL,
+                                tip="unlocked by beating the 'poltergeist' challenge"
+                            },
+                        }
+                    })
+                end
+            },
+
 
             Beckycredits = {
                 title = 'credits',

@@ -98,7 +98,7 @@ local SpellDescs = {
             "{{BeckySpellSummon_3}} Familiar that chases enemies. It can takes damage and die",
             "{{BeckySpellSummon_4}} Familiar that can be charge. On release the familiar will be throw",
             "{{BeckyMana}} Cost varies by what is selected",
-            "{{!!!}} Only one summon can be active at the time",
+            "!!! Only one summon can be active at the time",
         },
         spa = {
             "{{BeckySpell".. SpellType.SUMMON .."}} Invocar diferentes familiares dependiendo de que se elijá",
@@ -107,7 +107,7 @@ local SpellDescs = {
             "{{BeckySpellSummon_3}} Familiar que persigue enemigos. Puede recibir daño y morir",
             "{{BeckySpellSummon_4}} Familiar que se puede cargar. Al largarlo, este es lazado",
             "{{BeckyMana}} El costo varia en lo que se elija",
-            "{{!!!}} Solo uno puede ser invocado a la vez",
+            "!!! Solo uno puede ser invocado a la vez",
         },
     },
     [SpellType.SACRIFICIAL_BUFF] = {
@@ -116,14 +116,14 @@ local SpellDescs = {
             "{{ArrowUp}} {{Damage}} x1.25 Damage multiplier",
             "{{ArrowUp}} {{Tears}} x1.25 Tears multiplier",
             "{{ArrowUp}} {{Range}} x1.25 Range multiplier",
-            "{{!!!}} Will deal one full heart of damage to Isaac",
+            "!!! Will deal one full heart of damage to Isaac",
         },
         spa = {
             "{{BeckySpell".. SpellType.SACRIFICIAL_BUFF .."}} Al usarlo, dará:",
             "{{ArrowUp}} {{Damage}} x1.25 multiplicador de Daño",
             "{{ArrowUp}} {{Tears}} x1.25 multiplicador de Lágrimas",
             "{{ArrowUp}} {{Range}} x1.25 multiplicador de Rango",
-            "{{!!!}} Le hará un corazón entero de daño a Isaac",
+            "!!! Le hará un corazón entero de daño a Isaac",
         },
     },
     [SpellType.FIRE_POWER] = {
@@ -141,13 +141,13 @@ local SpellDescs = {
             "{{BeckySpell".. SpellType.NUKE .."}} On use removes all non boss enemies and all destructible obstacles",
             "Bosses take 660 points of damage",
             "{{BeckyMana}} Cost 100 mana points",
-            "{{!!!}} Isaac takes 6 full hearts of damage",
+            "!!! Isaac takes 6 full hearts of damage",
         },
         spa = {
             "{{BeckySpell".. SpellType.NUKE .."}} Al usarlo remueve todos los enemigos normales y todos los obstaculos destructibles",
             "Jefes recibiran 660 puntos de daño",
             "{{BeckyMana}} Cuesta 100 punto de mana",
-            "{{!!!}} Isaac recibira 6 corazones de daño",
+            "!!! Isaac recibira 6 corazones de daño",
         },
     },
     [SpellType.DEVIL] = {

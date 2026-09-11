@@ -1,3 +1,9 @@
+DeadSeaScrollsMenu.AddChangelog("Becky MOD", "Becky v2.1", [[
+-Buffed a little Bug Spray so it can deal more damage to fly and spider bosses
+-Added unlocks manager in the dss menu
+-Minor additions to Fiend Folio compatibility
+]])
+
 DeadSeaScrollsMenu.AddChangelog("Becky MOD", "Becky v2.0", [[{FSIZE2} 10/8/2026
 {FSIZE2}TAINTED + SYNERGIES UPDATE!!!
 
