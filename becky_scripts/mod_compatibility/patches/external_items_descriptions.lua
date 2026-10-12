@@ -55,10 +55,10 @@ local function EIDPatch()
 	local CharIcons = Sprite()
 	CharIcons:Load("gfx/ui/eid/becky_icons.anm2", true)
 	EID:addIcon("Becky", "Becky", 0, 16, 16, 6, 6, CharIcons)
-	--EID:addIcon("Tainted Becky", "Tainted Becky", 0, 16, 16, 6, 6, CharIcons)
+	EID:addIcon("Tainted Becky", "TBecky", 0, 16, 16, 6, 6, CharIcons)
 
 	EID.InlineIcons["Player" .. Character.BECKY.PLAYERTYPE] = EID.InlineIcons["Becky"]
-	EID.InlineIcons["Player" .. Character.BECKY_B.PLAYERTYPE] = EID.InlineIcons["Becky"] --EID.InlineIcons["Tainted Becky"]
+	EID.InlineIcons["Player" .. Character.BECKY_B.PLAYERTYPE] = EID.InlineIcons["Tainted Becky"]
 
 	-- Dynamic Callbacks
 

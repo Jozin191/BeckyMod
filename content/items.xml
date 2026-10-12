@@ -20,6 +20,7 @@
         quality="2"
         maxcharges="1"
         chargetype="normal"
+        tags="book"
         achievement="Butcher's Cookbook"
         />
 

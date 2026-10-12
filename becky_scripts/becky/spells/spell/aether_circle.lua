@@ -7,7 +7,7 @@ local function fun(player)
     for i=1, 8 do
         local angle = 45 * i -180
         local mult = 1
-        if i % 2 then mult = 0.66 end
+        if i % 2 == 0 then mult = 0.66 end
 
         local fire = Isaac.Spawn(1000, EffectVariant.RED_CANDLE_FLAME, 0, player.Position, (FIRESPEED * mult):Rotated(angle), player):ToEffect()
         fire.CollisionDamage = dmg

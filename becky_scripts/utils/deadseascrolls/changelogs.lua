@@ -1,3 +1,8 @@
+DeadSeaScrollsMenu.AddChangelog("Becky MOD", "Becky v2.1a", [[
+-Butcher's Cookbook now contributes to Bookworm transformation
+-Added Tainted Becky's Coop icon
+]])
+
 DeadSeaScrollsMenu.AddChangelog("Becky MOD", "Becky v2.1", [[
 -Buffed a little Bug Spray so it can deal more damage to fly and spider bosses
 -Added unlocks manager in the dss menu

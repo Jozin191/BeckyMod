@@ -96,8 +96,8 @@ include("becky_scripts.becky.slots.sketchy_beggar")
 
 --misc stuff
 include("becky_scripts.utils.achievements_revamp")
-include("becky_scripts.becky.characters.becky_deal_stuff")
-include("becky_scripts.becky.characters.costume_hair_costume")
+include("becky_scripts.utils.becky_deal_stuff")
+include("becky_scripts.utils.costume_hair_costume")
 
 --ghost synergies
 for i, name in pairs({

@@ -411,12 +411,18 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(
         return
     end
     if not MultiShotItems[id] then return end
-    player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)    
+    player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)  
 end)
 
 ---@param player EntityPlayer
 BeckyMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
     if not HasGhostAmulet(player) then player:CheckFamiliar(GHOST_BALL_VAR, 0, player:GetCollectibleRNG(GHOST_AMULET.ID)) return end
+    local playerData = BeckyMod.GetEntData(player)
+    if playerData.ForceGhostReload then
+        player:CheckFamiliar(GHOST_BALL_VAR, 0, player:GetCollectibleRNG(GHOST_AMULET.ID))
+        playerData.ForceGhostReload = nil
+    end
+    
     local rng = RNG()
     local seed = math.max(Random(), 1)
     rng:SetSeed(seed, 35)
@@ -483,9 +489,15 @@ BeckyMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local playerData = BeckyMod.GetEntData(player)
     local ghosts = playerData.GhostBalls
 
-    if not ghosts or #ghosts <= 0 then return end
+    if not ghosts then return -- it means it wasn't initialize
+    elseif #ghosts <= 0 then  -- here it means something is wrong and reloads the ghost familiars
+        playerData.ForceGhostReload = true
+        playerData.GhostBalls = {}
+        player:AddCacheFlags(CacheFlag.CACHE_FAMILIARS, true)  
+        return
+    end
     player:SetUrethraBlock(false) -- "clog" kidney stone to prevent it firing from the player
-    player:SetCanShoot(false) -- somehow isaac is now able to shoot tears again when contining a run (great)
+    player:SetCanShoot(false) -- somehow isaac is now able to shoot tears again when continuing a run ("great")
     
     if HasLudo(player) then player:BlockCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) end
 

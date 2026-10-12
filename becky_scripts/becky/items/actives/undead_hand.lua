@@ -69,6 +69,7 @@ function UNDEAD_HAND:FamiliarUpdate(fam)
 
         local anim, xflip = GetBodyAnim(fam.Velocity)
         if anim ~= sprite:GetAnimation() then sprite:SetAnimation(anim, false) end
+        if not sprite:IsPlaying(anim) then sprite:Play(anim, true) end
         if fam.FlipX ~= xflip then fam.FlipX = xflip end
         local target = fam.Target
         if Isaac.CountEnemies() == 0 then
@@ -77,11 +78,11 @@ function UNDEAD_HAND:FamiliarUpdate(fam)
 
         local pathfinder = fam:GetPathfinder()
         if target then
-            if not sprite:IsPlaying(anim) then sprite:Play(anim, true) end
             local targetPos = target.Position
             if pathfinder:HasPathToPos(targetPos, false) then
                 pathfinder:FindGridPath(targetPos, UNDEAD_HAND.SPEED_MULT, 0, true)
                 if targetPos:Distance(fam.Position) < 4 then
+                    sprite:SetFrame("WalkVert", 0)
                     sprite.PlaybackSpeed = 0
                 else
                     sprite.PlaybackSpeed = UNDEAD_HAND.SPEED_MULT
@@ -94,7 +95,7 @@ function UNDEAD_HAND:FamiliarUpdate(fam)
         local famPos = fam.Position
         local prevDis
         local target
-        for _, ent in ipairs(Isaac.FindInRadius(game:GetRoom():GetCenterPos(), 50000, EntityPartition.ENEMY)) do
+        for _, ent in ipairs(Isaac.FindInRadius(game:GetRoom():GetCenterPos(), 5000, EntityPartition.ENEMY)) do
             local entPos = ent.Position
             if ent:CanShutDoors() and pathfinder:HasPathToPos(entPos, false) and (target == nil or entPos:Distance(famPos) < prevDis) then
                 prevDis = entPos:Distance(famPos)
